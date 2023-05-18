@@ -1,0 +1,121 @@
+{extend name="public/container" /}
+{block name="title"}讲师信息{/block}
+{block name="head"}
+<style>
+    body {
+        background-color: #F5F5F5;
+    }
+    .list {
+        padding-left: .3rem;
+        background-color: #FFFFFF;
+    }
+    .list .item {
+        display: flex;
+        padding: .35rem .3rem .35rem 0;
+        border-top: 1px solid #DDDDDD;
+    }
+    .list .item div:first-child {
+        width: 1.78rem;
+    }
+    .list .item div:last-child {
+        flex: 1;
+        min-width: 0;
+        word-break: break-all;
+    }
+    .btn-group {
+        padding: .8rem .3rem 0;
+    }
+    .btn-group .btn {
+        width: 100%;
+        height: .9rem;
+        border: 1px solid #2C8EFF;
+        border-radius: .45rem;
+        background-color: #FFFFFF;
+        font-size: .32rem;
+        color: #2C8EFF;
+    }
+    table {
+        width: 100%;
+    }
+    table, th, td {
+        border: 1px solid #EEEEEE;
+    }
+    td {
+        padding: .1rem;
+        text-align: center;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <ul class="list">
+        <li class="item">
+            <div>后台地址</div>
+            <div>{{ url }}</div>
+        </li>
+        <li class="item">
+            <div>登录账号</div>
+            <div>{{ admin.account }}（可使用短信登录）</div>
+        </li>
+        <li class="item">
+            <div>登录密码</div>
+            <div>123456（默认密码，若已修改则以修改的为准）</div>
+        </li>
+        <li class="item">
+            <div>分成比列</div>
+            <div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>专题</td>
+                            <td>{{ merchant.mer_special_divide }}%</td>
+                        </tr>
+                        <tr>
+                            <td>商品</td>
+                            <td>{{ merchant.mer_store_divide }}% + 运费</td>
+                        </tr>
+                        <tr>
+                            <td>活动</td>
+                            <td>{{ merchant.mer_event_divide }}%</td>
+                        </tr>
+                        <tr>
+                            <td>资料</td>
+                            <td>{{ merchant.mer_data_divide }}%</td>
+                        </tr>
+                        <tr>
+                            <td>试卷</td>
+                            <td>{{ merchant.mer_test_divide }}%</td>
+                        </tr>
+                        <tr>
+                            <td>直播</td>
+                            <td>{{ merchant.gold_divide }}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </li>
+    </ul>
+    <div class="btn-group">
+        <button class="btn" type="button" @click="goBack">返回</button>
+    </div>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue'], function (Vue) {
+        new Vue({
+            el: '#app',
+            data: {
+                url: '{$url}',
+                admin: {$admin},
+                merchant: {$merchant}
+            },
+            methods: {
+                goBack: function () {
+                    window.history.back();
+                }
+            }
+        });
+    });
+</script>
+{/block}

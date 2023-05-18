@@ -1,0 +1,595 @@
+{extend name="public/container" /}
+{block name="title"}讲师详情{/block}
+{block name="head"}
+<style>
+    .problem {
+        padding: .3rem;
+    }
+
+    .problem .item {
+        display: block;
+        padding: .3rem;
+        border-radius: .12rem;
+        margin-top: .3rem;
+        box-shadow: 0 .03rem .2rem 1px rgba(0, 0, 0, 0.07);
+    }
+
+    .problem .item:first-child {
+        margin-top: 0;
+    }
+
+    .problem .title {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #282828;
+    }
+
+    .problem .attribute {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: .3rem;
+        font-size: .22rem;
+        color: #999999;
+    }
+
+    .problem .button {
+        width: 1.2rem;
+        height: .42rem;
+        border-radius: .21rem;
+        background-color: #2C8EFF;
+        text-align: center;
+        line-height: .42rem;
+        color: #FFFFFF;
+    }
+
+    .question {
+        padding: .3rem;
+    }
+
+    .question .item {
+        display: flex;
+        padding: .3rem .3rem .36rem;
+        border-radius: .12rem;
+        margin-top: .3rem;
+        box-shadow: 0 .03rem .2rem 1px rgba(0, 0, 0, 0.07);
+    }
+
+    .question .item:first-child {
+        margin-top: 0;
+    }
+
+    .question .image {
+        width: 2.4rem;
+        height: 1.35rem;
+        border-radius: .1rem;
+    }
+
+    .question .text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin-left: .2rem;
+    }
+
+    .question .title {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        font-size: .3rem;
+        line-height: .41rem;
+        color: #333333;
+    }
+
+    .question .attribute {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: .22rem;
+        color: #FF6B00;
+    }
+
+    .question .button {
+        width: 1.2rem;
+        height: .42rem;
+        border-radius: .21rem;
+        background-color: #2C8EFF;
+        text-align: center;
+        line-height: .42rem;
+        color: #FFFFFF;
+    }
+
+    .teacher-detail .nav::-webkit-scrollbar {
+        width: 0;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="teacher-detail">
+    <div class="header">
+        <div class="avatar">
+            <img :src="lecturer.lecturer_head">
+        </div>
+        <a v-if="merId === lecturer.mer_id && lecturer.mer_id" :href="'{:url('spread/withdraw')}?mer_id=' + lecturer.mer_id" class="withdraw"><i
+               class="iconfont icontixian"></i>提现</a>
+        <button v-if="!(merId === lecturer.mer_id && lecturer.mer_id)" :class="{ followed: isFollow }" class="follow" @click="follow"><i v-show="!isFollow"
+               class="iconfont icontianjia"></i>{{ isFollow ? '已关注' : '关注' }}</button>
+        <div class="name">{{ lecturer.lecturer_name }}<a v-if="merId === lecturer.mer_id && lecturer.mer_id" :href="'{:url('merchant/info')}?mer_id=' + lecturer.mer_id">查看信息<i
+                   class="iconfont iconxiangyou"></i></a></div>
+        <div class="info">{{ lecturer.explain }}</div>
+        <div class="tags">
+            <div v-for="label in lecturer.label" :key="label" class="tag">{{ label }}</div>
+        </div>
+        <ul v-if="merId === lecturer.mer_id && lecturer.mer_id">
+            <li>
+                <div>{{ total }}</div>
+                <a :href="'{:url('merchant/income')}?mer_id=' + lecturer.mer_id">总收益<i class="iconfont iconxiangyou"></i></a>
+            </li>
+            <li>
+                <div>{{ today }}</div>
+                <div>今日收益</div>
+            </li>
+            <li>
+                <div>{{ extract }}</div>
+                <a :href="'{:url('merchant/income')}?active=2&mer_id=' + lecturer.mer_id">累计提现<i class="iconfont iconxiangyou"></i></a>
+            </li>
+            <li>
+                <div>{{ gold }}</div>
+                <a :href="'{:url('merchant/income')}?active=3&mer_id=' + lecturer.mer_id">金币收益<i class="iconfont iconxiangyou"></i></a>
+            </li>
+        </ul>
+    </div>
+    <div class="main">
+        <div ref="nav" :class="{ fixed: isFixed }" class="nav">
+            <div v-for="item in navList" :key="item.value" :class="{ active: navActive === item.value }" class="item" @click="navActive = item.value">
+                {{ item.name }}</div>
+        </div>
+        <div v-show="navActive === 1" class="panel1" v-html="lecturer.introduction"></div>
+        <div v-if="navActive === 2 && list.length" class="panel2">
+            <a v-for="item in list" :key="item.id" :href="(item.is_light ? '{:url('special/single_details')}' : '{:url('special/details')}') + '?id=' + item.id" class="item">
+                <div class="item-hd">
+                    <img :src="item.image">
+                    <div v-if="item.type === 1 || item.light_type === 1" class="tag">图文</div>
+                    <div v-else-if="item.type === 2 || item.light_type === 2" class="tag">音频</div>
+                    <div v-else-if="item.type === 3 || item.light_type === 3" class="tag">视频</div>
+                    <div v-else-if="item.type === 4" class="tag">直播</div>
+                    <div v-else-if="item.type === 5" class="tag">专栏</div>
+                </div>
+                <div class="item-bd">
+                    <div class="title">{{ item.title }}</div>
+                    <div class="tag-group"><span v-for="label in item.label" :key="label" class="tag">{{ label }}</span></div>
+                    <div class="money">￥<span>{{ item.money }}</span></div>
+                </div>
+            </a>
+        </div>
+        <div v-if="navActive === 3 && list.length" class="panel3">
+            <a v-for="item in list" :key="item.id" :href="'{:url('special/data_details')}?id=' + item.id" class="item">
+                <div class="item-hd">
+                    <img :src="item.image">
+                </div>
+                <div class="item-bd">
+                    <div class="title">{{ item.title }}</div>
+                    <div class="money">￥<span>{{ item.money }}</span></div>
+                    <div class="wrap">
+                        <div class="people">{{ item.ficti + item.sales }}人已下载</div>
+                        <div class="button">去下载</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div v-if="navActive === 4 && list.length" class="panel4">
+            <a v-for="item in list" :key="item.id" :href="'{:url('special/activity_details')}?id=' + item.id" class="item">
+                <div class="item-hd">
+                    <img :src="item.image">
+                </div>
+                <div class="item-bd">
+                    <div class="title">{{ item.title }}</div>
+                    <div class="time"><i class="iconfont iconshijian"></i>{{ item.time }}</div>
+                    <div class="wrap">
+                        <div class="money">￥<span>{{ item.price }}</span></div>
+                        <div class="people">{{ item.count }}人已报名</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div v-if="navActive === 5 && list.length" class="panel5">
+            <a v-for="item in list" :key="item.id" :href="'{:url('store/detail')}?id=' + item.id" class="item">
+                <div class="item-hd">
+                    <img :src="item.image">
+                </div>
+                <div class="item-bd">
+                    <div class="title">{{ item.store_name }}</div>
+                    <div class="wrap">
+                        <div class="money">￥<span>{{ item.price }}</span></div>
+                        <div class="sales">已售{{ item.sales }}件</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- 练习 -->
+        <div v-if="navActive === 6" class="problem">
+            <a v-for="item in problemList" :key="item.id" :href="'{:url('topic/problem_index')}?id=' + item.id" class="item">
+                <div class="title">{{ item.title }}</div>
+                <div class="attribute">
+                    <div>{{ item.fake_sales + item.answer }}人已答题</div>
+                    <div class="button">练习</div>
+                </div>
+            </a>
+            <div v-if="!problemList.length && problemFinished" class="empty">
+                <img src="{__WAP_PATH}zsff/images/empty.png">
+                <div>暂无{{ navCurrent }}</div>
+            </div>
+        </div>
+        <!-- 考试 -->
+        <div v-if="navActive === 7" class="question">
+            <a v-for="item in questionList" :key="item.id" :href="'{:url('special/question_index')}?id=' + item.id" class="item">
+                <div>
+                    <img :src="item.image" class="image">
+                </div>
+                <div class="text">
+                    <div class="title">{{ item.title }}</div>
+                    <div class="attribute">
+                        <div>共{{ item.item_number }}题</div>
+                        <div class="button">答题</div>
+                    </div>
+                </div>
+            </a>
+            <div v-if="!questionList.length && questionFinished" class="empty">
+                <img src="{__WAP_PATH}zsff/images/empty.png">
+                <div>暂无{{ navCurrent }}</div>
+            </div>
+        </div>
+        <div v-if="!list.length && finished" class="empty">
+            <img src="{__WAP_PATH}zsff/images/empty.png">
+            <div>暂无{{ navCurrent }}</div>
+        </div>
+    </div>
+    <base-login :login-show="loginShow" :site-name="site_name" @login-close="loginClose"></base-login>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'components/base-login/index', 'quick'], function (Vue, $h, store, BaseLogin) {
+        var isWechat = '{$isWechat}';
+        var uid = {$uid};
+        var site_name = "{$Auth_site_name}";
+        new Vue({
+            el: '#app',
+            components: {
+                'base-login': BaseLogin
+            },
+            data: {
+                lecturer: {$lecturer},
+                business: {$business},
+                merId: {$mer_id},
+                extract: 0,
+                today: 0,
+                total: 0,
+                gold: 0,
+                navList: [
+                    {
+                        name: '简介',
+                        value: 1
+                    },
+                    {
+                        name: '专题',
+                        value: 2
+                    },
+                    {
+                        name: '资料',
+                        value: 3
+                    },
+                    {
+                        name: '活动',
+                        value: 4
+                    },
+                    {
+                        name: '商品',
+                        value: 5
+                    },
+                    {
+                        name: '练习',
+                        value: 6
+                    },
+                    {
+                        name: '考试',
+                        value: 7
+                    },
+                ],
+                navActive: 1,
+                page: 1,
+                limit: 16,
+                list: [],
+                finished: false,
+                isFixed: false,
+                ticking: false,
+                isFollow: false,
+                loginShow: false,
+                site_name: site_name,
+                problemPage: 1,
+                problemList: [],
+                problemFinished: false,
+                questionPage: 1,
+                questionList: [],
+                questionFinished: false
+            },
+            computed: {
+                navCurrent: function () {
+                    for (var i = 0; i < this.navList.length; i++) {
+                        if (this.navList[i].value === this.navActive) {
+                            return this.navList[i].name;
+                        }
+                    }
+                }
+            },
+            watch: {
+                navActive: function (value) {
+                    this.page = 1;
+                    this.list = [];
+                    this.finished = false;
+                    switch (value) {
+                        case 2:
+                            this.lecturer_special_list();
+                            break;
+                        case 3:
+                            this.lecturer_download_list();
+                            break;
+                        case 4:
+                            this.lecturer_event_list();
+                            break;
+                        case 5:
+                            this.lecturer_store_list();
+                            break;
+                        case 6:
+                            this.getProblemList();
+                            break;
+                        case 7:
+                            this.getQuestionList();
+                            break;
+                    }
+                }
+            },
+            created: function () {
+                var vm = this;
+                this.lecturer_income();
+                this.getIsFollow();
+                if (isWechat) {
+                    mapleWx($jssdk(), function () {
+                        this.onMenuShareAll({
+                            title: vm.lecturer.lecturer_name,
+                            title: vm.lecturer.label.join(),
+                            imgUrl: vm.lecturer.lecturer_head,
+                            link: window.location.href + (window.location.search ? '&' : '?') + 'spread_uid=' + uid
+                        });
+                    });
+                }
+                $h.EventUtil.listenTouchDirection(document, function () {
+                    switch (vm.navActive) {
+                        case 2:
+                            vm.lecturer_special_list();
+                            break;
+                        case 3:
+                            vm.lecturer_download_list();
+                            break;
+                        case 4:
+                            vm.lecturer_event_list();
+                            break;
+                        case 5:
+                            vm.lecturer_store_list();
+                            break;
+                        case 6:
+                            vm.getProblemList();
+                            break;
+                        case 7:
+                            vm.getQuestionList();
+                            break;
+                    }
+                });
+                window.addEventListener('scroll', function () {
+                    if (!vm.ticking) {
+                        window.requestAnimationFrame(function () {
+                            vm.ticking = false;
+                            vm.isFixed = document.documentElement.scrollTop >= vm.offsetTop
+                        });
+                    }
+                    vm.ticking = true;
+                });
+                store.baseGet("{:url('index/login_user')}", undefined, undefined, true);
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    this.offsetTop = this.$refs.nav.offsetTop;
+                })
+            },
+            methods: {
+                // 讲师名下课程
+                lecturer_special_list: function () {
+                    var vm = this;
+                    if (this.finished) {
+                        return;
+                    }
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'lecturer_special_list',
+                        q: {
+                            mer_id: this.lecturer.mer_id,
+                            page: this.page,
+                            limit: this.limit
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        var data = res.data.data;
+                        vm.list = vm.list.concat(data);
+                        vm.finished = vm.limit > data.length;
+                    });
+                },
+                // 讲师名下资料
+                lecturer_download_list: function () {
+                    var vm = this;
+                    if (this.finished) {
+                        return;
+                    }
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'lecturer_download_list',
+                        q: {
+                            mer_id: this.lecturer.mer_id,
+                            page: this.page,
+                            limit: this.limit
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        var data = res.data.data;
+                        vm.list = vm.list.concat(data);
+                        vm.finished = vm.limit > data.length;
+                    });
+                },
+                // 讲师名下活动
+                lecturer_event_list: function () {
+                    var vm = this;
+                    if (this.finished) {
+                        return;
+                    }
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'lecturer_event_list',
+                        q: {
+                            mer_id: this.lecturer.mer_id,
+                            page: this.page,
+                            limit: this.limit
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        var data = res.data.data;
+                        vm.list = vm.list.concat(data);
+                        vm.finished = vm.limit > data.length;
+                    });
+                },
+                // 讲师名下商品
+                lecturer_store_list: function () {
+                    var vm = this;
+                    if (this.finished) {
+                        return;
+                    }
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'lecturer_store_list',
+                        q: {
+                            mer_id: this.lecturer.mer_id,
+                            page: this.page,
+                            limit: this.limit
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        var data = res.data.data;
+                        vm.list = vm.list.concat(data);
+                        vm.finished = vm.limit > data.length;
+                    });
+                },
+                // 收益及提现统计
+                lecturer_income: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'lecturer_income',
+                        q: {
+                            mer_id: this.lecturer.mer_id
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        vm.extract = data.extract;
+                        vm.today = data.today;
+                        vm.total = data.total;
+                        vm.gold = data.gold;
+                    });
+                },
+                getIsFollow: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'is_follow',
+                        q: {
+                            mer_id: this.lecturer.mer_id
+                        }
+                    }), function (res) {
+                        vm.isFollow = res.data.data.code;
+                    });
+                },
+                // 关注
+                follow: function () {
+                    var vm = this;
+                    store.baseGet("{:url('index/login_user')}", function () {
+                        store.baseGet("{:url('merchant/user_follow')}?mer_id=" + vm.lecturer.mer_id + '&is_follow=' + Number(!vm.isFollow), function (res) {
+                            vm.isFollow = !vm.isFollow;
+                            $h.pushMsg(vm.isFollow ? '关注成功' : '取消关注成功');
+                        });
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                //关闭登录
+                loginClose: function (value) {
+                    this.loginShow = false;
+                },
+                getProblemList: function () {
+                    var vm = this;
+                    if (this.problemFinished) {
+                        return;
+                    }
+                    store.basePost($h.U({
+                        c: 'merchant',
+                        a: 'lecturer_test_list'
+                    }), {
+                        mer_id: this.lecturer.mer_id,
+                        page: this.problemPage,
+                        limit: this.limit,
+                        type: 1
+                    }, function (res) {
+                        var problemList = res.data.data;
+                        vm.problemList = vm.problemList.concat(problemList);
+                        vm.problemFinished = vm.limit > problemList.length;
+                    }, function () {
+
+                    });
+                },
+                getQuestionList: function () {
+                    var vm = this;
+                    if (this.questionFinished) {
+                        return;
+                    }
+                    store.basePost($h.U({
+                        c: 'merchant',
+                        a: 'lecturer_test_list'
+                    }), {
+                        mer_id: this.lecturer.mer_id,
+                        page: this.questionPage,
+                        limit: this.limit,
+                        type: 2
+                    }, function (res) {
+                        var questionList = res.data.data;
+                        vm.questionList = vm.questionList.concat(questionList);
+                        vm.questionFinished = vm.limit > questionList.length;
+                    }, function () {
+
+                    });
+                },
+            }
+        });
+    });
+</script>
+{/block}

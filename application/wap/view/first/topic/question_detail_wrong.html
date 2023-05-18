@@ -1,0 +1,571 @@
+{extend name="public/container" /}
+{block name="title"}错题详情{/block}
+{block name="head"}
+<style>
+    body {
+        padding: 1.44rem .3rem 1.5rem;
+        background-color: #F5F5F5;
+    }
+
+    .wrong-question .header {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 5;
+        padding: .3rem .3rem 0;
+        background-color: #F5F5F5;
+    }
+
+    .wrong-question .header .upper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 1.14rem;
+        padding-right: .3rem;
+        border-radius: .12rem .12rem 0 0;
+        background-color: #FFFFFF;
+    }
+
+    .wrong-question .header .type {
+        position: relative;
+        left: -0.04rem;
+        height: .5rem;
+        padding: 0 .3rem 0 .22rem;
+        border-radius: 0 .25rem .25rem 0;
+        background-color: #2C8EFF;
+        font-size: .26rem;
+        line-height: .5rem;
+        color: #FFFFFF;
+    }
+
+    .wrong-question .header .type::after {
+        content: "";
+        position: absolute;
+        bottom: -0.02rem;
+        left: 0;
+        border-width: .01rem .02rem;
+        border-style: solid;
+        border-color: #0C73E9 #0C73E9 transparent transparent;
+    }
+
+    .wrong-question .header .iconfont {
+        font-size: .28rem;
+        color: #666666;
+    }
+
+    .wrong-question .question {
+        border-radius: 0 0 .12rem .12rem;
+        background-color: #FFFFFF;
+    }
+
+    .wrong-question .question .title {
+        padding: 0 .2rem;
+        font-size: .3rem;
+        line-height: .45rem;
+        color: #282828;
+    }
+
+    .wrong-question .question .title-image {
+        display: block;
+        width: 6.3rem;
+        height: 4.4rem;
+        margin: .3rem auto 0;
+    }
+
+    .wrong-question .question .options {
+        display: flex;
+        flex-direction: column;
+        padding: .3rem .3rem .27rem;
+        counter-reset: option;
+    }
+
+    .wrong-question .question .options .option {
+        position: relative;
+        padding: .24rem .61rem .24rem .73rem;
+        border-radius: .08rem;
+        margin: 0 0 .2rem;
+        background-color: #F9F9F9;
+        word-break: break-all;
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #282828;
+    }
+
+    .wrong-question .question .options .option.ok {
+        background-color: #EBF9EB;
+        color: #52A452;
+    }
+
+    .wrong-question .question .options .option.no {
+        background-color: #FFF0E5;
+        color: #FF6B00;
+    }
+
+    .wrong-question .question .options .option::before {
+        counter-increment: option;
+        content: counter(option, upper-alpha) ".";
+        position: absolute;
+        left: .3rem;
+    }
+
+    .wrong-question .question .options .iconfont {
+        position: absolute;
+        top: .24rem;
+        right: .3rem;
+        font-size: .23rem;
+    }
+
+    .wrong-question .question .images {
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        padding: .3rem .05rem .27rem .25rem;
+        counter-reset: option;
+    }
+
+    .wrong-question .question .images .option {
+        position: relative;
+        padding: .6rem .2rem .28rem;
+        border-radius: .08rem;
+        margin: 0 .2rem .2rem 0;
+        background-color: #F9F9F9;
+    }
+
+    .wrong-question .question .images .option.ok {
+        background-color: #EBF9EB;
+        color: #52A452;
+    }
+
+    .wrong-question .question .images .option.no {
+        background-color: #FFF0E5;
+        color: #FF6B00;
+    }
+
+    .wrong-question .question .images .option::before {
+        counter-increment: option;
+        content: counter(option, upper-alpha) ".";
+        position: absolute;
+        top: .3rem;
+        left: .2rem;
+        transform: translateY(-50%);
+    }
+
+    .wrong-question .question .images .option img {
+        width: 2.7rem;
+        height: 1.62rem;
+    }
+
+    .wrong-question .analysis {
+        padding: .2rem .2rem .32rem;
+        border-radius: .12rem;
+        margin-top: .2rem;
+        background-color: #FFFFFF;
+    }
+
+    .wrong-question .analysis .upper {
+        padding-bottom: .3rem;
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #FF6B00;
+    }
+
+    .wrong-question .analysis .upper .iconfont {
+        margin-right: .15rem;
+        font-size: .32rem;
+    }
+
+    .wrong-question .analysis .answers {
+        display: flex;
+        font-size: .28rem;
+        line-height: .4rem;
+        color: #666666;
+    }
+
+    .wrong-question .analysis .answer {
+        flex: 1;
+        display: flex;
+    }
+
+    .wrong-question .analysis .answer .value {
+        flex: 1;
+        min-width: 0;
+        padding-left: .26rem;
+        word-break: break-all;
+        color: #2C8EFF;
+    }
+
+    .wrong-question .analysis .answer:first-child .value {
+        color: #52A452;
+    }
+
+    .wrong-question .analysis .degree {
+        display: flex;
+        margin-top: .2rem;
+        font-size: .28rem;
+        line-height: .4rem;
+        color: #666666;
+    }
+
+    .wrong-question .analysis .degree .value {
+        flex: 1;
+        padding-left: .26rem;
+        font-size: 0;
+    }
+
+    .wrong-question .analysis .degree .iconfont {
+        margin-right: .15rem;
+        vertical-align: middle;
+        font-size: .24rem;
+        color: #FFF0E5;
+    }
+
+    .wrong-question .analysis .degree .active {
+        color: #FF6B00;
+    }
+
+    .wrong-question .analysis .content {
+        margin-top: .2rem;
+        font-size: .28rem;
+        line-height: .4rem;
+        color: #676767;
+    }
+
+    .wrong-question .analysis .content .value {
+        margin-top: .1rem;
+        font-size: .28rem;
+        line-height: .44rem;
+        color: #282828;
+    }
+
+    .wrong-question .special {
+        margin-top: .2rem;
+        font-size: .28rem;
+        line-height: .4rem;
+        color: #676767;
+    }
+
+    .wrong-question .special .value {
+        margin-top: .18rem;
+        counter-reset: special;
+    }
+
+    .wrong-question .special .item {
+        position: relative;
+        display: flex;
+        padding-left: .18rem;
+        margin-top: .3rem;
+    }
+
+    .wrong-question .special .item:first-child {
+        margin-top: 0;
+    }
+
+    .wrong-question .special .item::before {
+        counter-increment: special;
+        content: counter(special, disc);
+        position: absolute;
+        left: 0;
+        color: rgba(44, 142, 255, 0.4);
+    }
+
+    .wrong-question .special .title {
+        flex: 1;
+        color: #2C8EFF;
+    }
+
+    .wrong-question .special .iconfont {
+        font-size: .26rem;
+        color: #999999;
+    }
+
+    .wrong-question .footer {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 5;
+        display: flex;
+        background-color: #FFFFFF;
+    }
+
+    .wrong-question .footer button {
+        flex: 1;
+        height: 1.1rem;
+        font-size: .22rem;
+        line-height: .3rem;
+        color: #333333;
+    }
+
+    .wrong-question .footer div {
+        margin-top: .11rem;
+    }
+
+    .wrong-question .footer div:first-child {
+        margin-top: 0;
+    }
+
+    .wrong-question .footer .iconfont {
+        vertical-align: bottom;
+        font-size: .34rem;
+    }
+
+    .wrong-question .footer button:disabled {
+        color: #999999;
+    }
+
+    .wrong-question .footer .light {
+        color: #2C8EFF;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="wrong-question">
+    <template v-if="question">
+        <div class="header">
+            <div class="upper">
+                <div class="type">{{ question.question_type | questionType }}</div>
+                <button @click="deleteQuestion"><i class="iconfont iconshanchu"></i></button>
+            </div>
+        </div>
+        <div class="question">
+            <div class="title">{{ question.stem }}</div>
+            <img v-if="question.image" :src="question.image" class="title-image">
+            <div v-if="question.is_img" class="images">
+                <label
+                  v-for="item in question.options"
+                  :key="item.key"
+                  :class="{
+                    ok: question.user_answer.indexOf(item.key) !== -1 && question.answer.indexOf(item.key) !== -1,
+                    no: question.user_answer.indexOf(item.key) !== -1 && question.answer.indexOf(item.key) === -1
+                  }"
+                  class="option"
+                >
+                    <input type="radio" disabled hidden>
+                    <img :src="item.value">
+                </label>
+            </div>
+            <div v-else class="options">
+                <label
+                  v-for="item in question.options"
+                  :key="item.key"
+                  :class="{
+                    ok: question.user_answer.indexOf(item.key) !== -1 && question.answer.indexOf(item.key) !== -1,
+                    no: question.user_answer.indexOf(item.key) !== -1 && question.answer.indexOf(item.key) === -1
+                  }"
+                  class="option"
+                >
+                    <input type="radio" disabled hidden>
+                    {{ item.value }}
+                    <i
+                      v-if="question.user_answer.indexOf(item.key) !== -1"
+                      :class="[question.answer.indexOf(item.key) === -1 ? 'iconguanbi' : 'icongouxuan']"
+                      class="iconfont"
+                    ></i>
+                </label>
+            </div>
+        </div>
+        <div class="analysis">
+            <div class="upper"><i class="iconfont iconjurassic_true"></i>回答错误</div>
+            <div class="answers">
+                <div class="answer">
+                    <div>正确答案:</div>
+                    <div class="value">{{ question.answer }}</div>
+                </div>
+                <div class="answer">
+                    <div>您的答案:</div>
+                    <div class="value">{{ question.user_answer }}</div>
+                </div>
+            </div>
+            <div class="degree">
+                <div>试题难度:</div>
+                <div class="value"><i v-for="item in 5" :key="item" :class="{ active: item <= question.difficulty }" class="iconfont iconxing"></i></div>
+            </div>
+            <div class="content">
+                <div>答案解析:</div>
+                <div class="value" v-html="question.analysis"></div>
+            </div>
+            <div v-if="question.special && question.special.length" class="special">
+                <div>关联知识点:</div>
+                <div class="value">
+                    <a v-for="item in question.special" :key="item.id" class="item" href="">
+                        <div class="title">{{ item.title }}</div>
+                        <i class="iconfont iconxiangyou"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <button :disabled="!index" @click="changeQuestion(-1)">
+                <div><i class="iconfont iconshangyige"></i></div>
+                <div>上一题</div>
+            </button>
+            <button :class="{ light: question.is_master }" @click="graspQuestion">
+                <div><i :class="question.is_master ? 'iconyizhangwo' : 'iconweizhangwo'" class="iconfont"></i></div>
+                <div>{{ question.is_master ? '已' : '未' }}掌握</div>
+            </button>
+            <button :disabled="index === idList.length - 1" @click="changeQuestion(1)">
+                <div><i class="iconfont iconxiayige"></i></div>
+                <div>下一题</div>
+            </button>
+        </div>
+    </template>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'store', 'helper','quick'], function (Vue, store, $h) {
+        new Vue({
+            el: '#app',
+            filters: {
+                questionType: function (value) {
+                    switch (value) {
+                        case 1:
+                            return '单选题';
+                        case 2:
+                            return '多选题';
+                        case 3:
+                            return '判断题';
+                    }
+                }
+            },
+            data: {
+                id: 0,
+                is_master: '',
+                idList: [],
+                question: null
+            },
+            computed: {
+                index: function () {
+                    if (!this.question.id) {
+                        return -1;
+                    }
+                    return this.idList.indexOf(this.question.id);
+                }
+            },
+            created: function () {
+                var vm = this;
+                var wrongQuestion = localStorage.getItem('wrong_question');
+                if (!wrongQuestion) {
+                    return;
+                }
+                wrongQuestion = JSON.parse(wrongQuestion);
+                this.id = this.nodeId = wrongQuestion.id;
+                this.is_master = wrongQuestion.is_master;
+                this.idList.push(this.id);
+                this.getQuestion(this.id);
+                this.getIdList(1);
+                this.getIdList();
+                window.addEventListener('beforeunload', function () {
+                    localStorage.setItem('wrong_question', JSON.stringify({
+                        id: vm.id,
+                        is_master: vm.is_master
+                    }));
+                });
+            },
+            methods: {
+                // 错题消息
+                getQuestion: function (id) {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'topic',
+                        a: 'oneWrongBank',
+                        q: {
+                            id: id
+                        }
+                    }), function (res) {
+                        var question = res.data.data;
+                        var option = JSON.parse(question.option);
+                        var answer = question.answer.split(',');
+                        var optionObj = {};
+
+                        question.options = [];
+
+                        if (Array.isArray(option)) {
+                            option.forEach(function (item, index) {
+                                optionObj[String.fromCharCode(index + 65)] = item;
+                            });
+                            option = optionObj;
+                        }
+
+                        for (var key in option) {
+                            if (Object.hasOwnProperty.call(option, key)) {
+                                question.options.push({
+                                    key: key,
+                                    value: option[key]
+                                });
+                            }
+                        }
+
+                        vm.question = question;
+                    });
+                },
+                getIdList: function (order) {
+                    var vm = this;
+                    store.basePost($h.U({
+                        c: 'topic',
+                        a: 'userWrongBankIdArr'
+                    }), {
+                        id: this.nodeId,
+                        is_master: this.is_master,
+                        order: order || 0
+                    }, function (res) {
+                        vm.idList = vm.idList.concat(res.data.data).sort(function (a, b) {
+                            return b - a;
+                        });
+                    });
+                },
+                // 上一题/下一题
+                changeQuestion: function (value) {
+                    var id = this.idList[this.index + value];
+                    this.getQuestion(id);
+                    if (this.index === this.idList.length - 2 && value === 1) {
+                        this.nodeId = this.idList[this.idList.length - 1];
+                        this.getIdList(1);
+                    } else if (this.index === 1 && value === -1) {
+                        this.nodeId = this.idList[0];
+                        this.getIdList();
+                    }
+                },
+                // 掌握
+                graspQuestion: function () {
+                    var vm = this;
+                    var is_master = this.question.is_master ? 0 : 1;
+                    store.basePost($h.U({
+                        c: 'topic',
+                        a: 'submitWrongBank'
+                    }), {
+                        wrong_id: this.question.id,
+                        questions_id: this.question.questions_id,
+                        is_master: is_master
+                    }, function (res) {
+                        vm.question.is_master = is_master;
+                    });
+                },
+                // 删除
+                deleteQuestion: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'topic',
+                        a: 'delWrongBank',
+                        q: {
+                            id: this.question.id
+                        }
+                    }), function (res) {
+                        if (vm.idList.length === 1) {
+                            window.history.back();
+                        } else if (vm.index === vm.idList.length - 1) {
+                            vm.getQuestion(vm.idList[vm.idList.length - 2]);
+                            vm.idList.splice(vm.index, 1);
+                        } else {
+                            vm.getQuestion(vm.idList[vm.index + 1]);
+                            vm.idList.splice(vm.index, 1);
+                        }
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

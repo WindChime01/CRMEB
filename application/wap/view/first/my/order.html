@@ -1,0 +1,418 @@
+{extend name="public/container"}
+{block name="title"}订单详情{/block}
+{block name="head_top"}
+<style>
+    body {
+        padding-bottom: 1.12rem;
+        background-color: #f5f5f5;
+    }
+    a[href^="tel"] {
+        color: #2C8EFF;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="order-detail">
+        <!-- 退款 -->
+        {if condition="$order.refund_reason neq '' && $order.refund_status eq 0"}
+        <div class="section return">
+            <div>卖家拒绝退款</div>
+            <div class="time">拒绝退款原因：{$order.refund_reason}</div>
+            <div class="time">处理时间：{$order.refund_reason_time}</div>
+        </div>
+        {/if}
+        <!-- 退货 -->
+        {if condition="$order.refund_status eq 1"}
+        <div class="section return">
+            <div>退款中</div>
+            <div class="time">申请时间：{$order.refund_application_time}</div>
+        </div>
+        {elseif condition="$order.refund_status eq 2"}
+        <div class="section return">
+            <div>已退款</div>
+            <div class="time">{$order._status._msg}</div>
+        </div>
+        {/if}
+        {if condition="$order.refund_status eq 0 && $order.refund_reason eq ''"}
+        <div class="section status">
+            <div class="image">
+                <img src="{$order.status_pic}">
+            </div>
+            <div class="text">
+                <div>{$order._status._title}</div>
+                <div class="time">{$order._status._msg}</div>
+            </div>
+        </div>
+        {/if}
+        <div class="section contact">
+            <div>
+                <span>{$order.real_name}</span>
+                <span>{$order.user_phone}</span>
+            </div>
+            <div class="address">{$order.user_address}</div>
+        </div>
+        <div class="section goods">
+            {volist name="order.cartInfo" id="cart"}
+            <div class="goods-bd">
+                <div class="image">
+                    <img src="{$cart.productInfo.image}">
+                </div>
+                <div class="text">
+                    <div class="name">{$cart.productInfo.store_name}</div>
+                    <div class="money">
+                        <div class="price">￥
+                            <span>{$cart.truePrice}</span>
+                        </div>
+                    </div>
+                </div>
+                {if condition="$order._status._type eq 3"}
+                <div>
+                    <div class="num">x{$cart.cart_num}</div>
+                    <a href="{:url('my/order_reply')}?unique={$cart.unique}">评价</a>
+                </div>
+                {/if}
+            </div>
+            {/volist}
+            <div class="goods-ft">共{$order.total_num}件商品，总金额 <span>￥{$order.pay_price}</span></div>
+        </div>
+        <!-- 待收货 -->
+        {if condition="$order.status EGT 1"}
+        <div class="section express">
+            <div class="image">
+                <img src="/wap/first/zsff/images/express.png">
+            </div>
+            <div class="text">
+                <div>物流公司：<span>{$order.delivery_name}</span></div>
+                <div>快递单号：<span id="account">{$order.delivery_id}</span></div>
+            </div>
+            <button type="button" data-clipboard-action="copy" data-clipboard-target="#account" @click="copyNo" id="copy">复制单号</button>
+        </div>
+        {/if}
+        <ul class="section list">
+            <li>
+                <div>订单编号：</div>
+                <div>{$order.order_id}</div>
+            </li>
+            <li>
+                <div>下单时间：</div>
+                <div>{$order.add_time|date="Y-m-d H:i",###}</div>
+            </li>
+            <li>
+                <div>商品金额：</div>
+                <div>￥{$order.total_price}</div>
+            </li>
+            <li>
+                <div>支付方式：</div>
+                <div>{$order._status._payType}</div>
+            </li>
+            {gt name="order.total_postage" value="0"}
+            <li>
+                <div>运费：</div>
+                <div>￥{$order.total_postage}</div>
+            </li>
+            {/gt}
+            {gt name="order.use_gold" value="0"}
+            <li>
+                <div>使用{$gold_name}：</div>
+                <div>{$order.use_gold}</div>
+            </li>
+            {/gt}
+            {gt name="order.back_gold" value="0"}
+            <li>
+                <div>退还{$gold_name}：</div>
+                <div>￥{$order.back_gold}</div>
+            </li>
+            {/gt}
+            <li>
+                <div>实付款：</div>
+                <div>￥{$order.pay_price}</div>
+            </li>
+            <li>
+                <div>买家留言：</div>
+                <div class="msg">{$order.mark}</div>
+            </li>
+        </ul>
+        <div class="footer">
+            {if condition="$order._status._type eq 0"}
+            <a href="javascript:void(0);" class="blue" @click="submit">立即付款</a>
+            <a href="javascript:void(0);" @click="removeOrder('取消')">取消订单</a>
+            {elseif condition="$order._status._type eq 1 && $order.refund_reason eq '' && $order.refund_status eq 0 && $order.pay_price gt 0"}
+            <a href="javascript:void(0);" @click="applyRefundOrder">申请退款</a>
+            {elseif condition="$order._status._type eq 2"}
+            <a href="javascript:void(0);" class="blue" @click="userTake">确认收货</a>
+            {elseif condition="$order._status._type eq 3 && $order.refund_reason eq '' && $order.refund_status eq 0 && $order.pay_price gt 0"}
+            <a href="javascript:void(0);" @click="applyRefundOrder">申请退款</a>
+            <a href="javascript:void(0);" @click="removeOrder('删除')">删除订单</a>
+            {elseif condition="$order._status._type eq 4 && $order.refund_reason eq '' && $order.refund_status eq 0 && $order.pay_price gt 0"}
+            <a href="javascript:void(0);" @click="applyRefundOrder">申请退款</a>
+            <a href="javascript:void(0);" @click="removeOrder('删除')">删除订单</a>
+            {elseif condition="$order.refund_reason neq '' && $order.refund_status eq 0 && $order._status._type eq 3 && $order.pay_price gt 0"}
+            <a href="javascript:void(0);" class="blue" @click="applyRefundOrder()">再次申请</a>
+            <a href="javascript:void(0);" @click="removeOrder('删除')">删除订单</a>
+            {elseif condition="$order.refund_status eq 2 || $order._status._type eq 3 && $order.pay_price eq 0"}
+            <a href="javascript:void(0);" @click="removeOrder('删除')">删除订单</a>
+            {/if}
+            <a href="javascript:void(0);" @click="services">联系客服</a>
+            {if condition="$order.status EGT 1"}
+            <a href="javascript:void(0);" @click="express">查看物流</a>
+            {/if}
+        </div>
+    </div>
+    <!-- 支付弹窗 -->
+    <pay-dialog
+        :open.sync="payDialogOpen"
+        :money="money"
+        :now_money="now_money"
+        :special_id="id"
+        :pay_type_num="pay_type_num"
+        :is-wechat="isWechat"
+        :is-alipay="is_alipay"
+        :is-balance="is_yue"
+        :template-id="templateId"
+        :wxpay-h5="wxpayH5"
+        :is-member="isMember"
+        :member-money="member_money"
+        @change="changeVal"
+    ></pay-dialog>
+    <base-login :login-show="loginShow" :site-name="site_name"></base-login>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    require(['vue', 'store', 'helper','clipboard','components/pay-dialog/index', 'components/base-login/index', '{__WAP_PATH}zsff/js/enter.js', 'quick'], function (Vue, api, $h,ClipboardJS, PayDialog, BaseLogin) {
+        var site_name = '{$Auth_site_name}';
+        var id="{$order.id}";
+        var orderId="{$order.order_id}";
+        var money="{$order.pay_price}";
+        var isWechat={$isWechat ? 'true' : 'false'};
+        var is_yue={$is_yue ? 'true' : 'false'};
+        var now_money={$now_money};
+        var is_alipay={$is_alipay ? 'true' : 'false'};
+        var wxpayH5={$is_h5_wechat_payment_switch ? 'true' : 'false'};
+        var callback_url = '{$callback_url}';
+        var order = {$order};
+        var isMember = {$userInfo['level']};
+        for (var key in order.cartInfo) {
+          var productInfo = order.cartInfo[key].productInfo;
+        }
+        var app = new Vue({
+            el: '#app',
+            components: {
+                'pay-dialog': PayDialog,
+                'base-login': BaseLogin
+            },
+            data: {
+                loginShow: false,
+                isWechat:isWechat,
+                url:isWechat ? $h.U({c:'index',a:'login'}):$h.U({c:'login',a:'phone_check'}),
+                id:id,
+                orderId:orderId,
+                payDialogOpen:false,  // 是否显示支付弹窗
+                money:money,
+                pay_type_num:50,
+                is_alipay: is_alipay, //支付宝是否开启
+                now_money: now_money, //余额
+                is_yue:is_yue, //余额是否开启
+                templateId: '',
+                wxpayH5: wxpayH5,
+                site_name: site_name,
+                merId: 0,
+                isMember: isMember,
+                member_money: productInfo.vip_price
+            },
+            mounted: function () {
+                var search = window.location.search.slice(1);
+                var query = {};
+                if (search) {
+                    search.split('&').forEach(function (item) {
+                        item = item.split('=');
+                        query[item[0]] = item[1];
+                    });
+                }
+                this.merId = query.mer_id || 0;
+                api.baseGet("{:url('index/login_user')}", function () {
+                    this.loginShow = false;
+                }.bind(this), function () {
+                    if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            this.loginShow = true;
+                        }
+                }.bind(this), true);
+                this.subscribeTemplate();
+            },
+            methods: {
+                subscribeTemplate: function () {
+                    api.baseGet($h.U({
+                        c: 'special',
+                        a: 'getTemplateIds',
+                        q: {
+                            pay_type_num: this.pay_type_num,
+                            special_id: this.id
+                        }
+                    }), function (res) {
+                        this.templateId = res.data.msg;
+                    }.bind(this));
+                },
+                submit: function () {
+                    this.payDialogOpen=true;
+                },
+                copyNo:function(delivery_id){
+                    var clipboard = new ClipboardJS('#copy');
+                    clipboard.on('success', function (e) {
+                        $h.pushMsgOnce('复制成功');
+                        e.clearSelection();
+                    });
+                    clipboard.on('error', function (e) {
+                        $h.pushMsgOnce('复制失败');
+                    });
+                },
+                userTake:function(){
+                    var that = this;
+                    layer.confirm('确定立即收货?',{icon:3},function(index){
+                        layer.close(index);
+                        $h.loadFFF();
+                        api.userTakeOrder(that.orderId,function(){
+                            $h.loadClear();
+                            $h.pushMsg('收货成功',function(){
+                                location.reload(true);
+                            });
+                        },function(e){ $h.loadClear(); return true; });
+                    })
+                },
+                removeOrder: function (title) {
+                    var that = this;
+                    layer.confirm('确认'+title+'该订单？', { icon: 3, title: false, btn: ['确定', '取消'] }, function (index) {
+                        layer.close(index);
+                        $h.loadFFF();
+                        api.removeUserOrder(that.orderId, function () {
+                            $h.loadClear();
+                            $h.pushMsg(title+'成功', function () {
+                                location.replace($h.U({
+                                    c: 'special',
+                                    a: 'order_store_list'
+                                }));
+                            });
+                        }, function (e) { $h.loadClear(); return true; });
+                    })
+                },
+                // 联系客服
+                services: function () {
+                    var vm = this;
+                    api.baseGet("{:url('PublicApi/get_site_service_phone')}?mer_id=" + this.merId, function (res) {
+                        var data = res.data.data;
+                        if (Array.isArray(data)) {
+                            api.baseGet("{:url('PublicApi/public_data')}", function (res) {
+                                var data = res.data.data;
+                                if (data.customer_service === '3') {
+                                    if (data.site_service_phone) {
+                                        layer.confirm('拨打<a href="tel:' + data.site_service_phone + '">' + data.site_service_phone + '</a>进行咨询？', {
+                                            title: false,
+                                            closeBtn: false,
+                                            btn: ['拨打', '取消']
+                                        }, function (index) {
+                                            window.location.assign('tel:' + data.site_service_phone);
+                                            layer.close(index);
+                                        });
+                                    } else {
+                                        layer.msg('抱歉，无法联系客服');
+                                    }
+                                } else {
+                                    window.location.assign("{:url('service/service_list')}?mer_id=" + vm.merId);
+                                }
+                            });
+                        } else {
+                            layer.confirm('拨打<a href="tel:' + data.site_service_phone + '">' + data.site_service_phone + '</a>进行咨询？', {
+                                title: false,
+                                closeBtn: false,
+                                btn: ['拨打', '取消']
+                            }, function (index) {
+                                window.location.assign('tel:' + data.site_service_phone);
+                                layer.close(index);
+                            });
+                        }
+                    });
+                },
+                applyRefundOrder:function(){
+                    location.replace($h.U({
+                        c:'my',
+                        a:'refund_apply',
+                        p:{order_id:this.orderId}
+                    }));
+                },
+                pay_order:function(data){
+                    this.orderId=data.data.result.orderId || '';
+                    switch (data.data.status){
+                        case "PAY_ERROR":case 'ORDER_EXIST':case 'ORDER_ERROR':
+                            this.extendOrder(data.msg);
+                            break;
+                        case 'WECHAT_PAY':
+                            this.wechatPay(data.data.result.jsConfig);
+                            break;
+                        case 'WECHAT_H5_PAY':
+                            this.payDialogOpen=false;
+                            var callbackUrl = callback_url + '?type=2&id=0';
+                            var mwebUrl = data.data.result.jsConfig.mweb_url + '&redirect_url=' + encodeURIComponent(callbackUrl);
+                            window.location.href = mwebUrl;
+                            break;
+                        case 'SUCCESS':
+                            this.successOrder(data.msg);
+                            break;
+                        case 'ZHIFUBAO_PAY':
+                            window.location.href=$h.U({m:'wap',c:'alipay',a:'index',q:{info:data.data.result,params:'goods'}});
+                            break;
+                    }
+                },
+                wechatPay:function(config){
+                    var that = this;
+                    mapleWx($jssdk(),function(){
+                        this.chooseWXPay(config,function(){
+                            that.successOrder();
+                        },{
+                            fail:that.extendOrder,
+                            cancel:that.extendOrder
+                        });
+                    });
+                },
+                successOrder:function(msg){
+                    $h.showMsg({
+                        title:msg ? msg :'支付成功',
+                        icon:'success',
+                        success:function (){
+                            location.reload();
+                        }
+                    });
+                },
+                extendOrder:function(msg){
+                    if (typeof msg === 'object') {
+                        if (msg.errMsg === 'chooseWXPay:cancel') {
+                            msg = '微信支付取消';
+                        } else {
+                            msg = '支付失败';
+                        }
+                    } else {
+                        msg = msg || '支付失败';
+                    }
+                    $h.pushMsg(msg, function () {
+                        location.reload();
+                    });
+                },
+                enter: function () {
+                    this.loginShow = true;
+                },
+                //所有插件回调处理事件
+                changeVal: function (opt) {
+                    if (typeof opt != 'object') opt = {};
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                express: function () {
+                    window.location.assign("{:url('my/express')}?uni=" + orderId);
+                }
+            }
+        });
+    });
+</script>
+{/block}

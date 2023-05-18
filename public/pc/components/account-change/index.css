@@ -1,0 +1,72 @@
+.phone-pwd-dialog .el-dialog__header {
+    padding-top: 47px;
+}
+
+.phone-pwd-dialog .el-dialog__title {
+    font-size: 20px;
+    color: #282828;
+}
+
+.phone-pwd-dialog .el-dialog__body {
+    padding: 17px 56px 59px;
+}
+
+.phone-pwd-dialog .el-form-item {
+    margin-bottom: 20px;
+}
+
+.phone-pwd-dialog .el-form-item:last-child {
+    margin-top: 40px;
+}
+
+.phone-pwd-dialog .el-input__inner {
+    height: 50px;
+    border-radius: 25px;
+    font-size: 14px;
+    line-height: 50px;
+}
+
+.phone-pwd-dialog .el-form-item:nth-child(2) .el-input__inner {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.phone-pwd-dialog .el-input-group__append {
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    background-color: #fff;
+}
+
+.phone-pwd-dialog .el-input-group__append .el-button {
+    width: 112px;
+    padding: 17px 0;
+    border-top-right-radius: 24px;
+    border-bottom-right-radius: 24px;
+    color: #2c8eff;
+}
+
+.phone-pwd-dialog .el-input-group__append .el-button img {
+    width: 80px;
+    height: 33px;
+    vertical-align: middle;
+}
+
+.phone-pwd-dialog .el-button.is-disabled,
+.phone-pwd-dialog .el-button.is-disabled:focus,
+.phone-pwd-dialog .el-button.is-disabled:hover {
+    color: #ccc;
+}
+
+.phone-pwd-dialog .el-form-item:last-child .el-button {
+    width: 100%;
+    padding-top: 17px;
+    padding-bottom: 17px;
+    border-color: #409dff;
+    border-radius: 25px;
+    background: -webkit-gradient(linear, left top, right top, from(#409dff), to(#1e85fb));
+    background: -webkit-linear-gradient(left, #409dff 0%, #1e85fb 100%);
+    background: -moz-linear-gradient(left, #409dff 0%, #1e85fb 100%);
+    background: -o-linear-gradient(left, #409dff 0%, #1e85fb 100%);
+    background: linear-gradient(90deg, #409dff 0%, #1e85fb 100%);
+    color: #fff;
+}

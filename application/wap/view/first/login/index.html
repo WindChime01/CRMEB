@@ -1,0 +1,142 @@
+{extend name="public/container"}
+{block name="title"}一键登录{/block}
+{block name="head_top"}
+<style>
+    .auth-login img {
+        display: block;
+        width: 6.9rem;
+        height: 5.92rem;
+        margin: .72rem auto 0;
+    }
+
+    .auth-login>button {
+        display: block;
+        width: 6.7rem;
+        height: .86rem;
+        border-radius: .43rem;
+        margin: .56rem auto 0;
+        background-color: #2C8EFF;
+        font-size: .32rem;
+        color: #FFFFFF;
+    }
+
+    .auth-login>button:disabled {
+        background-color: #A9CEF9;
+    }
+
+    .auth-login .tips {
+        width: 6.3rem;
+        padding: .23rem .25rem .26rem;
+        border-radius: .06rem;
+        margin: .55rem auto;
+        background-color: #FFFAF6;
+        font-size: .2rem;
+        line-height: .28rem;
+        color: #666666;
+    }
+
+    .auth-login .tips div:first-child {
+        margin-bottom: .11rem;
+        text-align: center;
+        color: #FF6B00;
+    }
+
+    .auth-login>.copyright {
+        position: fixed;
+        bottom: .3rem;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: .2rem;
+        line-height: .28rem;
+        color: #999999;
+    }
+
+    .auth-login>.copyright a {
+        color: #478BF1;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="auth-login">
+    <template v-if="isWechat">
+        <img src="{__WAP_PATH}zsff/images/auth-login.png" alt="微信一键登录">
+        <button :disabled="code" @click="wechat_one_click_login">微信一键登录</button>
+        <div class="tips">
+            <div>温馨提示：</div>
+            <div>点击一键登录按钮，为保证您正常使用系统，我们将获取您的昵称、头像。</div>
+        </div>
+        <div v-if="hasCopyright" class="copyright">{{ nncnL_crmeb_copyright }}</div>
+        <div v-else class="copyright">© 2014-2022 <a href="http://www.crmeb.com">www.crmeb.com</a></div>
+    </template>
+    <base-login v-else :cancel-btn="false" :site-name="site_name" login-show @login-close="loginClose"></base-login>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    var spread_uid = "{$spread_uid}", ref = '{$ref}', appid = "{$appid}", url = encodeURI(window.location.href);
+    var site_name = "{$Auth_site_name}";
+    require(['vue', 'helper', 'store', 'components/base-login/index'], function (Vue, $h, store, BaseLogin) {
+        new Vue({
+            el: '#app',
+            components: {
+                'base-login': BaseLogin
+            },
+            data: {
+                codeUrl: '',
+                isfollow: false,
+                weixinUrl: 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' + appid + '&redirect_uri=' + url + '&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect',
+                code: '',
+                hasCopyright: false,
+                nncnL_crmeb_copyright: '',
+                isWechat: isWechat,
+                site_name: site_name
+            },
+            created: function () {
+                this.go_weixin_check();
+                if (isWechat) {
+                    this.getCopyright();
+                }
+            },
+            methods: {
+                go_weixin_check: function () {
+                    this.code = $h.getParmas('code');
+                    if (this.code) {
+                        store.baseGet($h.U({
+                            c: 'login',
+                            a: 'weixin_check',
+                            p: {spread_uid: spread_uid, code: this.code}
+                        }), function (res) {
+                            $h.loadClear();
+                            layer.msg(res.data.msg, {anim: 0, time: 2000}, function () {
+                                window.location.assign(ref || localStorage.getItem('login_back_url') || "{:url('index/index')}");
+                            });
+                        }, function (err) {
+                            $h.loadClear();
+                            layer.msg(err, {anim: 0, time: 2000}, function () {
+                                window.location.replace("{:url('login/index')}");
+                            });
+                        }, true);
+                    }
+                },
+                wechat_one_click_login: function () {
+                    $h.loadFFF();
+                    window.location.assign(this.weixinUrl);
+                },
+                getCopyright: function () {
+                    var vm = this;
+                    store.baseGet('/admin/login/get_copyright', function (res) {
+                        vm.hasCopyright = true;
+                        vm.nncnL_crmeb_copyright = res.data.data.nncnL_crmeb_copyright;
+                    }, undefined, true);
+                },
+                loginClose: function (data) {
+                    if (data) {
+                        window.location.assign(ref || "{:url('index/index')}");
+                    }
+                }
+            }
+        })
+    })
+</script>
+{/block}

@@ -1,0 +1,67 @@
+<div class="base-footer">
+    <div v-if="publicData" class="footer">
+        <el-row v-if="publicData.pc_end_bottom_display && publicData.pc_end_bottom_display.length">
+            <el-col v-for="item in publicData.pc_end_bottom_display" :key="item.id" :span="6">
+                <div>
+                    <el-image :src="item.pic" fit="cover"></el-image><span>{{ item.title }}</span>
+                </div>
+            </el-col>
+        </el-row>
+        <el-row class="icp-beian">
+            <el-col v-if="publicData.site_phone || publicData.company_address" :span="24">
+                <span v-if="publicData.site_phone">联系电话：{{ publicData.site_phone }}</span>
+                <span v-if="publicData.company_address" class="address">地址：{{ publicData.company_address }}</span>
+            </el-col>
+            <el-col v-if="publicData.full_name_the_company || publicData.keep_on_record" :span="24">
+                <span v-if="publicData.full_name_the_company">Copyright © {{ publicData.full_name_the_company }}</span>
+                <el-link v-if="publicData.keep_on_record" :underline="false" href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">{{ publicData.keep_on_record }}
+                </el-link>
+            </el-col>
+            <el-col v-if="publicData.hasCopyright" :span="24">
+                {{ publicData.nncnL_crmeb_copyright }}
+            </el-col>
+            <el-col v-else :span="24">
+                <span class="copyright"><span>© 2014-2023</span>
+                    <el-link :underline="false" href="http://www.crmeb.com" target="_blank">www.crmeb.com</el-link>
+                </span>
+                <el-link :underline="false" href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">京ICP备 10046444</el-link>
+            </el-col>
+        </el-row>
+        <el-row class="security-beian">
+          <el-col>
+            <el-link v-for="item in publicData.pc_keep_on_record" :href="item.url" :underline="false" target="_blank">
+              <el-image :src="item.img" fit="contain" style="width: 16px;height: 16px;margin: 0 3px 0 0;vertical-align: top;"></el-image>{{ item.title }}
+            </el-link>
+          </el-col>
+        </el-row>
+    </div>
+    <div ref="sidebar" class="sidebar">
+        <div class="button-group">
+            <el-button v-if="publicData && (publicData.sitePhone || publicData.customer_service === '2')" class="service-button" @click="goPage">
+                咨询<br>客服
+            </el-button>
+            <el-popover v-if="publicData && publicData.site_service_phone" trigger="hover" width="200" placement="left" popper-class="phone-popover" effect="light">
+                <div class="content">
+                    <div>服务热线</div>
+                    <div>{{ publicData.site_service_phone }}</div>
+                </div>
+                <el-button slot="reference" class="phone-popover-reference">
+                    服务<br>热线
+                </el-button>
+            </el-popover>
+            <el-popover v-if="code_url && is_official_account_switch!=0" trigger="hover" width="140" placement="left" popper-class="subscribe-popover">
+                <div class="content">
+                    <img :src="code_url" alt="公众号">
+                    <div>扫码关注公众号</div>
+                </div>
+                <el-button slot="reference">
+                    关注<br>公众号
+                </el-button>
+            </el-popover>
+        </div>
+        <el-backtop v-if="(publicData && (publicData.sitePhone || publicData.customer_service === '2')) || (publicData && publicData.site_service_phone) || (code_url && is_official_account_switch!=0)" :style="{top: 'calc(50% + '+(sidebarHeight/2)+'px)', bottom: 'auto', right: 'auto'}">
+            <i class="el-icon-arrow-up"></i>
+        </el-backtop>
+    </div>
+    <iframe v-if="publicData && !publicData.sitePhone && publicData.customer_service === '2'" :class="{ active: serviceActive }" :src="publicData.serviceSrc"></iframe>
+</div>

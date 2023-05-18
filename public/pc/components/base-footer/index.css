@@ -1,0 +1,286 @@
+.base-footer {
+    background-color: #f2f2f2;
+}
+
+.base-footer .el-row {
+    width: 1200px;
+    margin: 0 auto;
+}
+
+.base-footer .el-row:first-child {
+    padding-top: 32px;
+    padding-bottom: 32px;
+    font-size: 16px;
+    text-align: center;
+    color: #666;
+}
+
+.base-footer .el-col-6>div {
+    display: -webkit-inline-box;
+    display: -webkit-inline-flex;
+    display: -moz-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+}
+
+.base-footer .el-image {
+    width: 38px;
+    height: 38px;
+    margin: 0 10px 0 0;
+    vertical-align: middle;
+}
+
+.base-footer .icp-beian {
+    padding-top: 20px;
+    border-top: 1px solid #e2e2e2;
+    font-size: 14px;
+    line-height: 22px;
+    text-align: center;
+    color: #999;
+}
+
+.base-footer .icp-beian .el-link {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -moz-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+}
+
+.base-footer .icp-beian .el-link:hover {
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+
+.base-footer .footer span {
+    display: inline-block;
+}
+
+.base-footer .address {
+    margin-left: 40px;
+}
+
+.base-footer .footer .el-image+span {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+    padding: 12px 0 0;
+    margin: 0;
+    text-align: left;
+}
+
+.base-footer .el-link {
+    font-weight: normal;
+    color: #999;
+}
+
+.base-footer .sidebar {
+    position: fixed;
+    right: 40px;
+    bottom: 50%;
+    z-index: 99;
+    -webkit-transform: translateY(50%);
+       -moz-transform: translateY(50%);
+        -ms-transform: translateY(50%);
+         -o-transform: translateY(50%);
+            transform: translateY(50%);
+}
+
+.base-footer .sidebar .button-group {
+    -webkit-box-shadow: 0 3px 20px rgba(91, 126, 165, 0.15);
+    box-shadow: 0 3px 20px rgba(91, 126, 165, 0.15);
+}
+
+.base-footer .el-button {
+    position: relative;
+    display: block;
+    width: 64px;
+    height: 90px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    line-height: 18px;
+    color: #666666;
+}
+
+.base-footer .el-button:hover {
+    color: #2c8eff;
+}
+
+.base-footer>.el-button::after {
+    content: "";
+    position: absolute;
+    right: 12px;
+    bottom: 0;
+    left: 12px;
+    z-index: 2;
+    height: 1px;
+    background-color: #f0f0f0;
+}
+
+.base-footer>.el-button:last-child::after {
+    display: none;
+}
+
+.base-footer .service-button span {
+    display: block;
+    padding-top: 34px;
+    background: url("../../images/service1.png") top center/28px 28px no-repeat;
+}
+
+.base-footer .service-button:hover span {
+    background-image: url("../../images/service2.png");
+}
+
+.phone-popover {
+    padding: 0;
+    border-color: #2C8EFF;
+}
+
+.phone-popover .content {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -moz-box-orient: vertical;
+    -moz-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -moz-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    height: 74px;
+    padding: 0 21px 0 53px;
+    background: url("../../images/phone2.png") 29px center/24px 24px no-repeat;
+    font-size: 14px;
+    line-height: 19px;
+    text-align: center;
+    color: #2C8EFF;
+}
+
+.phone-popover .content div:last-child {
+    margin-top: 3px;
+}
+
+.phone-popover-reference span {
+    display: block;
+    padding-top: 34px;
+    background: url("../../images/phone1.png") top center/28px 28px no-repeat;
+}
+
+.phone-popover-reference:hover span {
+    background-image: url("../../images/phone2.png");
+}
+
+.el-popover.phone-popover .popper__arrow {
+    border-left-color: #2C8EFF;
+}
+
+.base-footer .el-backtop {
+    width: 64px;
+    height: 30px;
+    border-radius: 0;
+    font-size: 18px;
+    color: #999;
+}
+
+.subscribe-popover {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+}
+
+.subscribe-popover img {
+    display: block;
+    width: 110px;
+    height: 110px;
+    margin: 15px auto;
+}
+
+.subscribe-popover img+div {
+    border-radius: 0 0 4px 4px;
+    background-color: #2C8EFF;
+    font-size: 12px;
+    line-height: 26px;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+.base-footer iframe {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+    width: 377px;
+    height: 645px;
+    border: none;
+    -webkit-box-shadow: 0 3px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 20px rgba(0, 0, 0, 0.1);
+    -webkit-transform: translateY(100%);
+       -moz-transform: translateY(100%);
+        -ms-transform: translateY(100%);
+         -o-transform: translateY(100%);
+            transform: translateY(100%);
+    -webkit-transition: -webkit-transform 0.3s;
+    transition: -webkit-transform 0.3s;
+    -o-transition: -o-transform 0.3s;
+    -moz-transition: transform 0.3s, -moz-transform 0.3s;
+    transition: transform 0.3s;
+    transition: transform 0.3s, -webkit-transform 0.3s, -moz-transform 0.3s, -o-transform 0.3s;
+}
+
+.base-footer iframe.active {
+    -webkit-transform: translateY(0);
+       -moz-transform: translateY(0);
+        -ms-transform: translateY(0);
+         -o-transform: translateY(0);
+            transform: translateY(0);
+}
+
+.base-footer .copyright {
+    font-size: 12px;
+    color: #282828;
+}
+
+.base-footer .copyright .el-link {
+    color: #478BF1;
+}
+
+.base-footer .copyright + .el-link {
+    color: #478BF1;
+}
+
+.base-footer .security-beian {
+  margin-top: 5px;
+  text-align: center;
+}
+
+.base-footer .security-beian .el-link {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -moz-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+}
+
+.base-footer .security-beian .el-link:hover {
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+
+.base-footer .security-beian .el-link + .el-link {
+  margin-left: 10px;
+}
+
+.base-footer .footer {
+  padding-bottom: 40px;
+}

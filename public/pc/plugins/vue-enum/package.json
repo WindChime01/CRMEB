@@ -1,0 +1,67 @@
+{
+  "_from": "vue-enum@1.0.5",
+  "_id": "vue-enum@1.0.5",
+  "_inBundle": false,
+  "_integrity": "sha512-bAsX5dx9jsizxe45upj9VBYVRxeQnleRq0Np4TLdtCr1+MvSUfMmDuiy79BwyTyP2J2Be7zJWuw6gqgsh3tEuA==",
+  "_location": "/vue-enum",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "vue-enum@1.0.5",
+    "name": "vue-enum",
+    "escapedName": "vue-enum",
+    "rawSpec": "1.0.5",
+    "saveSpec": null,
+    "fetchSpec": "1.0.5"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/vue-enum/-/vue-enum-1.0.5.tgz",
+  "_shasum": "7107c3e2d7d79e9d4728bb16cef4bcdd34c1ce23",
+  "_spec": "vue-enum@1.0.5",
+  "_where": "F:\\",
+  "author": {
+    "name": "1024-lab",
+    "email": "1024lab@sina.com"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ],
+  "bugs": {
+    "url": "https://github.com/1024-lab/vue-enum/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {},
+  "deprecated": false,
+  "description": "前端枚举工具",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-3": "^6.24.1",
+    "cross-env": "^5.0.5",
+    "css-loader": "^0.28.7",
+    "file-loader": "^1.1.4",
+    "vue-loader": "^13.0.5",
+    "vue-template-compiler": "^2.4.4",
+    "webpack": "^3.6.0",
+    "webpack-dev-server": "^2.9.1"
+  },
+  "homepage": "https://github.com/1024-lab/vue-enum#readme",
+  "license": "MIT",
+  "main": "dist/vue-enum.js",
+  "name": "vue-enum",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1024-lab/vue-enum.git"
+  },
+  "scripts": {
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+  },
+  "version": "1.0.5"
+}

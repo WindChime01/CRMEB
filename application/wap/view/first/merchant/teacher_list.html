@@ -1,0 +1,276 @@
+{extend name="public/container" /}
+{block name="title"}讲师列表{/block}
+{block name="head"}
+<style>
+    input[type="search"]::-webkit-search-cancel-button {
+        display: none;
+    }
+
+    .form {
+        display: flex;
+        align-items: center;
+        height: .66rem;
+        padding-right: .2rem;
+        padding-left: .3rem;
+        border-radius: .33rem;
+        margin: .18rem .6rem;
+        background-color: #F7F7F7;
+    }
+
+    .form .label {
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .form .iconsousuo {
+        font-size: .23rem;
+        color: #939393;
+    }
+
+    .form .input {
+        flex: 1;
+        padding-left: .11rem;
+        font-size: .26rem;
+    }
+
+    .form .input::placeholder {
+        color: #999999;
+    }
+
+    .form .iconguanbi1 {
+        font-size: .26rem;
+        color: #CCCCCC;
+        cursor: pointer;
+    }
+
+    .list .item {
+        position: relative;
+        display: flex;
+        padding: .3rem .3rem .35rem;
+    }
+
+    .list .item::before {
+        content: " ";
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: .3rem;
+        z-index: 2;
+        height: 1px;
+        border-top: 1px solid #F2F2F2;
+        color: #F2F2F2;
+        transform-origin: 0 0;
+        transform: scaleY(0.5);
+    }
+
+    .list .item:first-child::before {
+        display: none;
+    }
+
+    .list .image {
+        width: 1.3rem;
+        height: 1.3rem;
+        border-radius: 50%;
+        background-color: #9D8585;
+        overflow: hidden;
+    }
+
+    .list .image img {
+        width: 100%;
+        height: 100%;
+    }
+
+    .list .text {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        margin-left: .22rem;
+    }
+
+    .list .text-content {
+        flex: 1;
+    }
+
+    .list .name {
+        font-weight: 500;
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #282828;
+    }
+
+    .list .tags {
+        display: flex;
+        margin-top: .1rem;
+    }
+
+    .list .tag {
+        height: .32rem;
+        padding: 0 .12rem;
+        border-radius: .04rem;
+        margin-left: .1rem;
+        background-color: rgba(255, 107, 0, 0.1);
+        font-size: .22rem;
+        line-height: .32rem;
+        color: #FF6B00;
+    }
+
+    .list .tag:first-child {
+        margin-left: 0;
+    }
+
+    .list .attr {
+        margin-top: .1rem;
+        font-size: .26rem;
+        line-height: .37rem;
+        color: #666666;
+    }
+
+    .list button {
+        width: 1.2rem;
+        height: .48rem;
+        border: 1px solid #2C8EFF;
+        border-radius: .24rem;
+        font-size: .22rem;
+        color: #2C8EFF;
+    }
+
+    .list .iconfont {
+        margin-right: .05rem;
+        vertical-align: middle;
+        font-size: .15rem;
+    }
+
+    .list .followed {
+        border-color: #999999;
+        color: #999999;
+    }
+
+    .empty {
+        display: block;
+        width: 4.14rem;
+        margin: 2rem auto 0;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <form class="form" @submit.prevent="get_lecturer_list">
+        <label class="label">
+            <i class="iconfont iconsousuo"></i>
+            <input v-model.trim="search" type="search" placeholder="输入要搜索的讲师" required class="input">
+        </label>
+        <i v-show="search" class="iconfont iconguanbi1" @click="search = ''"></i>
+    </form>
+    <div v-if="lecturerList.length" class="list">
+        <a v-for="item in lecturerList" :key="item.id" :href="'{:url('merchant/teacher_detail')}?id=' + item.id" class="item">
+            <div class="image">
+                <img :src="item.lecturer_head">
+            </div>
+            <div class="text">
+                <div class="text-content">
+                    <div class="name">{{ item.lecturer_name }}</div>
+                    <div class="tags">
+                        <div v-for="label in item.label" :key="label" class="tag">{{ label }}</div>
+                    </div>
+                    <div class="attr">{{ item.study }}人学习 | {{ item.curriculum }}课时</div>
+                </div>
+                <button :class="{ followed: item.is_follow }" @click.prevent="follow(item)"><i v-show="!item.is_follow"
+                       class="iconfont icontianjia"></i>{{ item.is_follow.code ? '取消关注' : '关注' }}</button>
+            </div>
+        </a>
+    </div>
+    <img v-else-if="finished" src="{__WAP_PATH}zsff/images/empty.png" class="empty">
+    <base-login :login-show="loginShow" :site-name="site_name" @login-close="loginClose"></base-login>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'components/base-login/index'], function (Vue, $h, store, BaseLogin) {
+        var site_name = "{$Auth_site_name}";
+        new Vue({
+            el: '#app',
+            components: {
+                'base-login': BaseLogin
+            },
+            data: {
+                finished: false,
+                page: 1,
+                limit: 10,
+                lecturerList: [],
+                search: '',
+                loginShow: false,
+                site_name: site_name
+            },
+            watch: {
+                search: function (value) {
+                    this.lecturerList = [];
+                    this.finished = false;
+                    this.page = 1;
+                    if (!value) {
+                        this.get_lecturer_list();
+                    }
+                }
+            },
+            created: function () {
+                var vm = this;
+                this.get_lecturer_list();
+                $h.EventUtil.listenTouchDirection(document, function () {
+                    vm.get_lecturer_list();
+                });
+            },
+            methods: {
+                // 讲师列表
+                get_lecturer_list: function () {
+                    var vm = this;
+                    if (this.finished) {
+                        return;
+                    }
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'get_lecturer_list',
+                        q: {
+                            page: this.page++,
+                            limit: this.limit,
+                            search: this.search
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        $h.loadClear();
+                        vm.lecturerList = vm.lecturerList.concat(data);
+                        vm.finished = vm.limit > data.length;
+                    });
+                },
+                follow: function (item) {
+                    var vm = this;
+                    store.baseGet("{:url('index/login_user')}", function () {
+                        store.baseGet($h.U({
+                            c: 'merchant',
+                            a: 'user_follow',
+                            q: {
+                                mer_id: item.mer_id,
+                                is_follow: Number(!item.is_follow)
+                            }
+                        }), function (res) {
+                            item.is_follow = !item.is_follow;
+                            $h.pushMsg(item.is_follow ? '关注成功' : '取消关注成功');
+                        });
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                //关闭登录
+                loginClose: function (value) {
+                    this.loginShow = false;
+                }
+            }
+        });
+    });
+</script>
+{/block}

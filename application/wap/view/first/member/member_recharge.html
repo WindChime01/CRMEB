@@ -1,0 +1,466 @@
+{extend name="public/container"}
+{block name="title"}会员管理{/block}
+{block name="content"}
+<div v-cloak id="app" class="member-recharge">
+    <div v-if="userInfo" class="user-section">
+        <div>
+            <img :src="userInfo.avatar">
+        </div>
+        <div class="text">
+            <div class="name">{{ userInfo.nickname }}</div>
+            <div v-if="userInfo.level && userInfo.is_permanent" class="info">永久会员</div>
+            <div v-else-if="userInfo.level && !userInfo.is_permanent && userInfo.surplus" class="info">您的会员剩余{{ userInfo.surplus }}天</div>
+            <div v-else class="info">开通会员立享会员尊享权益</div>
+        </div>
+        <a v-if="userInfo.level" href="#flag">续费会员</a>
+        <a v-else-if="!userInfo.is_permanent" href="#flag">开通会员</a>
+    </div>
+    <!-- 会员权益 -->
+    <div v-if="interests.length" class="rights-section">
+        <div class="title">
+            <div class="inner">会员尊享权益</div>
+        </div>
+        <ul>
+            <li v-for="item in interests" :key="item.id">
+                <div class="image">
+                    <img :src="item.pic">
+                </div>
+                <div class="name">{{ item.name }}</div>
+                <div class="info">{{ item.explain }}</div>
+            </li>
+        </ul>
+    </div>
+    <!-- 会员套餐 -->
+    <div v-if="cardList.length" class="card-section" id="flag">
+        <div class="title">
+            <div class="inner">选择会员套餐</div>
+        </div>
+        <div class="radio-group">
+            <label v-for="item in cardList" :key="item.id">
+                <input v-model="cardChecked" :value="item" type="radio" hidden>
+                <div>
+                    <div class="name">{{ item.title }}</div>
+                    <div class="money">￥<span>{{ item.price }}</span></div>
+                    <div class="delete">￥{{ item.original_price }}</div>
+                </div>
+            </label>
+        </div>
+        <button @click="loginUser(1)">{{ userInfo && userInfo.level ? '立即续费' : '立即开通' }}</button>
+        <div v-if="userInfo && !userInfo.is_permanent" class="tip">已有卡密兑换会员，<a href="javascript:" @click="loginUser(2)">点击兑换</a></div>
+    </div>
+    <!-- 会员说明 -->
+    <div v-if="description.length" class="detail-section">
+        <div class="title">会员说明：</div>
+        <ol>
+            <li v-for="item in description" :key="item.id">{{ item.text }}</li>
+        </ol>
+    </div>
+    <!-- 兑换弹窗 -->
+    <div :class="{ mask: exchangeShow }" @click="exchangeShow = false"></div>
+    <div :class="{ show: exchangeShow }" class="exchange-dialog">
+        <button class="close" @click="exchangeShow = false">
+            <i class="iconfont iconguanbi2"></i>
+        </button>
+        <div class="title">
+            <div class="inner">激活会员卡</div>
+        </div>
+        <div class="content">
+            <input v-model.trim="member_code" type="text" placeholder="请输入卡号">
+            <input v-model.trim="member_pwd" type="password" placeholder="请输入卡密">
+        </div>
+        <div class="shade">
+            <button @click="loginUser(3)">确认激活</button>
+        </div>
+    </div>
+    <!-- 登陆弹窗 -->
+    <base-login :login-show="loginShow" :site-name="siteName" @login-close="logComplete"></base-login>
+    <!-- 支付弹窗 -->
+    <pay-dialog :open.sync="payDialogOpen" :money="cardChecked && cardChecked.price" :special_id="cardChecked && cardChecked.id" :pay_type_num="pay_type_num" :is-wechat="isWechat" :is-alipay="isAlipay" :template-id="templateId" :wxpay-h5="wxpayH5" @change="changeVal"></pay-dialog>
+    <quick-menu></quick-menu>
+    <!-- 分享返佣 -->
+    <rebate-guide v-if="rebateMoney && isShareDisplaySwitch" :rebate-money="rebateMoney" @rebate-action="rebateAction"></rebate-guide>
+</div>
+<script>
+    require([
+        'vue',
+        'helper',
+        'store',
+        'components/pay-dialog/index',
+        'components/base-login/index',
+        'components/rebate-guide/index',
+        'quick',
+        'qrcode'
+    ], function (Vue, $h, store, PayDialog, BaseLogin, RebateGuide) {
+        var isAlipay = {$is_alipay},
+            isWechat = '{$isWechat}',
+            siteName = '{$Auth_site_name}',
+            wxpayH5 = {$is_h5_wechat_payment_switch},
+            callbackUrl = '{$callback_url}',
+            spreadPosterUrl = '{$spread_poster_url}',
+            url = '{$url}',
+            app = new Vue({
+                el: '#app',
+                components: {
+                    'pay-dialog': PayDialog,
+                    'base-login': BaseLogin,
+                    'rebate-guide': RebateGuide
+                },
+                data: {
+                    exchangeShow: false,  // 是否显示兑换弹窗
+                    loginShow: false,  // 是否显示登录弹窗
+                    userInfo: null,  // 用户信息
+                    interests: [],  // 会员权益
+                    description: [],  // 会员说明
+                    cardList: [],  // 会员套餐
+                    cardChecked: null,  // 选中的套餐
+                    member_code: '',  // 卡号
+                    member_pwd: '',  // 卡密
+                    surplus: 0,
+                    siteName: siteName,  // 站点名称
+                    isWechat: isWechat,  // 是否是微信
+                    url: isWechat ? $h.U({ c: 'index', a: 'login' }) : $h.U({ c: 'login', a: 'phone_check' }),
+
+                    id: 0,
+                    payDialogOpen: false,  // 是否显示支付弹窗
+                    isAlipay: isAlipay,  // 是否开启支付宝支付
+                    pay_type_num: 10,
+
+                    templateId: '',  // 订阅通知模板id
+                    wxpayH5: wxpayH5,  // 是否开启微信H5支付
+                    rebateMoney: 0,
+                    isShareDisplaySwitch: {$is_share_display_switch}  // 是否显示分享返佣
+                },
+                watch: {
+                    cardChecked: function (value) {
+                        if (value.is_free) {
+                            this.rebateMoney = 0;
+                        } else {
+                            this.rebateAmount();
+                        }
+                    }
+                },
+                created: function () {
+                    this.loginUser();
+                    if (isWechat) {
+                        this.mapleApi = mapleWx($jssdk());
+                        this.subscribe();
+                    }
+                },
+                methods: {
+                    // 订阅通知模板id
+                    subscribe: function () {
+                        var vm = this;
+                        store.baseGet($h.U({
+                            c: 'special',
+                            a: 'gettemplateIds',
+                            q: {
+                                pay_type_num: this.pay_type_num,
+                                special_id: this.cardChecked.id
+                            }
+                        }), function (res) {
+                            vm.templateId = res.data.msg;
+                        });
+                    },
+                    loginUser: function (type) {
+                        var vm = this;
+                        store.baseGet($h.U({
+                            c: 'index',
+                            a: 'login_user'
+                        }), function () {
+                            switch (type) {
+                                case 1:
+                                  if (isWechat) {
+                                    store.baseGet($h.U({
+                                      c: 'index',
+                                      a: 'user_login'
+                                    }), function () {
+                                      vm.payDialogOpen = true;
+                                    }, function () {
+                                      vm.loginShow = true;
+                                    });
+                                  } else {
+                                    vm.payDialogOpen = true;
+                                  }
+                                    break;
+                                case 2:
+                                    vm.exchangeShow = true;
+                                    break;
+                                case 3:
+                                    vm.exchange();
+                                    break;
+                                default:
+                                    vm.getUserInfo();
+                                    vm.getMemberList();
+                                    vm.getMemberData();
+                                    break;
+                            }
+                        }, function () {
+                            // vm.loginShow = true;
+                            if (isWechat) {
+                              window.localStorage.setItem('login_back_url', window.location.href);
+                              window.location.assign("{:url('login/index')}");
+                            } else {
+                              vm.loginShow = true;
+                            }
+                        });
+                    },
+                    // 用户信息
+                    getUserInfo: function () {
+                        var vm = this;
+                        store.baseGet($h.U({
+                            c: 'auth_api',
+                            a: 'userInfo'
+                        }), function (res) {
+                            vm.userInfo = res.data.data;
+                        });
+                    },
+                    // 会员权益、说明
+                    getMemberData: function () {
+                        var vm = this;
+                        store.baseGet($h.U({
+                            c: 'auth_api',
+                            a: 'merberDatas'
+                        }), function (res) {
+                            var data = res.data.data;
+                            vm.interests = data.interests;
+                            vm.description = data.description;
+                        });
+                    },
+                    // 会员套餐
+                    getMemberList: function () {
+                        var vm = this;
+                        store.baseGet($h.U({
+                            c: 'auth_api',
+                            a: 'membershipLists'
+                        }), function (res) {
+                            var data = res.data.data;
+                            data.forEach(function (item) {
+                                item.price = Number(item.price);
+                                item.original_price = Number(item.original_price);
+                            });
+                            vm.cardList = data;
+                            vm.cardChecked = data[0] || null;
+                        });
+                    },
+                    pay_order: function (data) {
+                        this.orderId = data.data.result.orderId || '';
+                        switch (data.data.status) {
+                            case "PAY_ERROR": case 'ORDER_EXIST': case 'ORDER_ERROR':
+                                this.extendOrder(data.msg);
+                                break;
+                            case 'WECHAT_PAY':
+                                this.wechatPay(data.data.result.jsConfig);
+                                break;
+                            case 'WECHAT_H5_PAY':
+                                window.location.assign(data.data.result.jsConfig.mweb_url + '&redirect_url=' + encodeURIComponent(callbackUrl + '?type=5&id=0'));
+                                break;
+                            case 'SUCCESS':
+                                this.successOrder(data.msg);
+                                break;
+                            case 'ZHIFUBAO_PAY':
+                              window.location.assign($h.U({ m: 'wap', c: 'alipay', a: 'index', q: { info: data.data.result, params: 'member' } }));
+                                break;
+                        }
+                    },
+                    wechatPay: function (config) {
+                        var vm = this;
+                        this.mapleApi.chooseWXPay(config, function () {
+                            vm.successOrder();
+                        }, {
+                            fail: vm.extendOrder,
+                            cancel: vm.extendOrder
+                        });
+                    },
+                    successOrder: function (msg) {
+                        var vm = this;
+                        $h.showMsg({
+                            title: msg ? msg : '领取成功',
+                            icon: 'success',
+                            success: function () {
+                                vm.payDialogOpen = false;
+                                vm.getUserInfo();
+                                vm.getMemberList();
+                            }
+                        });
+                    },
+                    extendOrder: function (msg) {
+                        var vm = this;
+                        if (typeof msg === 'object') {
+                            if (msg.errMsg === 'chooseWXPay:cancel') {
+                                msg = '微信支付取消';
+                            } else {
+                                msg = '支付失败';
+                            }
+                        } else {
+                            msg = msg || '支付失败';
+                        }
+                        $h.pushMsg(msg, function () {
+                            vm.payment = true;
+                        });
+                    },
+                    close: function () {
+                        this.popupShow = false
+                    },
+                    getUrlStr: function () {
+                        var queryStr = {};
+                        location.search.replace(/([^?&=]+)=([^&]+)/g, function (_, k, v) {
+                            queryStr[k] = v;
+                        });
+                        return queryStr;
+                    },
+                    // 激活
+                    exchange: function () {
+                        if (!this.member_code) {
+                            $h.pushMsg('请输入卡号');
+                        } else if (!this.member_pwd) {
+                            $h.pushMsg('请输入卡密');
+                        } else {
+                            $h.loadFFF();
+                            store.basePost($h.U({
+                                c: 'auth_api',
+                                a: 'confirm_activation'
+                            }), {
+                                member_code: this.member_code,
+                                member_pwd: this.member_pwd
+                            }, function (res) {
+                                $h.loadClear();
+                                $h.showMsg({
+                                    title: res.data.msg,
+                                    icon: 'success',
+                                    success: function () {
+                                        window.location.reload();
+                                    }
+                                });
+                            }, function () {
+                                $h.loadClear();
+                            });
+                        }
+                    },
+                    enter: function () {
+                        this.loginShow = true;
+                    },
+                    payClose:function(value){
+                        this.payment=value;
+                    },
+                    //关闭登录
+                    loginClose: function (value) {
+                        this.loginShow = false;
+                        value && this.logComplete();
+                    },
+                    //登录完成回调事件
+                    logComplete: function () {
+                        this.loginShow = false;
+                    },
+                    //所有插件回调处理事件
+                    changeVal: function (opt) {
+                        if (typeof opt != 'object') opt = {};
+                        var action = opt.action || '';
+                        var value = opt.value || '';
+                        this[action] && this[action](value);
+                    },
+                    // 获取返佣金额
+                    rebateAmount: function () {
+                        var vm = this;
+                        store.baseGet($h.U({
+                            c: 'auth_api',
+                            a: 'rebateAmount',
+                            p: {
+                                type: 1,
+                                id: this.cardChecked.id
+                            }
+                        }), function (res) {
+                            vm.rebateMoney = parseFloat(res.data.data.brokeragePrice);
+                        });
+                    },
+                    // 生成分享海报
+                    createSharePoster: function () {
+                        var vm = this;
+                        var imagePromise = new Promise(function (resolve, reject) {
+                            var image = new Image();
+                            image.crossOrigin = 'anonymous';
+                            image.src = spreadPosterUrl + '?' + new Date().getTime();
+                            image.onload = function () {
+                                resolve(image);
+                            },
+                                image.onerror = function () {
+                                    reject('error-image');
+                                };
+                        }),
+                            qrcodePromise = new Promise(function (resolve, reject) {
+                                resolve(new QRCode(document.createElement('canvas'), url));
+                            });
+                        Promise.all([
+                            imagePromise,
+                            qrcodePromise
+                        ]).then(function (sources) {
+                            var canvas = document.createElement('canvas');
+                            var context = canvas.getContext('2d');
+                            canvas.width = 600;
+                            canvas.height = 960;
+
+                            context.fillStyle = '#FFFFFF';
+                            context.fillRect(0, 0, 600, 960);
+
+                            context.drawImage(sources[0], 0, 0, 600, 740);
+                            context.drawImage(sources[1]._el.firstElementChild, 108, 775, 150, 150);
+
+                            context.font = '22px sans-serif';
+                            context.fillStyle = '#999999';
+                            context.textBaseline = 'top';
+
+                            var text = '邀您加入' + siteName;
+                            var list = [];
+                            var start = 0;
+                            for (var i = 0; i <= text.length; i++) {
+                                if (context.measureText(text.slice(start, i)).width > 198) {
+                                    list.push(text.slice(start, i - 1));
+                                    start = i - 1;
+                                }
+                            }
+                            if (start !== text.length) {
+                                list.push(text.slice(start));
+                            }
+                            if (list.length > 3) {
+                                list.length = 3;
+                                for (var j = 0; j <= list[2].length; j++) {
+                                    if (context.measureText(list[2].slice(0, j) + '……').width > 198) {
+                                        list[2] = list[2].slice(0, j - 1) + '……';
+                                        break;
+                                    }
+                                }
+                            }
+                            list.push('长按识别或扫码进入');
+                            for (var k = 0; k < list.length; k++) {
+                                context.fillText(list[k], 294, 775 + (150 / list.length) * k);
+                            }
+
+                            layer.photos({
+                                photos: {
+                                    data: [
+                                        {
+                                            src: canvas.toDataURL('image/jpeg')
+                                        }
+                                    ]
+                                },
+                                anim: 5
+                            });
+                            canvas = null;
+                        }).catch(function (err) {
+                            $h.pushMsg(err);
+                        });
+                    },
+                    rebateAction: function (value) {
+                        switch (value) {
+                            case 'close':
+                                this.rebateMoney = 0;
+                                break;
+                            case 'share':
+                                this.createSharePoster();
+                                break;
+                        }
+                    }
+                }
+            });
+    });
+</script>
+{/block}

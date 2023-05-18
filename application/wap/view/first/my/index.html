@@ -1,0 +1,345 @@
+{extend name="public/container"}
+{block name="title"}个人中心{/block}
+{block name="head"}
+<style>
+    html {
+        min-height: 100%;
+    }
+
+    body {
+        padding-bottom: 1.1rem;
+        padding-bottom: calc(1.1rem + constant(safe-area-inset-bottom));
+        padding-bottom: calc(1.1rem + env(safe-area-inset-bottom));
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#f5f5f5));
+        background-image: linear-gradient(#fff, #f5f5f5);
+    }
+
+    .copyright {
+        margin: .2rem;
+        overflow: hidden;
+        word-break: keep-all;
+        text-align: center;
+        font-size: .28rem;
+        color: #BBBBBB;
+    }
+
+    a[href^="tel"] {
+        color: #2C8EFF;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="user-page">
+    <div class="user-section" @click="goUrl('{:Url('user_info')}', 1)">
+        {if isset($userInfo['uid']) && $userInfo['uid']}
+        <img class="img" src="{$userInfo.avatar}">
+        {else}
+        <img class="img" src="/wap/first/zsff/images/avatar_default.jpg">
+        {/if}
+        <div class="text-wrap">
+            {if isset($userInfo['uid']) && $userInfo['uid']}
+            <div class="name">{$userInfo.nickname}</div>
+            {if $userInfo['level'] eq 1 && $userInfo['is_permanent'] neq 1}
+            <div class="info">
+                <img class="icon" src="/wap/first/zsff/images/user_member1.png">
+                <span class="time">{$overdue_time}到期</span>
+            </div>
+            {elseif $userInfo['level'] eq 1 && $userInfo['is_permanent'] eq 1}
+            <div class="info">
+                <img class="icon" src="/wap/first/zsff/images/user_member1.png">
+                <span class="time">永久会员</span>
+            </div>
+            {elseif $userInfo['level'] eq 0 && $userInfo['member_time'] neq 0}
+            <div class="info">
+                <img class="icon" src="/wap/first/zsff/images/user_member1.png">
+                <span class="time">会员已过期</span>
+            </div>
+            {else /}
+            <div class="info">
+                <img class="icon" src="/wap/first/zsff/images/user_member1.png">
+                <span class="time">未开通会员</span>
+            </div>
+            {/if}
+            {else}
+            <div class="name">请登录</div>
+            {/if}
+        </div>
+        <div class="iconfont iconxiangyou"></div>
+    </div>
+    <div class="member-section" @click="memberUrl">
+        <div>
+            <img src="{__WAP_PATH}zsff/images/user_member2.png">
+        </div>
+        <div>会员可享多项课程特权</div>
+        {notempty name="$userInfo"}
+        {if isset($userInfo['is_permanent']) && $userInfo['is_permanent'] neq 1}
+        {if $userInfo['level'] eq 1 || $userInfo['member_time'] neq 0}
+        <button>续费会员</button>
+        {else}
+        <button>立即激活</button>
+        {/if}
+        {/if}
+        {else /}
+        <button>立即激活</button>
+        {/notempty}
+    </div>
+    <div class="tool-section">
+        <a href="javascript:" @click="goUrl('{:Url('special/grade_special')}', 1)">
+            <img src="{__WAP_PATH}zsff/images/wdkc.png">
+            我的课程
+        </a>
+        <a href="javascript:" @click="goUrl('{:Url('special/record')}', 1)">
+            <img src="{__WAP_PATH}zsff/images/xxjl.png">
+            学习记录
+        </a>
+        <a href="javascript:" @click="goUrl('{:Url('special/order_store_list')}', 1)" v-show="is_store_switch==1">
+            <img src="{__WAP_PATH}zsff/images/ddgl.png">
+            商品订单
+        </a>
+    </div>
+    <div v-if="question.length" class="question-section">
+        <a v-for="item in question" :key="item.id" href="javascript:" @click="goUrl(item.url, 1)">
+            <div>
+                <img :src="item.icon">
+            </div>
+            <div>
+                <div>{{ item.title }}</div>
+                <div>{{ item.explain }}</div>
+            </div>
+        </a>
+    </div>
+    <div class="serve-section">
+        <div class="section-hd">我的服务</div>
+        <div class="section-bd">
+            <a v-for="item in menuList" :key="item.id" href="javascript:" @click="goUrl(item, 2)">
+                <img :src="item.icon">
+                {{ item.title }}
+            </a>
+        </div>
+    </div>
+    <img v-if="!copyrightLogo && hasCopyright" class="support" src="{__WAP_PATH}zsff/images/crmeb_my.png">
+    <img v-else-if="copyrightLogo && hasCopyright" class="support" :src="copyrightLogo">
+
+    {if $is_official_account_switch}
+    <div v-show="isfollow">
+        <div class="mask" @touchmove.prevent></div>
+        <div class="follow">
+            <div>立即绑定微信公众号用户</div>
+            <img :src="codeUrl">
+            <button @click.stop="skip">跳过</button>
+        </div>
+    </div>
+    {/if}
+    <base-login :login-show="loginShow" :site-name="site_name" @login-close="logComplete"></base-login>
+    <!-- 申请讲师状态 -->
+    <apply-dialog :show.sync="applyVisible" :status="applyStatus" :fail="failMessage"></apply-dialog>
+    {include file="public/store_menu"}
+</div>
+<script>
+    var site_name = '{$Auth_site_name}', store_switch = '{$store_switch}', isyue = {$is_yue? 'true': 'false'}, phone = '{$phone}', isWechat = '{$isWechat}', is_official_account_switch = {$is_official_account_switch};
+    require(['vue', 'helper', 'store', 'axios', 'components/base-login/index', 'components/apply-dialog/index'], function (Vue, $h, store, axios, BaseLogin, ApplyDialog) {
+        new Vue({
+            el: '#app',
+            components: {
+                'base-login': BaseLogin,
+                'apply-dialog': ApplyDialog
+            },
+            data: {
+                appear: true,
+                codeUrl: '',
+                isfollow: false,
+                url: isWechat ? $h.U({c: 'index', a: 'login'}) : $h.U({c: 'login', a: 'phone_check'}),
+                site_name: site_name,
+                isyue: isyue,
+                phone: phone,
+                isWechat: isWechat,
+                menuList: [],
+                question: [],
+                loginShow: false,
+                is_store_switch: store_switch,
+                applyStatus: null,
+                failMessage: '',
+                applyVisible: false,
+                clickedLink: '',
+                hasCopyright: false,
+                copyrightLogo: ''
+            },
+            created: function () {
+                this.getQuestion();
+                this.getMenu();
+                this.get_copyright();
+            },
+            methods: {
+                getMenu: function () {
+                    var that = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'my',
+                        a: 'getPersonalCenterMenu'
+                    }), function (res) {
+                        $h.loadClear();
+                        that.menuList = res.data.data;
+                    }, function (err) {
+                        $h.loadClear();
+                    });
+                },
+                skip: function () {
+                    this.isfollow = false;
+                    this.appear = true;
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 800);
+                },
+                logComplete: function (data) {
+                    var that = this;
+                    that.loginShow = false;
+                    if (!data) {
+                        return;
+                    }
+                    if (!data.isfollow && is_official_account_switch) {
+                        that.codeUrl = data.url;
+                        that.isfollow = true;
+                    } else {
+                        window.location.reload();
+                    }
+                },
+                goUrl: function (item, type) {
+                    var vm = this;
+                    store.baseGet("{:url('index/login_user')}", function () {
+                        if (type === 1) {
+                            window.location.assign(item);
+                        }
+                        if (type === 2) {
+                            // 讲师申请
+                            if (item.link.indexOf('merchant/index') !== -1) {
+                                vm.is_apply(item.link);
+                                return false;
+                            }
+                            // 咨询客服
+                            if (item.link.indexOf('service/service_list') !== -1) {
+                                vm.public_data(item.link);
+                                return false;
+                            }
+                            window.location.assign(item.link);
+                        }
+                    }, function () {
+                        if (isWechat) {
+                            localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                memberUrl: function () {
+                    var that = this;
+                    store.baseGet("{:url('index/login_user')}", function () {
+                        window.location.assign("{:url('special/member_recharge')}");
+                    }, function () {
+                        that.appear = false;
+                        if (isWechat) {
+                            localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            that.loginShow = true;
+                        }
+                    });
+                },
+                //所有插件回调处理事件
+                changeVal: function (opt) {
+                    if (typeof opt != 'object') opt = {};
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                enter: function () {
+                    this.appear = false;
+                },
+                change: function (title) {
+                    this.appear = title;
+                },
+                // 练习考试模块
+                getQuestion: function () {
+                    var index = layer.load(1);
+                    axios.get('/wap/my/questionModule').then(function (res) {
+                        this.question = res.data.data;
+                    }.bind(this)).catch(function (err) {
+
+                    }).then(function () {
+                        layer.close(index);
+                    });
+                },
+                // 申请状态
+                is_apply: function (link) {
+                    var vm = this;
+                    this.clickedLink = link;
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'is_apply'
+                    }), function (res) {
+                        if (res.data.data) {
+                            vm.applyStatus = res.data.data.status;
+                            if (res.data.data.status === null) {
+                                window.location.assign(link);
+                            } else {
+                                if (res.data.data.status === 2) {
+                                    window.location.assign(link);
+                                } else {
+                                    vm.applyVisible = true;
+                                    if (res.data.data.status === -1) {
+                                        vm.failMessage = res.data.data.fail_message;
+                                    }
+                                }
+                            }
+                        } else {
+                            window.location.assign(link);
+                        }
+                    });
+                },
+                // 咨询客服
+                public_data: function (link) {
+                    store.baseGet($h.U({
+                        c: 'public_api',
+                        a: 'public_data'
+                    }), function (res) {
+                        var data = res.data.data;
+                        if (data.customer_service === '3') {
+                            if (data.site_service_phone) {
+                                layer.confirm('是否拨打 <a href="tel:' + data.site_service_phone + '">' + data.site_service_phone + '</a> 进行咨询？', {
+                                    title: false,
+                                    closeBtn: false,
+                                    btn: ['拨打', '取消']
+                                }, function (index) {
+                                    window.location.assign('tel:' + data.site_service_phone);
+                                    layer.close(index);
+                                });
+                            } else {
+                                layer.msg('抱歉，无法联系客服');
+                            }
+                        } else {
+                            window.location.assign(link);
+                        }
+                    });
+                },
+                goApply: function () {
+                    window.location.assign(this.clickedLink);
+                },
+                // 版权信息
+                get_copyright: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        m: 'admin',
+                        c: 'login',
+                        a: 'get_copyright'
+                    }), function (res) {
+                        vm.hasCopyright = true;
+                        vm.copyrightLogo = res.data.data.nncnL_crmeb_copyright_logo;
+                    }, function () {
+                        vm.hasCopyright = true;
+                    }, true);
+                }
+            }
+        })
+    })
+</script>
+{/block}

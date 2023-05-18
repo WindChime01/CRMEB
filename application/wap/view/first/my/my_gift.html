@@ -1,0 +1,97 @@
+{extend name="public/container"}
+{block name="title"}我的赠送{/block}
+{block name="head"}
+<style>
+    body {
+        background: #F5F5F5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="gift-given">
+    <div class="list" v-if="updateGiftList.length">
+        <a v-for="(item, index) in updateGiftList" :key="index" :href="item.path" class="item given">
+            <div class="item-hd">
+                <div v-if="item.is_draw">赠送成功</div>
+                <div v-else>未赠送</div>
+                <div v-if="item.is_draw">领取人:{{item.gift_user.nickname}}</div>
+                <div v-else>去赠送</div>
+            </div>
+            <div class="item-bd">
+                <div>
+                    <img :src="item.image" alt="">
+                </div>
+                <div class="text">
+                    <div class="title">{{ item.title }}</div>
+                    <div class="money">￥<span>{{ item.money }}</span></div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div v-if="!updateGiftList.length && loaded" class="empty">
+        <img src="{__WAP_PATH}zsff/images/empty.png" alt="暂无数据">
+        <div>暂无数据</div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'quick'], function (Vue, helper, store) {
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                page: 1,
+                limit: 16,
+                appear: true,
+                giftList: [],
+                loaded: false,
+                loading: false,
+            },
+            computed: {
+                updateGiftList: function () {
+                    var that = this;
+                    return this.giftList.map(function (value) {
+                        value.path = value.is_draw ? $h.U({ c: 'special', a: 'gift_receive', p: { orderId: value.order_id } }) : $h.U({ c: 'special', a: 'gift_special', q: { orderId: value.order_id } });
+                        return value;
+                    });
+                }
+            },
+            created: function () {
+                this.getGiftList();
+            },
+            mounted: function () {
+                $h.EventUtil.listenTouchDirection(document, function () {
+                    this.loading == false && this.getGiftList();
+                }.bind(this), false);
+            },
+            methods: {
+                getGiftList: function () {
+                    var that = this;
+                    if (that.loading) return;
+                    if (that.loaded) return;
+                    that.loading = true;
+                    store.baseGet(helper.U({
+                        c: 'my',
+                        a: 'get_order_list',
+                        q: {
+                            page: that.page,
+                            limit: that.limit,
+                            type: 1
+                        }
+                    }), function (res) {
+                        var list = res.data.data.list;
+                        var giftList = $h.SplitArray(list, that.giftList);
+                        that.loaded = list.length < that.limit;
+                        that.page = res.data.data.page;
+                        that.loading = false;
+                        that.$set(that, 'giftList', giftList);
+                    }, function (res) {
+                        that.loading = false;
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

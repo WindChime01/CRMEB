@@ -1,0 +1,120 @@
+{extend name="public/container"}
+{block name='title'}拼团海报{/block}
+{block name="head"}
+<style>
+    body {
+        background-color: rgba(0, 0, 0, .6);
+        font-size: .24rem;
+        text-align: center;
+        color: #cecece;
+    }
+
+    img {
+        width: 6rem;
+        margin-top: 1.92rem;
+        margin-bottom: .5rem;
+        vertical-align: middle;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <img :src="imgSrc">
+    <div v-show="imgSrc">长按图片，保存至手机</div>
+</div>
+<script>
+    require([
+        'vue',
+        'helper',
+        'qrcode'
+    ], function (Vue, $h) {
+        var url = '{$url}',
+            special = {$special},
+            vm = new Vue({
+                el: '#app',
+                data: {
+                    loading: false,
+                    imgSrc: ''
+                },
+                created: function () {
+                    this.createPoster();
+                },
+                methods: {
+                    createPoster: function () {
+                        $h.loadFFF();
+                        var imagePromise = new Promise(function (resolve, reject) {
+                            var image = new Image();
+                            image.crossOrigin = 'anonymous';
+                            image.src = special.image + '?' + new Date().getTime();
+                            image.onload = function () {
+                                resolve(image);
+                            },
+                            image.onerror = function () {
+                                reject('error-image');
+                            };
+                        }),
+                            qrcodePromise = new Promise(function (resolve, reject) {
+                                resolve(new QRCode(document.createElement('canvas'), url));
+                            });
+                        Promise.all([
+                            imagePromise,
+                            qrcodePromise
+                        ]).then(function (sources) {
+                            var canvas = document.createElement('canvas'),
+                                context = canvas.getContext('2d'),
+                                money = '￥' + special.money,
+                                i = Math.ceil(special.title.length / 18),
+                                pinkWidth;
+                            canvas.width = 600;
+                            canvas.height = 723;
+
+                            context.fillStyle = '#FFFFFF';
+                            context.fillRect(0, 0, 600, 723);
+
+                            context.fillStyle = '#F7F7F7';
+                            context.fillRect(0, 553, 600, 170);
+
+                            context.drawImage(sources[0], 30, 30, 540, 304);
+                            context.drawImage(sources[1]._el.firstElementChild, 64, 576, 126, 126);
+
+                            context.font = 'bold 26px sans-serif';
+                            context.fillStyle = '#FF6B00';
+                            context.fillText('￥', 35, 406);
+
+                            context.font = 'bold 42px sans-serif';
+                            context.fillText(special.pink_money, 56, 406);
+
+                            pinkWidth = Math.ceil(context.measureText(special.pink_money).width);
+
+                            context.font = '26px sans-serif';
+                            context.fillStyle = '#999999';
+                            context.fillText(money, pinkWidth + 65, 406);
+
+                            context.moveTo(pinkWidth + 65, 397);
+                            context.lineTo(Math.ceil(context.measureText(money).width) + pinkWidth + 65, 397);
+                            context.stroke();
+
+                            context.font = '22px sans-serif';
+                            context.fillText('邀您参与拼团课程', 226, 622);
+                            context.fillText('长按识别参与拼团', 226, 662);
+
+                            context.font = '28px sans-serif';
+                            context.fillStyle = '#282828';
+
+                            for (; i--;) {
+                                context.fillText(special.title.substr(i * 18, 18), 35, i * 41 + 472);
+                            }
+
+                            vm.imgSrc = canvas.toDataURL('image/jpeg');
+                            $h.loadClear();
+                            canvas = null;
+                        }).catch(function (err) {
+                            $h.loadClear();
+                            $h.pushMsg(err);
+                        });
+                    }
+                }
+            });
+    });
+</script>
+{/block}

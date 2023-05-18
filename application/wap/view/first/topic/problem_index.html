@@ -1,0 +1,220 @@
+{extend name="public/container"}
+{block name="title"}{$titles}{/block}
+{block name="head_top"}
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="problem-index-page">
+        <div class="wrapper">
+            <div class="title">{{ problem.title }}</div>
+            <div class="group">{{ problem.answer + problem.fake_sales}}人已答题<div>试题数量：<span>{{ problem.item_number }}题</span></div>
+            </div>
+            <ul>
+                <li>
+                    <div><span>{{ problem.single_number }}</span>题</div>
+                    单选题
+                </li>
+                <li>
+                    <div><span>{{ problem.many_number }}</span>题</div>
+                    多选题
+                </li>
+                <li>
+                    <div><span>{{ problem.judge_number }}</span>题</div>
+                    判断题
+                </li>
+            </ul>
+            <div>
+                <a v-if="!status" href="javascript:" @click="handleAnswer">开始练习</a>
+                <a v-if="status === 1" href="javascript:" @click="handleAnswer">再次练习</a>
+                <a v-if="status === 2" href="javascript:" @click="handleAnswer">继续练习</a>
+            </div>
+        </div>
+        <div class="content">
+            <div>题型介绍：</div>
+            <ol>
+                <li>单选题（选项中只有1个正确答案)；</li>
+                <li>多选题（选项中至少有2个正确答案)；</li>
+                <li>判断题（选项中只有1个正确答案)。</li>
+            </ol>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+    <base-login :login-show="loginShow" :site-name="site_name" @login-close="logComplete"></base-login>
+</div>
+{/block}
+{block name='foot'}
+<script>
+    var uid = '{$uid}', id = "{$id}";
+    var titles = '{$titles}';
+    var wechat_share =<?php echo isset($overallShareWechat) ? $overallShareWechat : '{}'; ?>;
+    window.overallShare = false;
+    require(['vue', 'helper', 'store', 'components/base-login/index', '{__WAP_PATH}zsff/js/quick.js'], function (Vue, $h, $http, BaseLogin) {
+        var site_name = '{$Auth_site_name}';
+        var vm = new Vue({
+            el: '#app',
+            filters: {
+                m: function (n, d) {
+                    x = ('' + n).length, p = Math.pow, d = p(10, d);
+                    x -= x % 3;
+                    return Math.round(n * d / p(10, x)) / d + " kMGTPE"[x / 3]
+                }
+            },
+            components: {
+                'base-login': BaseLogin
+            },
+            data: {
+                id: id,
+                problem: {},
+                status: -1,
+                e_id: 0,
+                loginShow: false,
+                site_name: site_name
+            },
+            created: function () {
+                this.getDetail();
+                this.getStatus();
+            },
+            mounted: function () {
+                var that = this;
+                this.$nextTick(function () {
+                    mapleWx($jssdk(), function () {
+                        this.onMenuShareAll({
+                            title: titles,
+                            desc: titles,
+                            imgUrl: wechat_share.wechat_share_img,
+                            link: location.origin + "{:url('topic/problem_index')}?spread_uid=" + uid + "&id=" + $h.getParmas('id')
+                        });
+                    });
+                });
+            },
+            methods: {
+                getDetail: function () {
+                    $h.loadFFF();
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'testPaperDetails',
+                        q: {
+                            id: id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.problem = res.data.data;
+                    });
+                },
+                getStatus: function () {
+                    var vm = this;
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'situationRecord',
+                        q: {id: this.id}
+                    }), function (res) {
+                        vm.status = res.data.data;
+                    });
+                },
+                getAnswer: function () {
+                    var vm = this;
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'userAnswer',
+                        q: {
+                            test_id: this.id,
+                            type: 1
+                        }
+                    }), function (res) {
+                        $h.setCookie('e_id', res.data.data);
+                        vm.e_id = res.data.data;
+                        window.location.assign($h.U({
+                            c: 'topic',
+                            a: 'problem_detail',
+                            q: {
+                                test_id: vm.id,
+                                e_id: vm.e_id,
+                                type: 1
+                            }
+                        }));
+                    });
+                },
+                getAnswerAgain: function () {
+                    var vm = this;
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'takeTheTestAgain',
+                        q: {
+                            test_id: this.id,
+                            type: 1
+                        }
+                    }), function (res) {
+                        $h.setCookie('e_id', res.data.data);
+                        vm.e_id = res.data.data;
+                        window.location.assign($h.U({
+                            c: 'topic',
+                            a: 'problem_detail',
+                            q: {
+                                test_id: vm.id,
+                                e_id: vm.e_id,
+                                type: 1
+                            }
+                        }));
+                    });
+                },
+                getAnswerContinue: function () {
+                    var vm = this;
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'continueAnswer',
+                        q: {
+                            test_id: this.id,
+                            type: 1
+                        }
+                    }), function (res) {
+                        $h.setCookie('e_id', res.data.data);
+                        vm.e_id = res.data.data;
+                        window.location.assign($h.U({
+                            c: 'topic',
+                            a: 'problem_detail',
+                            q: {
+                                test_id: vm.id,
+                                e_id: vm.e_id,
+                                type: 1
+                            }
+                        }));
+                    });
+                },
+                handleAnswer: function () {
+                    var vm = this;
+                    $http.baseGet("{:url('index/login_user')}", function () {
+                      switch (vm.status) {
+                        case 0:
+                            vm.getAnswer();
+                            break;
+                        case 1:
+                            vm.getAnswerAgain();
+                            break;
+                        case 2:
+                            vm.getAnswerContinue();
+                            break;
+                      }
+                    }, function () {
+                      if (isWechat) {
+                          window.localStorage.setItem('login_back_url', window.location.href);
+                          window.location.assign("{:url('login/index')}");
+                      } else {
+                          vm.loginShow = true;
+                      }
+                    }, true);
+                },
+                logComplete: function () {
+                    this.loginShow = false;
+                    this.getDetail();
+                    this.getStatus();
+                }
+            }
+        });
+    });
+</script>
+{/block}

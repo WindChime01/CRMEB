@@ -1,0 +1,1298 @@
+body {
+    background: #F9F9F9;
+}
+
+.layout {
+    padding: 40px 0 50px;
+    background: #4A4E57;
+}
+
+.container {
+    width: 1200px;
+    margin: 0 auto;
+}
+
+.classroom {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    height: 770px;
+}
+
+.classroom_video {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -moz-box-orient: vertical;
+    -moz-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    min-width: 0;
+    border-radius: 8px;
+    background: #FFFFFF;
+}
+
+/* 左侧视频部分开始 */
+.classroom_video_title {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -moz-box-orient: vertical;
+    -moz-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    -moz-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    height: 100px;
+    padding: 17px 30px 14px;
+}
+
+.classroom_video_title_value {
+    font-weight: bold;
+    font-size: 22px;
+    line-height: 29px;
+    color: #282828;
+}
+
+.classroom_video_title_teacher {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.classroom_video_title_teacher>div~div {
+    margin: 0 0 0 30px;
+}
+
+.classroom_video_title_teacher .classroom_video_title_teacher_name,
+.classroom_video_title_teacher .classroom_video_title_teacher_tip {
+    margin: 0 0 0 10px;
+}
+
+
+
+.classroom_video_title_teacher_avatar img {
+    display: block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    -o-object-fit: cover;
+    object-fit: cover;
+}
+
+.classroom_video_title_teacher_name {
+    font-size: 16px;
+    line-height: 21px;
+    color: #2B2B2B;
+}
+
+.classroom_video_title_teacher_tip {
+    height: 20px;
+    padding: 0 11px;
+    border-radius: 10px;
+    background: #2C8EFF;
+    font-size: 12px;
+    line-height: 20px;
+    color: #FFFFFF;
+}
+
+.classroom_video_title_teacher_time {
+    font-size: 0;
+    line-height: 20px;
+    color: #999999;
+}
+
+.classroom_video_title_teacher_time span {
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+.classroom_video_title_teacher_time .iconfont {
+    margin: 0 6px 0 0;
+}
+
+.classroom_video_title_teacher_audience {
+    margin: 0 0 0 30px;
+    font-size: 0;
+    color: #999999;
+}
+
+.classroom_video_title_teacher_audience span {
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+.classroom_video_title_teacher_audience .iconfont {
+    margin: 0 6px 0 0;
+}
+
+
+.classroom_video_content {
+    position: relative;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-height: 0;
+    background: #000000;
+}
+
+.classroom_video_content .cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.classroom_video_content .shade {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.classroom_video_content .tip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    color: #FFFFFF;
+}
+
+.classroom_video_methods {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 90px;
+}
+
+.classroom_video_methods_giftList {
+    position: relative;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+    padding: 0 36px;
+}
+
+.classroom_video_methods_giftList .swiper-slide {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #E9E9E9;
+    cursor: pointer;
+}
+
+.classroom_video_methods_giftList .swiper-slide:hover {
+    border-color: #2C8EFF;
+}
+
+.classroom_video_methods_giftList img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+}
+
+.classroom_video_methods_giftList .swiper-button-next,
+.classroom_video_methods_giftList .swiper-button-prev {
+    width: 30px;
+    height: 60px;
+    margin: -30px 0 0;
+    background: #F3F3F3;
+    border-radius: 4px;
+    color: #999999;
+}
+
+.classroom_video_methods_giftList .swiper-button-next:after,
+.classroom_video_methods_giftList .swiper-button-prev:after {
+    font-size: 14px;
+}
+
+.classroom_video_methods_giftList .left,
+.right {
+    width: 30px;
+    height: 60px;
+    background: #f3f3f3;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -moz-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+}
+
+.classroom_video_methods_giftList_con {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    position: relative;
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.classroom_video_methods_giftList_con_tip {
+    position: absolute;
+    left: 0;
+    top: -100px;
+    z-index: 99;
+    background: #fff;
+    padding: 12px 15px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    border-radius: 6px;
+    -webkit-box-shadow: 0px 1px 3px rgba(109, 136, 167, 0.2);
+    box-shadow: 0px 1px 3px rgba(109, 136, 167, 0.2);
+}
+
+.classroom_video_methods_giftList_con_tip .text {
+    white-space: nowrap;
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 14px;
+    color: #666666;
+}
+
+.classroom_video_methods_giftList_con_item {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    border: 1px solid #E9E9E9;
+    overflow: hidden;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -moz-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    margin: 0 13px;
+    cursor: pointer;
+}
+
+.classroom_video_methods_giftList_con_item img {
+    max-width: 100%;
+    height: auto;
+}
+
+.classroom_video_methods_pay {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    height: 60px;
+    padding: 0 20px;
+}
+
+.classroom_video_methods_pay_item {
+    width: 40px;
+    padding: 4px 0 0;
+    cursor: pointer;
+}
+
+.classroom_video_methods_pay_item~.classroom_video_methods_pay_item {
+    margin: 0 0 0 20px;
+}
+
+.classroom_video_methods_pay_item>div:nth-child(1) img {
+    display: block;
+    width: 32px;
+    height: 32px;
+    margin: 0 auto;
+}
+
+.classroom_video_methods_pay_item>div:nth-child(2) {
+    margin: 3px 0 0 0;
+    font-size: 14px;
+    line-height: 19px;
+    text-align: center;
+    color: #666666;
+}
+
+/* 左侧视频部分结束 */
+
+
+.classroom_chat {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -moz-box-orient: vertical;
+    -moz-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 300px;
+    border-radius: 8px;
+    margin: 0 0 0 10px;
+    background: #FFFFFF;
+}
+
+.classroom_chat_fun {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    height: 48px;
+    border-radius: 8px 8px 0 0;
+    background: #EDF2F8;
+
+}
+
+
+.classroom_chat_fun .classroom_chat_fun_item {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    border-radius: 8px 8px 0 0;
+    font-size: 14px;
+    line-height: 48px;
+    text-align: center;
+    color: #666666;
+    cursor: pointer;
+}
+
+.classroom_chat_fun .selectEdTap {
+    background: #FFFFFF;
+    color: #2C8EFF;
+}
+
+.classroom_chat_con {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-height: 0;
+    padding: 25px 14px;
+    overflow-y: auto;
+}
+
+.classroom_chat_con3 {
+    padding: 20px 16px;
+}
+
+.classroom_chat_con4 {
+    padding: 22px 20px;
+}
+
+
+.classroom_chat_con::-webkit-scrollbar {
+    width: 2px;
+}
+
+.classroom_chat_con_item {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.classroom_chat_con_item~.classroom_chat_con_item {
+    margin: 20px 0 0;
+}
+
+.classroom_chat_con .right_box {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: reverse;
+    -webkit-flex-direction: row-reverse;
+    -moz-box-orient: horizontal;
+    -moz-box-direction: reverse;
+    -ms-flex-direction: row-reverse;
+    flex-direction: row-reverse;
+}
+
+.classroom_chat_con .right_box .user_message {
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+    -moz-box-pack: end;
+    -ms-flex-pack: end;
+    justify-content: flex-end;
+}
+
+.classroom_chat_con .right_box .user_message .nickname {
+    margin-left: 5px;
+    margin-right: 0;
+}
+
+.classroom_chat_con .right_box .classroom_chat_con_item_msg {
+    margin-right: 7px;
+}
+
+
+.classroom_chat_con_item_avator {
+    width: 28px;
+    height: 28px;
+}
+
+.classroom_chat_con_item_avator img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    -o-object-fit: contain;
+    object-fit: contain;
+}
+
+.classroom_chat_con_item_msg {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+    margin: 0 10px;
+
+}
+
+.classroom_chat_con_item_msg .user_message {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+
+.classroom_chat_con_item_msg .user_message .nickname {
+    font-size: 12px;
+    line-height: 16px;
+    color: #999999;
+    margin-right: 5px;
+}
+
+.classroom_chat_con_item_msg .user_message .identity {
+    margin: 0 0 0 5px;
+    height: 14px;
+    padding: 0 6px;
+    border-radius: 7px;
+    background: #2C8EFF;
+    font-size: 9px;
+    line-height: 14px;
+    color: #FFFFFF;
+}
+
+.classroom_chat_con_item_msg .user_message .identity>span {
+    font-size: 9px;
+    display: inline-block;
+    -webkit-transform: scale(.9);
+    -moz-transform: scale(.9);
+    -ms-transform: scale(.9);
+    -o-transform: scale(.9);
+    transform: scale(.9);
+    color: #fff;
+}
+
+.classroom_chat_con_item_msg .message {
+    display: inline-block;
+    padding: 6px 10px 5px;
+    border-radius: 2px;
+    margin: 6px 0 0;
+    background: #ECECEC;
+    font-size: 14px;
+    line-height: 19px;
+    word-break: break-all;
+    text-align: left;
+    color: #282828;
+}
+
+.classroom_chat_con_item_msg .message>img {
+    max-width: 100%;
+}
+
+.classroom_chat_con .right_box .classroom_chat_con_item_msg {
+    text-align: right;
+}
+
+.classroom_chat_con_item_msg .gift {
+    display: -webkit-inline-box;
+    display: -webkit-inline-flex;
+    display: -moz-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    margin: 6px 0 0;
+}
+
+.classroom_chat_con_item_msg .gift>div:nth-child(1) {
+    margin: 0 10px 0 0;
+    font-size: 14px;
+    color: #61AAFF;
+}
+
+.classroom_chat_con_item_msg .gift>div:nth-child(2) img {
+    width: 28px;
+    height: 25px;
+    -o-object-fit: contain;
+    object-fit: contain;
+}
+
+.classroom_chat_con_item_msg .gift>div:nth-child(3) {
+    margin: 0 0 0 5px;
+    font-size: 14px;
+    color: #666666;
+}
+
+
+.classroom_chat_bottom {
+    height: 100px;
+    padding: 11px 10px 10px;
+    border-top: 1px solid #F5F5F5;
+}
+
+.classroom_chat_bottom_top {
+    padding: 0 0 0 3px;
+}
+
+.classroom_chat_bottom_top .faceList {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.classroom_chat_bottom_top .faceList>* {
+    font-size: 0;
+}
+
+.classroom_chat_bottom_top .faceList>span {
+    margin: 0 10px 0 0;
+}
+
+.classroom_chat_bottom_top .faceList .face {
+    display: inline-block;
+    width: 19px;
+    height: 19px;
+    background: url("../images/face1.png") center/contain no-repeat;
+    font-size: 0;
+}
+
+.classroom_chat_bottom_top .faceList .face~.face {
+    margin-left: 10px;
+}
+
+.classroom .el-upload.el-upload--text .face {
+    background-image: url("../images/face2.png");
+}
+
+.classroom_chat_bottom_top .numberOfWords {
+    font-size: 12px;
+}
+
+.classroom_chat_bottom_input {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    height: 50px;
+    margin: 10px 0 0;
+}
+
+.classroom_chat_bottom_input>input {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+    padding: 0 10px;
+    border-width: 1px 0 1px 1px;
+    border-style: solid;
+    border-color: #E9E9E9;
+    border-radius: 4px 0 0 4px;
+    outline: 0;
+}
+
+.classroom_chat_bottom_input>input:focus {
+    border-color: #2C8EFF;
+}
+
+.classroom_chat_bottom_input>p {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+    padding: 10px;
+    border-width: 1px 0 1px 1px;
+    border-style: solid;
+    border-color: #E9E9E9;
+    border-radius: 4px 0 0 4px;
+    outline: 0;
+    overflow: auto;
+}
+
+.classroom_chat_bottom_input>p:focus {
+    border-color: #2C8EFF;
+}
+
+.classroom_chat_bottom_input>button {
+    width: 64px;
+    border: 0;
+    border-radius: 0 4px 4px 0;
+    background: #2C8EFF;
+    outline: 0;
+    font-size: 14px;
+    color: #FFFFFF;
+}
+
+/* 聊天结束 */
+
+/* 课堂开始 */
+
+/* 课堂结束 */
+
+/* 讲师推荐开始 */
+.instructor_recommendation {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    cursor: pointer;
+}
+
+.instructor_recommendation~.instructor_recommendation {
+    margin: 20px 0 0 0;
+}
+
+.instructor_recommendation_img {
+    position: relative;
+    width: 140px;
+    height: 80px;
+}
+
+.instructor_recommendation_img img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    -o-object-fit: cover;
+    object-fit: cover;
+}
+
+.instructor_recommendation_img div {
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 2px;
+    background-color: rgba(0, 0, 0, 0.5);
+    font-size: 12px;
+    line-height: 18px;
+    color: #FFFFFF;
+}
+
+.instructor_recommendation_value {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -moz-box-orient: vertical;
+    -moz-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    -moz-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    min-width: 0;
+    padding: 2px 0;
+    margin: 0 0 0 10px;
+}
+
+.instructor_recommendation_value_title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-size: 16px;
+    line-height: 22px;
+    color: #282828;
+}
+
+.instructor_recommendation_value_price {
+    font-size: 0;
+    color: #FF6B00;
+}
+
+.instructor_recommendation_value_price span:nth-child(1) {
+    font-size: 12px;
+}
+
+.instructor_recommendation_value_price span:nth-child(2) {
+    font-size: 18px;
+}
+
+/* 讲师推荐结束 */
+
+
+/* 榜单开始 */
+.classroom_chat_con_noun {
+    -webkit-align-self: center;
+    -ms-flex-item-align: center;
+    align-self: center;
+    margin: 0 10px 0 0;
+}
+
+.classroom_chat_con_noun img {
+    display: block;
+    width: 17px;
+    height: 20px;
+    -o-object-fit: contain;
+    object-fit: contain;
+}
+
+.classroom_chat_con_noun span {
+    display: inline-block;
+    min-width: 17px;
+    font-size: 13px;
+    text-align: center;
+    color: #666666;
+}
+
+.classroom_chat_con_user {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    min-width: 0;
+
+}
+
+.classroom_chat_con_user .avatar img {
+    display: block;
+    width: 33px;
+    height: 33px;
+    border-radius: 50%;
+    background: #EEEEEE;
+    -o-object-fit: contain;
+    object-fit: contain;
+}
+
+.classroom_chat_con_user .nickname {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+    margin: 0 0 0 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    line-height: 22px;
+    color: #333333;
+}
+
+.classroom_chat_con_payEd {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.classroom_chat_con_payEd span:nth-child(1) {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+    margin: 0 5px 0 0;
+    font-size: 14px;
+    color: #282828;
+}
+
+.classroom_chat_con_payEd img {
+    display: block;
+    width: 20px;
+    height: 20px;
+    -o-object-fit: contain;
+    object-fit: contain;
+}
+
+
+/* 榜单结束 */
+
+
+.container_detils {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.container_detils_con {
+    margin-top: 30px;
+}
+
+
+.container_selectTap {
+    margin-bottom: 10px;
+    position: relative;
+    height: 56px;
+    background: #fff;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.container_selectTap_item {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.container_selectTap_tip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 113px;
+    -webkit-transition: .3s;
+    -o-transition: .3s;
+    -moz-transition: .3s;
+    transition: .3s;
+}
+
+.container_selectTap_tip img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+}
+
+
+.container_selectTap_item_value {
+    width: 113px;
+    font-size: 14px;
+    color: #282828;
+    text-align: center;
+    cursor: pointer;
+}
+
+
+.container_selectTap_item>div:not(:last-child) {
+    border-right: 1px solid #D9D9D9;
+}
+
+.selectEd {
+    color: #2C8EFF;
+}
+
+
+.container_introduce {
+    padding: 20px;
+    background: #fff;
+}
+
+.container_introduce .introduce {
+    line-height: normal;
+}
+
+.container_introduce .introduce img,
+.container_introduce .introduce video,
+.container_introduce .introduce audio {
+    max-width: 100%;
+}
+
+
+/* 课程目录开始 */
+.el-pagination {
+    padding: 50px 0 !important;
+    text-align: center;
+}
+
+.container_content_detils {
+    background: #fff;
+    padding: 30px;
+}
+
+.course_catalogue_item {
+    cursor: pointer;
+}
+
+.course_catalogue_item.active {
+    color: #2C8EFF;
+}
+
+.panel {
+    overflow: hidden;
+    opacity: 0;
+    -webkit-transition: .3s;
+    -o-transition: .3s;
+    -moz-transition: .3s;
+    transition: .3s;
+}
+
+.isShowList {
+    opacity: 1;
+}
+
+.course_catalogue_item_value {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 64px;
+    background: #F5F6F6;
+    padding: 0 20px;
+    font-size: 16px;
+}
+
+.course_catalogue_item_value_status {
+    cursor: pointer;
+}
+
+.course_catalogue_item_value .playback-tag {
+    width: 30px;
+    height: 16px;
+    border: 1px solid #999999;
+    margin-right: 10px;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+    color: #999999;
+}
+
+.course_catalogue_item.active .course_catalogue_item_value .playback-tag {
+    color: #2C8EFF;
+}
+
+.course_catalogue_item_value_message {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+}
+
+.course_catalogue_item_child {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    -moz-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 68px;
+    padding: 0 29px;
+    border-bottom: 1px solid #F5F6F6;
+}
+
+
+.course_catalogue_item_child .course_catalogue_item_child_value {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    font-size: 16px;
+}
+
+.course_catalogue_item_child_value .course_catalogue_item_child_value_type {
+    margin-right: 15px;
+}
+
+
+.course_catalogue_item_child_value .course_catalogue_item_child_value_title {
+    color: #333333;
+    font-size: 14px;
+}
+
+.type_free {
+    display: inline-block;
+    width: 64px;
+    height: 28px;
+    background: #FFF0E5;
+    border-radius: 19px;
+    color: #FF6B00;
+    font-size: 12px;
+    text-align: center;
+    line-height: 28px;
+}
+
+.gift-popover.el-popover {
+    padding: 0;
+}
+
+.gift-popover .gift-info {
+    padding: 10px;
+    font-size: 0;
+}
+
+.gift-popover .gift-info img {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+    vertical-align: middle;
+    -o-object-fit: contain;
+    object-fit: contain;
+}
+
+.gift-popover .gift-info span {
+    vertical-align: middle;
+    font-size: 14px;
+    color: #666666;
+}
+
+.gift-popover .gift-info span:nth-child(3) {
+    color: #FF6B00;
+}
+
+.gift-popover .gift-size {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 10px;
+}
+
+.gift-popover .radio-group {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+    margin: 0 -5px 0 0;
+    font-size: 0;
+}
+
+.gift-popover label {
+    display: inline-block;
+    margin: 0 5px 5px 0;
+}
+
+.gift-popover input+span {
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+    border: 1px solid #E9E9E9;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 24px;
+    text-align: center;
+    color: #666666;
+}
+
+.gift-popover input:checked+span {
+    border-color: #2C8EFF;
+    color: #2C8EFF;
+}
+
+.gift-popover input[type="number"] {
+    width: 46px;
+    height: 24px;
+    border: 1px solid #E9E9E9;
+    border-radius: 4px;
+    outline: 0;
+    font-size: 12px;
+    text-align: center;
+    color: #282828;
+}
+
+.gift-popover input[type="number"]::-webkit-outer-spin-button,
+.gift-popover input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.gift-popover input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.gift-popover input[type="number"]:focus {
+    border-color: #2C8EFF;
+}
+
+.gift-popover button {
+    width: 54px;
+    height: 24px;
+    border: 0;
+    border-radius: 4px;
+    margin: 0 0 0 5px;
+    background: #2C8EFF;
+    outline: 0;
+    font-size: 14px;
+    color: #FFFFFF;
+}
+
+.emoji-popover.el-popover {
+    padding: 10px 0 0 10px;
+    font-size: 0;
+}
+
+.emoji-popover img {
+    width: 30px;
+    height: 30px;
+    padding: 2px;
+    margin: 0 10px 10px 0;
+    cursor: pointer;
+}
+
+.emoji-popover img:hover {
+    background: #ECECEC;
+}
+
+/* 课程目录结束 */

@@ -1,0 +1,151 @@
+{extend name="public/container"}
+{block name="title"}证书展示{/block}
+{block name="head"}
+<style>
+    body {
+        background-color: rgba(0, 0, 0, .6);
+        font-size: .24rem;
+        text-align: center;
+        color: #cecece;
+    }
+
+    .poster {
+        width: 6rem;
+        margin-top: 1.92rem;
+        margin-bottom: .5rem;
+        vertical-align: middle;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <img :src="imgSrc" class="poster">
+    <div v-show="imgSrc">长按图片，保存至手机</div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    require([
+        'vue',
+        'helper',
+        'store',
+        'moment',
+        'quick'
+    ], function (Vue, $h, $http, moment) {
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                nickname: "{$userInfo['nickname'] ? $userInfo['nickname'] : '--'}",
+                loading: false,
+                certificate: null,
+                imgSrc: ''
+            },
+            watch: {
+                loading: function (loading) {
+                    loading ? $h.loadFFF() : $h.loadClear();
+                },
+                certificate: function (certificate) {
+                    this.createCertificate(certificate);
+                }
+            },
+            created: function () {
+                this.getCertificateDetail();
+            },
+            methods: {
+                getCertificateDetail: function () {
+                    this.loading = true;
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'viewCertificate',
+                        q: {
+                            id: $h.getParmas('id'),
+                            obtain: $h.getParmas('obtain')
+                        }
+                    }), function (res) {
+                        vm.loading = false;
+                        vm.certificate = res.data.data;
+                    }, function (err) {
+                        $h.pushMsg(err, function () {
+                            history.back();
+                        });
+                    });
+                },
+                createCertificate: function (certificate) {
+                    this.loading = true;
+                    var promiseArr = [];
+                    for (var key in certificate.certificate) {
+                        if (Object.hasOwnProperty.call(certificate.certificate, key)) {
+                            switch (key) {
+                                case 'background':
+                                case 'qr_code':
+                                    promiseArr.push(new Promise(function (resolve, reject) {
+                                        var image = new Image();
+                                        image.crossOrigin = 'anonymous';
+                                        image.src = certificate.certificate[key] + '?' + new Date().getTime();
+                                        image.onload = function () {
+                                            resolve(image);
+                                        };
+                                        image.onerror = function () {
+                                            reject('error-' + key);
+                                        }
+                                    }));
+                                    break;
+                            }
+                        }
+                    }
+                    Promise.all(promiseArr).then(function (imageArr) {
+                        var canvas = document.createElement('canvas'),
+                            context = canvas.getContext('2d');
+                        canvas.width = imageArr[0].width;
+                        canvas.height = imageArr[0].height;
+
+                        context.drawImage(imageArr[0], 0, 0);
+                        context.drawImage(imageArr[1], 220, 557, 160, 160);
+
+                        context.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                        context.fillRect(220, 724, 160, 36);
+
+                        context.font = 'bold 34px sans-serif';
+                        context.textAlign = 'center';
+                        context.fillStyle = '#29466D';
+                        context.fillText(vm.nickname, 300, 296);
+
+                        context.font = '24px sans-serif';
+                        context.fillText('颁发时间：' + moment(vm.certificate.add_time * 1000).format('YYYY.MM.DD'), 300, 490);
+
+                        context.font = '20px sans-serif';
+                        context.fillStyle = '#666666';
+                        context.fillText('长按二维码查看', 300, 748);
+
+                        context.font = '28px sans-serif';
+                        context.textAlign = 'start';
+                        context.fillStyle = '#333333';
+
+                        var lineWidth = 0;
+                        var substringFrom = 0;
+                        var offsetTop = 364;
+                        for (var i = 0; i < vm.certificate.certificate.explain.length; i++) {
+                            lineWidth += context.measureText(vm.certificate.certificate.explain[i]).width;
+                            if (lineWidth > 434) {
+                                context.fillText(vm.certificate.certificate.explain.substring(substringFrom, i), 83, offsetTop);
+                                lineWidth = 0;
+                                substringFrom = i;
+                                offsetTop += 50;
+                            }
+                            if (i == vm.certificate.certificate.explain.length - 1) {
+                                context.fillText(vm.certificate.certificate.explain.substring(substringFrom, i), 83, offsetTop);
+                            }
+                        }
+
+                        vm.imgSrc = canvas.toDataURL('image/jpeg');
+                        vm.loading = false;
+                        canvas = null;
+                    }).catch(function (err) {
+                        vm.loading = false;
+                        $h.pushMsg(err);
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

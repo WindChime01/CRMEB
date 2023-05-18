@@ -1,0 +1,155 @@
+{extend name="public/container"}
+{block name="title"}报名核销{/block}
+{block name="head"}
+<style>
+    body {
+        background: #F5F5F5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="activity-verify">
+    <div class="one">
+        <div v-if="order.status==0">待核销</div>
+        <div v-else-if="order.status==1">已核销</div>
+        <div>报名成功，请在活动时间内到活动地点核销</div>
+    </div>
+    <div class="two" @click="activityDetails(activity.id)">
+        <div>
+            <img :src="activity.image">
+        </div>
+        <div>
+            <div v-text="activity.title"></div>
+            <div>￥<span>{{activity.price}}</span></div>
+        </div>
+    </div>
+    <div class="three">
+        <div>核销信息</div>
+        <div>
+            <div>
+                <div>活动时间：</div>
+                <div>{{ activity.start_time | timeFormat }}至{{ activity.end_time | timeFormat }}</div>
+            </div>
+            <div>
+                <div>活动地址：</div>
+                <div>{{activity.province}}{{activity.city}}{{activity.district}}{{activity.detail}}</div>
+            </div>
+            <div>
+                <div>活动状态：</div>
+                <div v-if="activity.statu == 0 || activity.statu == 1 || activity.statu == 2">活动未开始</div>
+                <div v-else-if="activity.statu == 3">活动已开始</div>
+                <div v-else-if="activity.statu == 4">活动已结束</div>
+            </div>
+            <div>
+                <div>核销状态：</div>
+                <div v-if="order.status == 0">未核销</div>
+                <div v-else-if="order.status == 1">已核销</div>
+            </div>
+            <div class="qrcode">
+                <div>
+                    <img :src="order.write_off_code">
+                </div>
+                <div>券码 {{ order.code }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="four">
+        <div>订单信息</div>
+        <div>
+            <div v-for="item in userInfo">
+                <div>{{ item.event_name }}：</div>
+                <div>{{ item.event_value }}</div>
+            </div>
+            <div>
+                <div>人数：</div>
+                <div>{{ order.number }}人</div>
+            </div>
+            <div>
+                <div>订单编号：</div>
+                <div>{{order_id}}</div>
+            </div>
+            <div>
+                <div>支付时间：</div>
+                <div>{{order.add_time | timeFormat}}</div>
+            </div>
+            <div>
+                <div>支付金额：</div>
+                <div>￥{{order.pay_price}}</div>
+            </div>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    var orderId="{$order_id}";
+    require(['vue', 'store', 'helper', 'moment', '{__WAP_PATH}zsff/js/quick.js'], function (Vue, store, $h, moment) {
+        new Vue({
+            el: '#app',
+            filters: {
+                timeFormat: function (value) {
+                    if (!value) {
+                        return '--';
+                    }
+                    return moment(value * 1000).format('YYYY-MM-DD HH:mm');
+                }
+            },
+            data: {
+                order: {},
+                activity: {},
+                order_id: orderId,
+                status: 0,
+                userInfo: []
+            },
+            mounted: function () {
+                this.getActivitySign();
+                if(this.status==0) {
+                    setInterval(this.orderStatus, 60000);
+                }
+            },
+            methods: {
+                orderStatus:function(){
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'activity',
+                        a: 'orderStatus',
+                        q: {
+                            order_id: vm.order_id
+                        }
+                    }),function (res) {
+                        if (res.data.data == 1) {
+                            window.location.assign("{:url('wap/my/sign_list')}");
+                        }
+                    });
+                },
+                getActivitySign: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'activity',
+                        a: 'activitySignIn',
+                        q:{
+                            order_id: this.order_id
+                        }
+                    }),function (res) {
+                        var data = res.data.data;
+                        vm.order = data;
+                        vm.activity = data.activity;
+                        vm.status = data.status;
+                        vm.userInfo = JSON.parse(data.user_info);
+                    });
+                },
+                activityDetails: function (id) {
+                    window.location.assign($h.U({
+                        c: 'special',
+                        a: 'activity_details',
+                        q: {
+                            id: id
+                        }
+                    }));
+                }
+            }
+        });
+    });
+</script>
+{/block}

@@ -1,0 +1,311 @@
+{extend name="public/container"}
+{block name="title"}考题测评{/block}
+{block name="head"}
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+
+    .user-question-page {
+        padding: .2rem .3rem;
+    }
+
+    .user-question-page .nav {
+        display: -webkit-box;
+        display: flex;
+        border-radius: .12rem;
+        background-color: #fff;
+    }
+
+    .user-question-page .nav a {
+        -webkit-box-flex: 1;
+        flex: 1;
+        position: relative;
+        height: .9rem;
+        font-size: .28rem;
+        line-height: .9rem;
+        text-align: center;
+        color: #333;
+    }
+
+    .user-question-page .nav a.on {
+        color: #2c8eff;
+    }
+
+    .user-question-page .nav a.on::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: .7rem;
+        height: .04rem;
+        border-radius: .02rem;
+        background-color: #2c8eff;
+        -webkit-transform: translateX(-50%);
+        transform: translateX(-50%);
+    }
+
+    .user-question-page .content {
+        margin-top: .2rem;
+    }
+
+    .user-question-page .problem li {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 2.05rem;
+        padding: .3rem .3rem .21rem;
+        border-radius: .12rem;
+        background-color: #FFFFFF;
+    }
+
+    .user-question-page .problem .title {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #282828;
+    }
+
+    .user-question-page .problem .group {
+        display: -webkit-box;
+        display: flex;
+        -webkit-box-align: center;
+        align-items: center;
+        font-size: .22rem;
+        color: #ff6b00;
+    }
+
+    .user-question-page .problem .group div:nth-child(2) {
+        -webkit-box-flex: 1;
+        flex: 1;
+        margin-left: .15rem;
+    }
+
+    .user-question-page .problem .group .gray {
+        color: #999;
+    }
+
+    .user-question-page .problem .group a {
+        height: .38rem;
+        padding: 0 .2rem;
+        border-radius: .19rem;
+        margin-left: .1rem;
+        background-color: #2C8EFF;
+        font-size: .2rem;
+        line-height: .38rem;
+        color: #FFFFFF;
+    }
+
+    .user-question-page .problem .group a:first-of-type {
+        background-color: #E8F3FF;
+        color: #2C8EFF;
+    }
+
+    .user-question-page .problem .group a:only-of-type {
+        background-color: #2C8EFF;
+        color: #FFFFFF;
+    }
+
+    .user-question-page .question li {
+        display: flex;
+        padding: .2rem;
+        border-radius: .12rem;
+        margin-top: .2rem;
+        background-color: #FFFFFF;
+    }
+
+    .user-question-page .question img {
+        display: block;
+        width: 2.5rem;
+        height: 1.4rem;
+        border-radius: .1rem;
+        object-fit: contain;
+    }
+
+    .user-question-page .question li>div:last-child {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin-left: .24rem;
+    }
+
+    .user-question-page .question .title {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        font-size: .3rem;
+        line-height: .41rem;
+        color: #333333;
+    }
+
+    .user-question-page .question .group {
+        display: -webkit-box;
+        display: flex;
+        -webkit-box-pack: justify;
+        justify-content: space-between;
+        -webkit-box-align: center;
+        align-items: center;
+        font-size: .22rem;
+        color: #ff6b00;
+    }
+
+    .user-question-page .question .gray {
+        color: #999;
+    }
+
+    .user-question-page .question .group a {
+        height: .38rem;
+        padding: 0 .2rem;
+        border-radius: .19rem;
+        margin-left: .1rem;
+        background-color: #2C8EFF;
+        font-size: .2rem;
+        line-height: .38rem;
+        color: #FFFFFF;
+    }
+
+    .user-question-page .question .group a:first-of-type {
+        background-color: #E8F3FF;
+        color: #2C8EFF;
+    }
+
+    .user-question-page .question .group a:only-of-type {
+        background-color: #2C8EFF;
+        color: #FFFFFF;
+    }
+
+    .empty {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        font-size: .3rem;
+        text-align: center;
+        color: #999;
+    }
+
+    .empty img {
+        width: 4.14rem;
+        vertical-align: middle;
+        -webkit-touch-callout: none;
+        pointer-events: none;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="user-question-page">
+        <div class="nav">
+            <a :class="{ on: type === 1}" href="javascript:" @click="onNav(1)">练习</a>
+            <a :class="{ on: type === 2}" href="javascript:" @click="onNav(2)">考试</a>
+        </div>
+        <div class="content">
+            <ul v-if="type === 1" class="problem">
+                <li v-for="item in questions">
+                    <div class="title">{{ item.title }}</div>
+                    <div class="group">
+                        <div>共{{ item.item_number }}题</div>
+                        <div :class="{ gray: !item.number }">{{ item.number ? '已完成' : '未完成' }}</div>
+                        <a v-if="item.number" :href="'{:url('topic/problem_index')}?id=' + item.test_id">再考一次</a>
+                        <a :href="'{:url('topic/problem_result')}?test_id=' + item.test_id" v-if="item.number>0">答题结果</a>
+                        <a :href="'{:url('topic/problem_index')}?id=' + item.test_id" v-else>开始答题</a>
+                    </div>
+                </li>
+            </ul>
+            <ul v-else class="question">
+                <li v-for="item in questions" :key="item.test_id">
+                    <div>
+                        <img :src="item.image">
+                    </div>
+                    <div>
+                        <div class="title">{{ item.title }}</div>
+                        <div class="group">
+                            <div :class="{ gray: !item.number }">{{ item.number ? '已完成' : '未完成' }}</div>
+                            <a v-if="item.number" :href="'{:url('special/question_index')}?id=' + item.test_id">再考一次</a>
+                            <a :href="'{:url('topic/question_result')}?from=question_user&test_id=' + item.test_id+'&type=2'" v-if="item.number>0">答题结果</a>
+                            <a :href="'{:url('special/question_index')}?id=' + item.test_id" v-else>开始答题</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div v-if="page > 1 && !loading && !questions.length" class="empty">
+                <img src="{__WAP_PATH}zsff/images/empty-box.png">
+                <div>暂无数据</div>
+            </div>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    require([
+        'vue',
+        'helper',
+        'store',
+        'quick'
+    ], function (Vue, $h, $http) {
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                type: 1,
+                page: 1,
+                limit: 15,
+                loading: false,
+                questions: []
+            },
+            watch: {
+                loading: function (val) {
+                    val ? $h.loadFFF() : $h.loadClear();
+                }
+            },
+            created: function () {
+                var type = $h.getParmas('type');
+                if (type) {
+                    this.type = parseInt(type);
+                }
+                this.getQuestions();
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    $h.EventUtil.listenTouchDirection(document, function () {
+                        !vm.loading && vm.getQuestion();
+                    });
+                });
+            },
+            methods: {
+                getQuestions: function () {
+                    if (this.loading || this.finished) {
+                        return;
+                    }
+                    this.loading = true;
+                    $http.basePost($h.U({
+                        c: 'topic',
+                        a: 'myTestPaper'
+                    }), {
+                        page: this.page++,
+                        limit: this.limit,
+                        type: this.type
+                    }, function (res) {
+                        var data = res.data.data;
+                        vm.loading = false;
+                        vm.questions = vm.questions.concat(data);
+                        vm.finished = vm.limit > data.length;
+                    });
+                },
+                onNav: function (type) {
+                    this.type = type;
+                    this.questions = [];
+                    this.page = 1;
+                    this.finished = false;
+                    this.getQuestions();
+                }
+            }
+        });
+    });
+</script>
+{/block}

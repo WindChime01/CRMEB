@@ -1,0 +1,128 @@
+.layout {
+    width: 1200px;
+    padding-bottom: 100px;
+    margin: 0 auto;
+}
+
+.el-breadcrumb {
+    padding: 30px 0 24px;
+}
+
+.el-col {
+    margin-bottom: 20px;
+}
+
+.el-col a {
+    display: block;
+}
+
+.el-col a:hover {
+    -webkit-box-shadow: 0px 2px 16px rgba(79, 109, 143, 0.12);
+            box-shadow: 0px 2px 16px rgba(79, 109, 143, 0.12);
+}
+
+.el-image {
+    display: block;
+    width: 100%;
+    height: 160px;
+    border-radius: 8px 8px 0 0;
+}
+
+.el-image + div {
+    padding: 15px 20px 0;
+    border-radius: 0 0 8px 8px;
+    background-color: #FFFFFF;
+}
+
+.el-col .title {
+    overflow: hidden;
+    white-space: nowrap;
+    -o-text-overflow: ellipsis;
+       text-overflow: ellipsis;
+    font-size: 18px;
+    line-height: 24px;
+    color: #282828;
+}
+
+.el-col .time {
+    padding: 10px 0 20px;
+    font-size: 14px;
+    line-height: 19px;
+    color: #666666;
+}
+
+.el-col .time .iconfont {
+    margin-right: 6px;
+    font-size: 13px;
+    color: #2C8EFF;
+}
+
+.el-col .wrap {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+       -moz-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+       -moz-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    height: 60px;
+    border-top: 1px dashed #E9E9E9;
+    font-size: 14px;
+    color: #999999;
+}
+
+.el-col .money {
+    font-size: 14px;
+    color: #FF6B00;
+}
+
+.el-col .money span {
+    font-size: 22px;
+}
+
+.layout .el-pagination {
+    margin-top: 70px;
+    text-align: center;
+}
+
+.filter {
+    border-radius: 4px;
+    margin-bottom: 20px;
+    background-color: #FFFFFF;
+}
+
+.filter-name {
+    float: left;
+    width: 117px;
+    padding: 20px 0 0 17px;
+    font-size: 14px;
+    line-height: 19px;
+    color: #969696;
+}
+
+.filter-content {
+    padding: 20px 0 0;
+    margin-left: 117px;
+    font-size: 0;
+}
+
+.filter-item {
+    display: inline-block;
+    margin: 0 30px 20px 0;
+    font-size: 14px;
+    line-height: 19px;
+    color: #282828;
+    cursor: pointer;
+}
+
+.filter-item.on {
+    color: #2C8EFF;
+}

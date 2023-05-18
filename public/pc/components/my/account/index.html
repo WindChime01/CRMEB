@@ -1,0 +1,46 @@
+<div class="my-account">
+    <div class="title">账户管理</div>
+    <div class="content">
+        <div class="wrapper">
+            <div class="wrapper-title">我的信息</div>
+            <div class="wrapper-content">
+                <div class="item">
+                    <div class="item-title">我的头像：</div>
+                    <el-upload ref="upload" :show-file-list="false" :before-upload="handleBeforeUpload" :on-success="handleSuccess" action="/web/auth_api/upload" accept="image/jpg, image/jpeg, image/png" drag @click.native="handleLogin">
+                        <img v-if="userInfo" :src="avatar">
+                        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                    </el-upload>
+                    <el-button type="text" @click="updateAvatar">修改</el-button>
+                </div>
+                <div class="item">
+                    <div class="item-title">我的昵称：</div>
+                    <el-input v-model="nickname" :readonly="nicknameReadonly"></el-input>
+                    <!-- <el-button type="text" @click="nicknameReadonly = !nicknameReadonly">修改</el-button> -->
+                    <el-button type="text" @click="handleUpdate">修改</el-button>
+                </div>
+                <div v-if="userInfo.phone" class="item">
+                    <div class="item-title">手机号：</div>
+                    <div>{{ userInfo.phone | phoneEncrypt }}</div>
+                    <el-button type="text" @click="accountOpen(true)">修改</el-button>
+                </div>
+                <div class="item">
+                    <div class="item-title">我的ID：</div>
+                    <div>{{ userInfo.uid }}</div>
+                </div>
+            </div>
+        </div>
+        <div v-if="userInfo.phone" class="wrapper">
+            <div class="wrapper-title">密码设置</div>
+            <div class="wrapper-content">
+                <div class="item">
+                    <div>我的密码</div>
+                    <div>**********</div>
+                    <el-button type="text" @click="accountOpen(false)">修改</el-button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <el-button round @click="save">保存</el-button>
+    </div>
+</div>

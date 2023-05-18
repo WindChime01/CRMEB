@@ -1,0 +1,234 @@
+{extend name="public/container"}
+{block name="title"}{$gold_name}签到{/block}
+{block name="head_top"}
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="sign-in">
+        <div class="header">
+            <div class="cont">
+                <div class="image" @click="myUser">
+                    <img :src="userInfo.avatar" class="img">
+                </div>
+                <div class="text" @click="myUser">
+                    <div class="name" v-html="userInfo.nickname"></div>
+                    <div class="info">{$gold_name}: {{ userInfo.gold_num }}</div>
+                </div>
+                <a class="btn" :href="$h.U({c: 'my', a: 'sign_in_list'})">明细</a>
+            </div>
+        </div>
+        <div class="main">
+            <div class="head">
+                <div class="list">
+                    <div class="item">
+                        <div class="image">
+                            <img :src="isSign ? '{__WAP_PATH}zsff/images/stars2.png' : '{__WAP_PATH}zsff/images/stars1.png'"
+                                class="star">
+                        </div>
+                        <div class="day">每日签到获得{$gold_coin}{$gold_name}</div>
+                    </div>
+                </div>
+                <button class="btn" v-if="isSign" type="button" @click="show_sign_image">已签到</button>
+                <button class="btn" v-else type="button" @click="sign">立即签到</button>
+            </div>
+            <div class="foot">
+                <img src="{__WAP_PATH}zsff/images/lock.png" class="lock">
+                <div class="panel">
+                    <div class="name">已累计签到</div>
+                    <div class="count">
+                        <div class="cont">
+                            <div class="wrap">
+                                <div v-for="(item, index) in updateTotal" :key="index" class="item">{{ item }}</div>
+                            </div>
+                            <div class="unit">天</div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="records.length" class="record">
+                    <div v-for="(item, index) in records" :key="index" class="item">
+                        <div class="text">
+                            <div class="name">签到</div>
+                            <div class="time">{{ item.add_time }}</div>
+                        </div>
+                        <div class="num">+{{ item.number }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    var signed="{$signed}",signCount={$signCount},sign_image = '{$sign_image}';
+    require(['vue', 'helper', 'store', 'moment', 'qrcode', 'quick'], function (Vue, $h, app, moment) {
+        new Vue({
+            el: '#app',
+            data: {
+                userInfo: {},
+                total: signCount,
+                isSign: signed ? true : false,
+                records: [],
+                poster: '',
+                sign_talk: '',
+                url: ''
+            },
+            computed: {
+                updateTotal: function () {
+                    let str = '0000',
+                        total = this.total,
+                        len = 0;
+                    if (!total) {
+                        return str;
+                    }
+                    if (typeof total === 'number') {
+                        total = total.toString();
+                    }
+                    len = total.length;
+                    if (len >= 4) {
+                        return total;
+                    }
+                    str += total;
+                    str = str.substring(len);
+                    return str;
+                }
+            },
+            created: function () {
+                this.getUserInfo();
+                this.getUserSign();
+            },
+            methods: {
+                sign: function () {
+                    var that = this;
+                    app.baseGet($h.U({ c: 'auth_api', a: 'user_sign' }), function (res) {
+                        that.isSign = true;
+                        that.userInfo.gold_num++;
+                        that.total = that.total + 1;
+                        that.getUserSign();
+                        that.getPoster();
+                        return $h.pushMsg(res.data.msg);
+                    }, function (res) {
+                        that.isSign = false;
+                    });
+                },
+                show_sign_image: function () {
+                    this.getPoster();
+                },
+                getUserSign: function () {
+                    app.baseGet($h.U({ c: 'auth_api', a: 'getUserList' }), function (res) {
+                        this.records = res.data.data;
+                    }.bind(this));
+                },
+                myUser: function () {
+                    window.location.href = $h.U({
+                        c: 'my',
+                        a: 'index'
+                    });
+                },
+                getUserInfo: function () {
+                    var that = this;
+                    app.baseGet($h.U({ c: 'auth_api', a: 'userInfo' }), function (res) {
+                        that.userInfo = res.data.data;
+                    });
+                },
+                // 获取海报信息
+                getPoster: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    app.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'get_user_sign_poster'
+                    }), function (res) {
+                        $h.loadClear();
+                        var data = res.data.data;
+                        vm.poster = data.poster;
+                        vm.sign_talk = data.sign_talk;
+                        vm.url = data.url;
+                        vm.createPoster();
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 创建海报
+                createPoster: function () {
+                    var vm = this,
+                        loadIndex = layer.load(1);
+                    Promise.all([
+                        new Promise(function (resolve, reject) {
+                            var image = new Image();
+                            image.crossOrigin = 'anonymous';
+                            image.src = vm.poster + '?t=' + new Date().getTime();
+                            image.onload = function () {
+                                resolve(image);
+                            };
+                            image.onerror = function () {
+                                reject('image-error');
+                            };
+                        }),
+                        new Promise(function (resolve, reject) {
+                            try {
+                                resolve(new QRCode(document.createElement('canvas'), vm.url));
+                            } catch (error) {
+                                reject(error);
+                            }
+                        })
+                    ]).then(function (data) {
+                        var canvas = document.createElement('canvas'),
+                            context = canvas.getContext('2d'),
+                            monthArr = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'],
+                            weekdayArr = ['日', '一', '二', '三', '四', '五', '六'];
+                        canvas.width = 600;
+                        canvas.height = 800;
+                        context.fillStyle = '#FFFFFF';
+                        context.fillRect(0, 0, canvas.width, canvas.height);
+                        context.drawImage(data[0], 30, 30, 540, 540);
+                        context.drawImage(data[1]._el.firstElementChild, 50, 620, 130, 130);
+                        context.font = '22px sans-serif';
+                        context.fillStyle = '#282828';
+                        var index = 0,
+                            length = vm.sign_talk.length,
+                            start = 0,
+                            line = 0;
+                        for (; index < length; index++) {
+                            if (context.measureText(vm.sign_talk.slice(start, index)).width > 350) {
+                                context.fillText(vm.sign_talk.slice(start, index), 210, 33 * line + 610);
+                                start = index;
+                                line++;
+                            }
+                        }
+                        if (start < length - 1) {
+                            context.fillText(vm.sign_talk.slice(start), 210, 33 * line + 610);
+                        }
+                        context.font = '64px sans-serif';
+                        context.fillStyle = '#FF0000';
+                        context.fillText(moment().date(), 326, 753);
+                        context.font = '24px sans-serif';
+                        context.fillStyle = '#333333';
+                        context.fillText(monthArr[moment().month()] + '月', 410, 713);
+                        context.strokeRect(405, 732, 58, 26);
+                        context.font = '16px sans-serif';
+                        context.fillText('星期'+ weekdayArr[moment().day()], 410, 753);
+                        layer.photos({
+                            photos: {
+                                data: [
+                                    {
+                                        src: canvas.toDataURL()
+                                    }
+                                ]
+                            },
+                            anim: 5
+                        });
+                        layer.close(loadIndex);
+                    }).catch(function (error) {
+                        layer.close(loadIndex);
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

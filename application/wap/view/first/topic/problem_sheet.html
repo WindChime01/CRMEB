@@ -1,0 +1,140 @@
+{extend name="public/container"}
+{block name="title"}答题卡{/block}
+{block name="head"}
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+
+    .answer-sheet-page .main-hd li:nth-child(1)::before {
+        border-color: #ebf9eb;
+        background-color: #ebf9eb;
+    }
+
+    .answer-sheet-page .main-hd li:nth-child(2)::before {
+        border-color: #fff0e5;
+        background-color: #fff0e5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="answer-sheet-page">
+        <div class="header">
+            <a :href="'{:url('topic/problem_detail')}?test_id=' + test_id + '&e_id=' + e_id + '&index=' + index">返回答题</a>
+        </div>
+        <div class="main">
+            <div class="main-hd">
+                <div>答题情况</div>
+                <ul>
+                    <li>正确</li>
+                    <li>错误</li>
+                    <li>未答</li>
+                </ul>
+            </div>
+            <div v-if="questions.length" class="main-bd">
+                <a
+                  v-for="(item, index) in questions"
+                  :class="{
+                    green: item.is_correct === 2,
+                    red: item.is_correct === 1
+                  }"
+                  :href="'{:url('topic/problem_detail')}?test_id=' + test_id + '&e_id=' + e_id + '&index=' + index + '&is_analysis=' + 1"
+                >{{ index + 1 }}</a>
+            </div>
+        </div>
+        <div v-if="!isSubmits" class="footer">
+            <a href="javascript:" @click="onAgain(1)">重新答题</a>
+            <a href="javascript:" @click="onAgain(2)">提交练习</a>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    require(['vue', 'helper', 'store', 'quick'], function (Vue, $h, $http) {
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                test_id: 0,
+                e_id: 0,
+                index: 0,
+                questions: [],
+                from: '',
+                isSubmits: 1
+            },
+            created: function () {
+                this.test_id = $h.getParmas('test_id');
+                this.e_id = $h.getParmas('record_id');
+                if ($h.getParmas('index')) {
+                    this.index = $h.getParmas('index');
+                }
+                if ($h.getParmas('from')) {
+                    this.from = $h.getParmas('from');
+                }
+                this.getSheet();
+                this.isSubmit();
+            },
+            methods: {
+                getSheet: function () {
+                    $h.loadFFF();
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'answerSheet',
+                        q: {
+                            test_id: this.test_id,
+                            type: 1,
+                            record_id: this.e_id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        var questions = res.data.data;
+                        for (var i = questions.length; i--;) {
+                            if (!Array.isArray(questions[i].userAnswer)) {
+                                Object.assign(questions[i], questions[i].userAnswer);
+                            }
+                        }
+                        vm.questions = questions;
+                    }, function () {
+                        window.location.replace($h.U({
+                            c: 'topic',
+                            a: 'question_user'
+                        }));
+                    });
+                },
+                onAgain: function (n) {
+                    var that=this;
+                    $h.loadFFF();
+                    $http.basePost($h.U({
+                        c: 'topic',
+                        a: 'submitTestPaper'
+                    }), {
+                        examination_id: that.e_id
+                    }, function (res) {
+                        $h.loadClear();
+                        $h.delCookie('e_id');
+                        if(n==1){
+                            location.href = "{:url('topic/problem_index')}?id=" + that.test_id;
+                        }else{
+                            location.href = "{:url('topic/problem_result')}?test_id=" + that.test_id;
+                        }
+                    });
+                },
+                isSubmit: function (n) {
+                    var that=this;
+                    $h.loadFFF();
+                    $http.basePost($h.U({
+                        c: 'topic',
+                        a: 'is_submit'
+                    }), {
+                        examination_id: that.e_id
+                    }, function (res) {
+                        $h.loadClear();
+                        $h.delCookie('e_id');
+                        that.isSubmits = res.data.data;
+                    }, undefined, true);
+                },
+            }
+        });
+    });
+</script>
+{/block}

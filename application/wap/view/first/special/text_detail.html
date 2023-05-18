@@ -1,0 +1,620 @@
+{extend name="public/container"}
+{block name="title"}图文详情{/block}
+{block name="head_top"}
+<style>
+  .page {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .head {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    padding: 0.2rem 0.3rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .head .title {
+    -webkit-box-flex: 1;
+    flex: 1;
+    min-width: 0;
+    margin-left: 0.3rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .head .browse {
+    margin-left: 0.3rem;
+    font-size: 0.24rem;
+    color: #999;
+  }
+
+  .head .iconfont {
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+    font-size: 0.3rem;
+  }
+
+  .content {
+    -webkit-box-flex: 1;
+    flex: 1;
+    padding: 0.3rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .content p {
+    font-size: 0.3rem;
+    line-height: 1.6;
+  }
+
+  .content img {
+    width: 100%;
+  }
+
+  .try-btn {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: .2rem .3rem;
+  }
+
+  .try-btn a {
+    display: block;
+    width: 100%;
+    height: .88rem;
+    border-radius: .44rem;
+    background-color: #2C8EFF;
+    font-size: .28rem;
+    line-height: .88rem;
+    text-align: center;
+    color: #FFFFFF;
+  }
+
+  .catalog-dialog {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    max-height: 75%;
+    border-radius: .16rem .16rem 0 0;
+    background-color: #FFFFFF;
+    overflow: hidden;
+    transform: translateY(100%);
+    transition: transform 0.3s;
+  }
+
+  .catalog-dialog.active {
+    transform: translateY(0);
+  }
+
+  .catalog-dialog .dialog-head {
+    position: relative;
+    height: 1.05rem;
+    text-align: center;
+    font-weight: 500;
+    font-size: .32rem;
+    line-height: 1.05rem;
+    color: #282828;
+  }
+
+  .catalog-dialog .close-button {
+    position: absolute;
+    top: 50%;
+    right: .3rem;
+    transform: translateY(-50%);
+  }
+
+  .catalog-dialog .close-button .iconfont {
+    font-size: .3rem;
+    color: #8A8A8A;
+  }
+
+  .catalog-dialog .dialog-body {
+    flex: 1;
+    min-height: 0;
+    padding: .1rem .3rem;
+    overflow-y: auto;
+    word-wrap: break-word;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .catalog-dialog .dialog-body .item {
+    display: flex;
+    align-items: center;
+    height: 1.4rem;
+    padding: 0 .2rem 0 .3rem;
+    border-radius: .12rem;
+    background-color: #F2F8FF;
+    cursor: pointer;
+  }
+
+  .catalog-dialog .dialog-body .item+.item {
+    margin-top: .2rem;
+  }
+
+  .catalog-dialog .dialog-body .item-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .catalog-dialog .dialog-body .title {
+    padding-left: .58rem;
+    background: url("{__WAP_PATH}zsff/images/media1.png") left center/.38rem .27rem no-repeat;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: .28rem;
+    line-height: .4rem;
+    color: #333333;
+  }
+
+  .catalog-dialog .dialog-body .title.audio {
+    background-image: url("{__WAP_PATH}zsff/images/media2.png");
+  }
+
+  .catalog-dialog .dialog-body .title.video {
+    background-image: url("{__WAP_PATH}zsff/images/media3.png");
+  }
+
+  .catalog-dialog .dialog-body .attribute {
+    display: flex;
+    padding: .15rem 0 0 .58rem;
+  }
+
+  .catalog-dialog .dialog-body .tag {
+    height: .25rem;
+    padding: 0 .08rem;
+    border: 1px solid #FFF0E5;
+    border-radius: .03rem;
+    background-color: #FFF0E5;
+    font-size: .18rem;
+    line-height: .23rem;
+    color: #FF6B00;
+  }
+
+  .catalog-dialog .dialog-body .tag+.tag {
+    margin-left: .15rem;
+  }
+
+  .catalog-dialog .dialog-body .tag.try {
+    border-color: #2C8EFF;
+    background-color: transparent;
+    color: #2C8EFF;
+  }
+
+  .catalog-dialog .dialog-body .item-foot {
+    width: .9rem;
+    margin-left: .15rem;
+    text-align: center;
+  }
+
+  .catalog-dialog .dialog-body .iconfont {
+    font-size: .39rem;
+    color: #CCCCCC;
+  }
+
+  .catalog-dialog .dialog-body .free-button {
+    width: .9rem;
+    height: .4rem;
+    border: 1px solid #FF6B00;
+    border-radius: .2rem;
+    font-size: .22rem;
+    line-height: .38rem;
+    color: #FF6B00;
+  }
+
+  .catalog-button {
+    position: fixed;
+    right: .3rem;
+    bottom: .47rem;
+    width: 1.06rem;
+    height: 1.08rem;
+    background-image: url("{__WAP_PATH}/zsff/images/catalog-button.png");
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
+
+  body {
+    overflow: hidden;
+  }
+
+  .finished,
+  .loading {
+    text-align: center;
+    font-size: .24rem;
+    line-height: .6rem;
+    color: #8A8A8A;
+  }
+
+  .loading .fa {
+    margin-right: .1rem;
+  }
+</style>
+{/block} {block name="content"}
+<div v-cloak id="app">
+  <div class="page">
+    <div class="head">
+      <a class="iconfont iconxiangyou" href="javascript:" @click="goBack"></a>
+      <div class="title">{{ taskInfo.title }}</div>
+      <div class="browse">已浏览 {{ taskInfo.play_count }}</div>
+    </div>
+    <div ref="content" class="content" v-html="isPay || isSourcePay ? taskInfo.content : taskInfo.try_content" @scroll="handleScroll"></div>
+  </div>
+  <div v-if="!isPay && !isSourcePay" style="height: 1.28rem;"></div>
+  <div v-if="!isPay && !isSourcePay" class="try-btn">
+    <a href="javascript:" @click="handlePay">已试看，立即购买</a>
+  </div>
+  <button class="catalog-button" @click="openToggle"></button>
+  <div :class="{ mask: dialogOpen }" @touchmove.prevent></div>
+  <div :class="{ active: dialogOpen }" class="catalog-dialog">
+    <div class="dialog-head">
+      课程目录
+      <button class="close-button" @click="openToggle">
+        <i class="iconfont iconguanbi"></i>
+      </button>
+    </div>
+    <div id="dialogBody" class="dialog-body">
+      <ul>
+        <li v-for="(item, index) in courseList" :key="item.id" class="item" @click="courseToggle(item)">
+          <div class="item-body">
+            <div :class="{ audio: item.type == 2, video: item.type == 3 }" class="title">{{ index >= 9 ? index + 1 : '0' + (index + 1) }} | {{ item.title }}</div>
+            <div class="attribute">
+              <div v-if="item.is_try" class="tag try">试看</div>
+              <div class="tag">已学习{{ item.watch ? item.watch.percentage : 0 }}%</div>
+            </div>
+          </div>
+          <div class="item-foot">
+            <i v-if="item.is_free" :class="{
+              iconsuozi: item.pay_status && !isPay,
+              iconziyuan2: isPay || !item.pay_status
+            }" class="iconfont"></i>
+            <div v-else class="free-button">免费</div>
+          </div>
+        </li>
+      </ul>
+      <div v-show="finished" class="finished">已加载全部</div>
+      <div v-show="loading" class="loading"><i class="fa fa-spinner"></i>正在加载中</div>
+    </div>
+  </div>
+  <quick-menu></quick-menu>
+  <pay-dialog :open.sync="payDialogOpen" :money="isMember ? specialInfo.member_money : specialInfo.money" :now_money="now_money" :special_id="specialId" :pay_type_num="2" :is-wechat="isWechat"
+              :is-alipay="is_alipay" :is-balance="is_yue" :template-id="templateIds" :wxpay-h5="wxpayH5" :is-member="isMember" :member-money="specialInfo.member_money" :member-link="memberLink"
+              @change="changeVal"></pay-dialog>
+</div>
+{/block} {block name="foot"}
+<script>
+  var uid = {$userInfo['uid']? $userInfo['uid']: 0};
+  require([
+    'vue',
+    'helper',
+    'axios',
+    'components/pay-dialog/index',
+    '{__WAP_PATH}zsff/js/quick.js'
+  ], function (Vue, $h, axios, PayDialog) {
+    var specialId = {$specialId};
+    var taskId = {$task_id};
+    var now_money = {$now_money};
+    var isWechat = {$isWechat? 'true': 'false'};
+    var is_alipay = {$is_alipay? 'true': 'false'};
+    var is_yue = {$is_yue? 'true': 'false'};
+    var wxpayH5 = {$is_h5_wechat_payment_switch? 'true': 'false'};
+    var memberLink = "{:url('special/member_recharge')}";
+    var vm = new Vue({
+      el: '#app',
+      components: {
+        'pay-dialog': PayDialog
+      },
+      data: {
+        specialId: specialId,
+        now_money: now_money,
+        isWechat: isWechat,
+        is_alipay: is_alipay,
+        is_yue: is_yue,
+        templateIds: '',
+        wxpayH5: wxpayH5,
+        memberLink: memberLink,
+        isPay: true,
+        isSourcePay: false,
+        isMember: 0,
+        linkUrl: '',
+        specialInfo: {},
+        taskInfo: {
+          play_count: 0
+        },
+        payDialogOpen: false,
+        dialogOpen: false,
+        courseList: [],
+        page: 1,
+        limit: 8,
+        finished: false,
+        loading: false
+      },
+      created: function () {
+        this.getTaskInfo();
+        this.get_course_list();
+      },
+      mounted() {
+        this.$nextTick(function () {
+          var vm = this;
+          $h.EventUtil.listenTouchDirection(document.getElementById('dialogBody'), function () {
+            vm.get_course_list();
+          })
+        });
+      },
+      updated: function () {
+        this.$nextTick(function () {
+          this.offsetHeight = this.$refs.content.offsetHeight;
+          this.scrollHeight = this.$refs.content.scrollHeight;
+          if (!(!this.isPay && this.taskInfo.is_try)) {
+            this.setTaskView(this.$refs.content.offsetHeight + this.$refs.content.scrollTop);
+          }
+        });
+      },
+      methods: {
+        // 获取图文信息
+        getTaskInfo: function () {
+          var vm = this;
+          var index = layer.load(1);
+          axios.post('/wap/special/getTaskInfo', {
+            special_id: specialId,
+            task_id: taskId
+          }).then(function (res) {
+            var data = res.data.data;
+            if (res.data.code === 200) {
+              vm.isPay = data.isPay;
+              vm.isSourcePay = data.isSourcePay;
+              vm.isMember = data.is_member;
+              vm.linkUrl = data.link_url;
+              vm.specialInfo = data.specialInfo;
+              vm.taskInfo = data.taskInfo;
+              if (isWechat) {
+                mapleWx($jssdk(), function () {
+                  this.onMenuShareAll({
+                    title: vm.taskInfo.title,
+                    desc: vm.taskInfo.title,
+                    imgUrl: vm.taskInfo.image,
+                    link: data.link_url
+                  });
+                });
+              }
+            }
+          }).catch(function (err) {
+
+          }).then(function () {
+            layer.close(index);
+          });
+        },
+        // 设置记录
+        setTaskView: function (viewingTime) {
+          axios.post('/wap/special/viewing', {
+            special_id: specialId,
+            task_id: taskId,
+            viewing_time: viewingTime,
+            percentage: Math.floor(viewingTime / vm.scrollHeight * 100),
+            total: vm.scrollHeight
+          });
+        },
+        // 返回
+        goBack: function () {
+          window.location = "{:url('special/details')}?id=" + specialId;
+        },
+        // 页面滚动
+        handleScroll: function () {
+          if (!this.isPay && !this.isSourcePay) {
+            return;
+          }
+          var scrollTop = this.$refs.content.scrollTop;
+          if (this.isCenter && this.isEnd) {
+            return;
+          }
+          if ((this.offsetHeight + scrollTop) * 2 >= this.scrollHeight && !this.isCenter) {
+            this.setTaskView(this.offsetHeight + scrollTop);
+            this.isCenter = true;
+          }
+          if (this.offsetHeight + scrollTop === this.scrollHeight && !this.isEnd) {
+            this.setTaskView(this.offsetHeight + scrollTop);
+            this.isEnd = true;
+          }
+        },
+        handlePay: function () {
+          this.payDialogOpen = true;
+          this.taskIdClicked = 0;
+        },
+        changeVal: function (opt) {
+          if (typeof opt !== 'object') {
+            opt = {};
+          }
+          var action = opt.action || '';
+          var value = opt.value || '';
+          this[action] && this[action](value);
+        },
+        // 支付方式回调
+        pay_order: function (data) {
+          this.orderId = data.data.result.orderId || '';
+          switch (data.data.status) {
+            case "PAY_ERROR":
+            case 'ORDER_EXIST':
+            case 'ORDER_ERROR':
+              this.extendOrder(data.msg);
+              break;
+            case 'WECHAT_PAY':
+              this.wechatPay(data.data.result.jsConfig);
+              break;
+            case 'WECHAT_H5_PAY':
+              this.payDialogOpen = false;
+              var callbackUrl = callback_url + '?type=7&id=' + this.special.id;
+              var mwebUrl = data.data.result.jsConfig.mweb_url + '&redirect_url=' + encodeURIComponent(callbackUrl);
+              window.location.assign(mwebUrl);
+              break;
+            case 'SUCCESS':
+              this.successOrder(data.msg);
+              break;
+            case 'ZHIFUBAO_PAY':
+              window.location.assign($h.U({
+                c: 'alipay',
+                a: 'index',
+                q: {
+                  info: data.data.result,
+                  params: 'special'
+                }
+              }));
+              break;
+          }
+        },
+        // 微信支付
+        wechatPay: function (config) {
+          var vm = this;
+          mapleWx($jssdk(), function () {
+            this.chooseWXPay(config, function () {
+              vm.successOrder();
+            }, {
+              fail: vm.extendOrder,
+              cancel: vm.extendOrder
+            });
+          });
+        },
+        // 支付成功
+        successOrder: function (msg) {
+          var that = this;
+          $h.showMsg({
+            title: msg || '支付成功',
+            icon: 'success',
+            success: function () {
+              that.payDialogOpen = false;
+              if (that.taskIdClicked) {
+                taskId = that.taskIdClicked;
+              }
+              that.getTaskInfo();
+              that.isPay = true;
+            }
+          });
+        },
+        // 支付未完成
+        extendOrder: function (msg) {
+          var that = this;
+          if (typeof msg === 'object') {
+            if (msg.errMsg === 'chooseWXPay:cancel') {
+              msg = '微信支付取消';
+            } else {
+              msg = '支付失败';
+            }
+          } else {
+            msg = msg || '支付失败';
+          }
+          $h.pushMsg(msg, function () {
+            that.payDialogOpen = false;
+            if (that.orderId) {
+              store.baseGet($h.U({
+                c: 'special',
+                a: 'del_order',
+                q: {
+                  orderId: that.orderId
+                }
+              }));
+            }
+          });
+        },
+        get_course_list: function () {
+          var vm = this;
+          if (this.finished) {
+            return;
+          }
+          // var index = layer.load(1);
+          this.loading = true;
+          axios.get("{:url('special/get_course_list')}", {
+            params: {
+              special_id: this.specialId,
+              page: this.page++,
+              limit: this.limit
+            }
+          }).then(function (res) {
+            if (res.data.code === 200) {
+              var data = res.data.data;
+              var list = [];
+              if (!Array.isArray(data)) {
+                list = data.list;
+              }
+              vm.courseList = vm.courseList.concat(list);
+              vm.finished = list.length < vm.limit;
+            } else {
+
+            }
+          }).catch(function (err) {
+
+          }).then(function () {
+            // layer.close(index);
+            vm.loading = false;
+          });
+        },
+        openToggle: function () {
+          this.dialogOpen = !this.dialogOpen;
+        },
+        courseToggle: function (course) {
+          var vm = this;
+          if (course.id == taskId) {
+            return;
+          }
+          if (!this.isPay && course.is_free && !course.is_try) {
+            return layer.confirm('购买后可操作，是否购买？', {
+              title: false,
+              closeBtn: false,
+              btn: ['购买', '取消']
+            }, function (index) {
+              layer.close(index);
+              vm.dialogOpen = false;
+              vm.payDialogOpen = true;
+              vm.taskIdClicked = course.id;
+            });
+          }
+          this.dialogOpen = false;
+          taskId = course.id;
+          axios.get("{:url('special/get_task_link')}", {
+            params: {
+              task_id: taskId,
+              special_id: specialId
+            }
+          }).then(function (res) {
+            if (res.data.code === 200) {
+              axios.get("{:url('special/play_num')}", {
+                params: {
+                  task_id: taskId,
+                  special_id: specialId
+                }
+              }).then(function (res) {
+                if (res.data.code === 200) {
+                  if (course.type == 1) {
+                    vm.getTaskInfo();
+                  } else {
+                    window.location.assign("{:url('special/task_info')}?id=" + course.id + '&specialId=' + course.special_id + '&viewing_time=' + (course.watch && course.watch.viewing_time || 0));
+                  }
+                }
+              });
+            }
+          });
+        }
+      }
+    });
+  });
+</script>
+{/block}

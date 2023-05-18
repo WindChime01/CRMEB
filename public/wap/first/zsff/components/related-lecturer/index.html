@@ -1,0 +1,15 @@
+<div class="bind-lecturer">
+    <div class="bind-lecturer-hd">相关讲师</div>
+    <div class="bind-lecturer-bd">
+        <a href="javascript:" class="item" @click="goLecture">
+            <div><img :src="lecturer.lecturer_head"></div>
+            <div class="item-bd">
+                <div class="name">{{ lecturer.lecturer_name }}</div>
+                <div class="tag-group">
+                    <span v-for="label in lecturer.label" class="tag">{{ label }}</span>
+                </div>
+            </div>
+            <i class="iconfont iconxiangyou"></i>
+        </a>
+    </div>
+</div>

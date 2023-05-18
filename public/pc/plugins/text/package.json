@@ -1,0 +1,45 @@
+{
+  "_from": "github:requirejs/text",
+  "_id": "text@2.0.16",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/text",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "requirejs/text",
+    "rawSpec": "requirejs/text",
+    "saveSpec": "github:requirejs/text",
+    "fetchSpec": null,
+    "gitCommittish": null
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "github:requirejs/text#3f9d4c19b3a1a3c6f35650c5788cbea1db93197a",
+  "_spec": "requirejs/text",
+  "_where": "F:\\",
+  "bugs": {
+    "url": "https://github.com/requirejs/text/issues"
+  },
+  "bundleDependencies": false,
+  "categories": [
+    "Loader plugins"
+  ],
+  "deprecated": false,
+  "description": "An AMD loader plugin for loading text resources.",
+  "github": "https://github.com/requirejs/text",
+  "homepage": "https://github.com/requirejs/text#readme",
+  "license": "MIT",
+  "main": "text.js",
+  "name": "text",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/requirejs/text.git"
+  },
+  "version": "2.0.16",
+  "volo": {
+    "url": "https://raw.github.com/requirejs/text/{version}/text.js"
+  }
+}

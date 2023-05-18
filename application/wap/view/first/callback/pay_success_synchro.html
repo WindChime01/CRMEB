@@ -1,0 +1,67 @@
+{extend name="public/container"}
+{block name="title"}支付结果{/block}
+{block name="head_top"}
+<style>
+    body {
+        background-color: #ddd;
+    }
+</style>
+{/block}
+{block name="content"}
+<div class="payState" id="app" v-cloak>
+    <!--fail.png-->
+    <div class="pictrue"><img src="{__WAP_PATH}zsff/images/msg_image/success.png"></div>
+    <!--支付失败-->
+    <div class="status">操作完成</div>
+    <!--重新支付-->
+    <a class="learn" style="display: inherit;" href="javascript:" @click="goPage">查看支付结果</a>
+</div>
+{/block}
+{block name='foot'}
+<script>
+    var type = '{$type}';
+    var id = '{$id}';
+    require(['vue', 'helper'], function (Vue, $h) {
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                id: id,
+                type: type
+            },
+            methods: {
+                goPage: function () {
+                    switch (this.type) {
+                        case '1':
+                            window.location = $h.U({ c: 'special', a: 'details', q: { id: this.id } });
+                            break;
+                        case '2':
+                            window.location = "{:url('wap/special/order_store_list')}?type=1";
+                            break;
+                        case '3':
+                            window.location = $h.U({ c: 'my', a: 'sign_list'});
+                            break;
+                        case '4':
+                            window.location = $h.U({ c: 'special', a: 'recharge_index'});
+                            break;
+                        case '5':
+                            window.location = $h.U({ c: 'special', a: 'member_recharge'});
+                            break;
+                        case '6':
+                            window.location = $h.U({ c: 'special', a: 'question_index', q: { id: this.id } });
+                            break;
+                        case '7':
+                            window.location = $h.U({ c: 'special', a: 'single_details', q: { id: this.id } });
+                            break;
+                        case '8':
+                            window.location = $h.U({ c: 'special', a: 'data_details', q: { id: this.id } });
+                            break;
+                        default:
+                            window.location = $h.U({ c: 'index', a: 'index'});
+                            break;
+                    }
+                }
+            }
+        });
+    });
+</script>
+{/block}

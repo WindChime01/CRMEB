@@ -1,0 +1,78 @@
+.rebate-guide {
+    position: fixed;
+    right: 0;
+    z-index: 5;
+    width: 1.71rem;
+    height: 2.15rem;
+    padding: .7rem .06rem 0 .02rem;
+    background: url("svg/adpz4-tcyzn.svg") left top/100% 100% no-repeat;
+    cursor: pointer;
+}
+
+.rebate-guide .iconfont {
+    position: absolute;
+    top: -0.73rem;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+       -moz-transform: translateX(-50%);
+        -ms-transform: translateX(-50%);
+         -o-transform: translateX(-50%);
+            transform: translateX(-50%);
+    font-size: .39rem;
+    line-height: 1;
+    color: #999999;
+    cursor: pointer;
+}
+
+.rebate-guide .iconfont::after {
+    content: "";
+    position: absolute;
+    bottom: -0.46rem;
+    left: 50%;
+    width: 1px;
+    height: .51rem;
+    background-color: #999999;
+    -webkit-transform: translateX(-50%);
+       -moz-transform: translateX(-50%);
+        -ms-transform: translateX(-50%);
+         -o-transform: translateX(-50%);
+            transform: translateX(-50%);
+}
+
+.rebate-guide .bottom .title {
+    font-size: .18rem;
+    line-height: .25rem;
+    text-align: center;
+    color: #FF6B00;
+}
+
+.rebate-guide .bottom .money {
+    margin-top: .02rem;
+    font-weight: bold;
+    font-size: .3rem;
+    line-height: .42rem;
+    text-align: center;
+    color: #E76021;
+}
+
+.rebate-guide .top {
+    position: absolute;
+    right: .06rem;
+    bottom: 0;
+    left: .02rem;
+    height: .79rem;
+    padding-top: .38rem;
+    background: url("svg/am33n-r78lf.svg") left top/100% 100% no-repeat;
+    text-align: center;
+    font-size: 0;
+}
+
+.rebate-guide button {
+    padding: .05rem .18rem;
+    border-radius: .13rem;
+    background-color: #FFE8BB;
+    font-weight: bold;
+    font-size: .16rem;
+    line-height: 1;
+    color: #DD2C1A;
+}

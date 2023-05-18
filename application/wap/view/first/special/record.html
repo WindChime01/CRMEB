@@ -1,0 +1,172 @@
+{extend name="public/container"}
+{block name="title"}学习记录{/block}
+{block name="head_top"}
+<script src="/wap/first/zsff/js/scroll.js"></script>
+<script src="/wap/first/zsff/js/navbarscroll.js"></script>
+<style>
+    .loading {
+        font-size: .4rem;
+        text-align: center;
+        color: #999;
+    }
+
+    .loaded {
+        font-size: .28rem;
+        line-height: .72rem;
+        text-align: center;
+        color: #999;
+    }
+
+    .nothing {
+        position: absolute;
+        top: 30%;
+        left: 50%;
+        width: 4rem;
+        height: 4rem;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="study-record">
+        <header>
+            {if $homeLogo}
+            <div class="image">
+                <img class="img" src="{$homeLogo}">
+            </div>
+            {else}
+            <div class="image">
+                <img class="img" src="/wap/first/zsff/images/crmeb.png">
+            </div>
+            {/if}
+            <form @submit.prevent="goSearch">
+                <img src="/wap/first/zsff/images/search.png">
+                <input v-model="search" type="search" placeholder="输入课程名称">
+            </form>
+        </header>
+        <main>
+            <div v-if="updateSpecials.length" class="goods">
+                <a v-for="item in updateSpecials" :key="item.id" :href="item.path" class="item">
+                    <div class="image">
+                        <img :src="item.image">
+                        <div class="label">{{ item.special_type }}</div>
+                    </div>
+                    <div class="text">
+                        <div class="name">{{ item.title }}</div>
+                        <div class="label">
+                            <template v-for="(itm, idx) in item.label">
+                                <span v-if="idx < 2" :key="idx" class="cell">{{ itm }}</span>
+                            </template>
+                        </div>
+                        <div class="price">
+                            <template v-if="item.is_pink">
+                                <div class="money">¥<span>{{ item.pink_money }}</span></div>
+                                <div v-if="!item.is_light && item.type!=4" class="total">共{{item.count}}节</div>
+                            </template>
+                            <template v-else>
+                                <div v-if="item.money === '0.00'" class="free">免费</div>
+                                <div v-else class="money">¥<span>{{ item.money }}</span></div>
+                                <div v-if="!item.is_light && item.type!=4" class="total">共{{item.count}}节</div>
+                            </template>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div v-show="loading" class="loading">
+                <span class="fa fa-spinner"></span>
+            </div>
+            <div v-if="loadend && specials.length" class="loaded">已全部加载</div>
+            <div v-if="!specials.length && !loading" >
+                <img class="nothing"  src="/wap/first/zsff/images/no_data_available.png">
+            </div>
+        </main>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name='foot'}
+<script>
+    require(['vue', 'helper', 'store', 'special-type', '{__WAP_PATH}zsff/js/quick.js'], function (Vue, $h, app, specialType) {
+        new Vue({
+            el: '#app',
+            data: {
+                specials: [],
+                search: '',
+                loadTitle: '',
+                loading: false,
+                loadend: false,
+                limit: 10,
+                page: 1,
+            },
+            computed: {
+                updateSpecials: function () {
+                    var that = this;
+                    return that.specials.map(function (value) {
+                        if (value.is_light) {
+                            value.path = "{:url('special/single_details')}?id=" + value.id;
+                        } else {
+                            value.path = $h.U({
+                                c: 'special',
+                                a: 'details',
+                                q: { id: value.id }
+                            });
+                        }
+                        value.special_type = specialType[value.type];
+                        return value;
+                    });
+                }
+            },
+            created: function () {
+                this.getSpecialList();
+            },
+            methods: {
+                goSearch: function () {
+                    this.loadend = false;
+                    this.page = 1;
+                    this.$set(this, 'specials', []);
+                    this.getSpecialList();
+                },
+                getSpecialList: function () {
+                    var that = this;
+                    if (that.loadend) return;
+                    if (that.loading) return;
+                    that.loading = true;
+                    that.loadTitle = '';
+                    app.baseGet($h.U({
+                        c: 'special',
+                        a: 'get_special_list',
+                        q: {
+                            subject_id: 0,
+                            search: that.search,
+                            page: that.page,
+                            limit: that.limit,
+                            type: 1
+                        }
+                    }), function (res) {
+                        var list = res.data.data;
+                        that.loading = false;
+                        that.page++;
+                        var specials=$h.SplitArray(list, that.specials);
+                        that.loadend = list.length < that.limit;
+                        that.loadTitle = that.loadend ? '我是有底线的' : '上拉加载更多';
+                        that.$set(that, 'specials', specials);
+                        that.EventUtil();
+                    }, function (res) {
+                        that.loading = false;
+                        this.loadTitle = '加载更多';
+                    });
+                },
+                EventUtil: function () {
+                    this.$nextTick(function () {
+                        $h.EventUtil.listenTouchDirection(document, function () {
+                            this.loading == false && this.getSpecialList();
+                        }.bind(this), false);
+                    })
+                }
+            }
+        });
+    })
+</script>
+{/block}

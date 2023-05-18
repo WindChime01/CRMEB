@@ -1,0 +1,1468 @@
+{extend name="public/container"}
+{block name="title"}{$title}{/block}
+{block name="head_top"}
+<link rel="stylesheet" href="{__PLUG_PATH}vue-photo-preview/skin.css">
+<script src="{__PLUG_PATH}vue-photo-preview/vue-photo-preview.js"></script>
+<style>
+    body {
+        padding-bottom: 1rem;
+        padding-bottom: calc(1rem + constant(safe-area-inset-bottom));
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+        background-color: #f5f5f5;
+    }
+
+    .validity {
+        padding-left: 0.3rem;
+        background: url("{__WAP_PATH}zsff/images/validity.png") center/cover no-repeat;
+        font-size: .26rem;
+        line-height: .8rem;
+        color: #FF6B00;
+    }
+
+    a[href^="tel"] {
+        color: #2C8EFF;
+    }
+
+    .poster {
+        position: fixed;
+        top: 15%;
+        left: 15%;
+        width: 70%;
+        z-index: 60
+    }
+
+    .poster img {
+        width: 100%
+    }
+
+    .poster p {
+        color: #eee;
+        font-size: 14px;
+        text-align: center;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="single-special">
+        <!-- 播放器 -->
+        <div class="header" :style="{ height: playerHeight + 'px' }">
+            <img :src="special.image" alt="封面">
+        </div>
+        <div v-if="special_validity == -1" class="validity">
+            <template v-if="special.validity">课程有效期为{{ special.validity }}天，过期后需重新购买哦！</template>
+            <template v-else>课程永久有效哦！</template>
+        </div>
+        <div v-else-if="special_validity == 0" class="validity">课程永久有效哦！</div>
+        <div v-else-if="special_validity > 0" class="validity">课程有效期剩余{{ special_validity | formatValidity }}，过期后需重新购买哦！</div>
+        <div class="special-attr">
+            <div class="title">{{ special.title }}</div>
+            <div class="label">
+                <div v-for="(item, index) in special.label" :key="index">{{ item }}</div>
+            </div>
+            <div class="money-button">
+                <div class="money">
+                    <template v-if="special.pay_type">
+                        <div><span>￥</span>{{ special.money }}</div>
+                        <div>￥{{ special.member_money }}</div>
+                    </template>
+                    <div v-else>免费</div>
+                </div>
+                <button type="button" @click="createPoster">
+                    <i class="iconfont iconfenxiang"></i>
+                    <div>分享</div>
+                </button>
+                <button type="button" @click="collect">
+                    <i :class="['iconfont', special.collect ? 'iconshoucang2' : 'iconshoucang11']"></i>
+                    <div>{{ special.collect ? '已收藏' : '收藏' }}</div>
+                </button>
+            </div>
+        </div>
+        <!-- 群聊 -->
+        <template v-if="special.service_code">
+            <div class="group-chat">
+                <div>和小伙伴一起学习，有老师答疑哦~</div>
+                <button type="button" @click="groupChartShow = true">加入群聊</button>
+            </div>
+        </template>
+        <!-- 学习人数、讲师 -->
+        <div class="learner-teacher">
+            <div v-if="record.length" class="learner">
+                <div>
+                    <img v-for="(item, index) in record" :key="index" :src="item.avatar" alt="">
+                </div>
+                已有{{ recordCoujnt }}人学习
+            </div>
+            <a v-if="lecturer" class="teacher" :href="'{:url('merchant/teacher_detail')}?id=' + special.lecturer_id">
+                <div>
+                    <img :src="lecturer.lecturer_head" :alt="lecturer.lecturer_name">
+                </div>
+                <div>
+                    <div>{{ lecturer.lecturer_name }}</div>
+                    <div v-if="lecturer.label.length" class="label">
+                        <div v-for="(item, index) in lecturer.label" :key="index">{{ item }}</div>
+                    </div>
+                </div>
+                <i class="iconfont iconxiangyou"></i>
+            </a>
+        </div>
+        <!-- 关联资料 -->
+        <div v-if="specialDownload.length" class="material">
+            <a v-for="item in specialDownload" :key="item.id" :href="'{:url('special/data_details')}?id=' + item.id">
+                <div>
+                    <img :src="item.image" alt="">
+                </div>
+                <div>
+                    <div>{{ item.title }}</div>
+                    <div v-if="item.pay_type" class="money">￥<span>{{ item.money }}</span></div>
+                    <div v-else>免费</div>
+                    <div>
+                        <div>{{ item.ficti + item.sales }}人已下载</div>
+                        <button type="button">去下载</button>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- 拼团人数 -->
+        <div v-if="special.is_pink" class="group-buy">
+            <div v-if="specialGroupLists.length" class="marquee">
+                <i class="iconfont iconshengyinyinliang"></i>
+                <div>已拼{{ specialGroupLists.length }}件</div>
+                <div class="swiper-container">
+                    <div class="swiper-wrapper">
+                        <div v-for="(item, index) in specialGroupLists" :key="index" class="swiper-slide">{{ item.nickname }}拼团成功</div>
+                    </div>
+                </div>
+            </div>
+            <ul v-if="specialPinkLists.length">
+                <li v-for="(item, index) in specialPinkLists" :key="index">
+                    <div>
+                        <img :src="item.avatar" alt="">
+                    </div>
+                    <div>{{ item.nickname }}</div>
+                    <div>
+                        <div>还差<span>{{ item.num }}人</span>成团</div>
+                        <div>剩余 {{ item.duration | format }}</div>
+                    </div>
+                    <button type="button" @click="goPink(item.id, item.uid)">去拼单</button>
+                </li>
+            </ul>
+        </div>
+        <!-- 拼团玩法 -->
+        <div v-if="special.is_pink" class="group-way">
+            <div>拼团玩法</div>
+            <ul>
+                <li>开团/参团</li>
+                <li>邀请好友</li>
+                <li>满员发货</li>
+            </ul>
+        </div>
+        <!-- 导航 -->
+        <ul class="tabbar">
+            <li :class="{ on: tabActive === 1}" @click="tabActive = 1">详情</li>
+            <li v-if="specialTest1.length" :class="{ on: tabActive === 2}" @click="tabActive = 2">练习</li>
+            <li v-if="specialTest2.length" :class="{ on: tabActive === 3}" @click="tabActive = 3">考试</li>
+            <li v-if="comment_switch" :class="{ on: tabActive === 4}" @click="tabActive = 4">评价({{ whole }})</li>
+        </ul>
+        <!-- 详情 -->
+        <div v-show="tabActive === 1" class="detail" v-html="special.abstract"></div>
+        <!-- 练习 -->
+        <ul v-if="specialTest1.length" v-show="tabActive === 2" class="exercise">
+            <li v-for="item in specialTest1" :key="item.id">
+                <div class="title"><i v-if="!isPay" class="iconfont iconsuozi"></i>{{ item.title }}</div>
+                <div class="group">
+                    <div class="progress">
+                        <div :style="{ width: item.rate + '%' }"></div>
+                    </div>
+                    <div>{{ item.rate }}%</div>
+                    <div>{{ item.answer }}人已答题</div>
+                    <button type="button" @click="goQuestion(item)"><i class="iconfont icon-19-lianxi"></i>练习</button>
+                </div>
+            </li>
+        </ul>
+        <!-- 考试 -->
+        <ul v-if="specialTest2.length" v-show="tabActive === 3" class="question">
+            <li v-for="item in specialTest2" :key="item.id">
+                <div class="head">
+                    <div>
+                        <img :src="item.image" alt="">
+                    </div>
+                    <div>
+                        <div class="title">{{ item.title }}</div>
+                        <div class="group">
+                            <div>共{{ item.item_number }}题</div>
+                            <button v-if="isPay" type="button" @click="goQuestion(item)"><i class="iconfont icon-19-lianxi"></i>答题
+                            </button>
+                            <div v-else>
+                                <i class="iconfont iconsuozi"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <!-- 评价 -->
+        <div v-show="tabActive === 4" class="evaluate">
+            <div>
+                <div class="score">
+                    <div><span>{{ score }}</span>分</div>
+                    <div>课程评分</div>
+                </div>
+                <button type="button" @click="userEvaluate">我要评价</button>
+            </div>
+            <evaluate-list :evaluate-list="replyList"></evaluate-list>
+            <div v-if="evaluateLoading" class="loading">
+                <i class="fa fa-spinner fa-spin"></i>
+            </div>
+            <div v-if="evaluateFinished && replyList.length" class="finished">已全部加载完</div>
+            <div v-if="evaluateFinished && !replyList.length" class="empty">
+                <img src="{__WAP_PATH}zsff/images/empty.png" alt="暂无评价">
+                <div>暂无评价</div>
+            </div>
+        </div>
+        <!-- 底部按钮 -->
+        <div class="footer">
+            <button type="button" @click="goHome">
+                <img src="{__WAP_PATH}zsff/images/special01.png" alt="首页">
+                <div>首页</div>
+            </button>
+            <button type="button" @click="customerService">
+                <img src="{__WAP_PATH}zsff/images/special02.png" alt="客服">
+                <div>客服</div>
+            </button>
+            <button type="button" @click="buy(1)">
+                <img src="{__WAP_PATH}zsff/images/special03.png" alt="送朋友">
+                <div>送朋友</div>
+            </button>
+            <div>
+                <button v-if="gift" type="button" @click="buy(4)">领取课程</button>
+                <template v-else>
+                    <button v-if="isPay || (!special.member_pay_type && is_member)" type="button" @click="buy(5)">{{
+                        special.pay_type || special.member_pay_type ? '去学习' : '免费学习' }}
+                    </button>
+                    <template v-else>
+                        <button v-if="special.profile.is_try" @click="handleTry">试{{ special.light_type === 2 ? '听' : '看' }}</button>
+                        <template v-if="special.is_pink">
+                            <button v-if="isPink" type="button" @click="goPink(0, uid)">查看拼团</button>
+                            <template v-else>
+                                <button type="button" @click="buy(3)">
+                                    ￥{{ special.pink_money }}
+                                    <div>{{ special.pink_number }}人团</div>
+                                </button>
+                                <button type="button" @click="buy(2)">
+                                    ￥{{ is_member ? special.member_money : special.money }}
+                                    <div>单独购</div>
+                                </button>
+                            </template>
+                        </template>
+                        <button v-else type="button" @click="buy(2)">立即购买</button>
+                    </template>
+                </template>
+            </div>
+        </div>
+        <!-- 遮罩层 -->
+        <div :class="{ mask: payDialogOpen || shareShow || groupChartShow || dialogShow || certificateImage }" @touchmove.prevent @click="maskClick">
+        </div>
+        <!-- 支付弹窗 -->
+        <pay-dialog :open.sync="payDialogOpen" :money="money" :now_money="now_money" :special_id="special.id" :link_pay_uid="link_pay_uid" :pay_type_num="pay_type_num" :pink-id="pinkId"
+                    :is-wechat="isWechat" :is-alipay="is_alipay" :is-balance="is_yue" :template-id="templateIds" :wxpay-h5="wxpayH5" :is-member="is_member" :member-money="special.member_money"
+                    :member-link="memberLink" @change="changeVal">
+        </pay-dialog>
+        <!-- 分享海报 -->
+        <!-- <img v-show="shareImage && shareShow" class="share-dialog" :src="shareImage" alt=""> -->
+        <div v-show="shareImage && shareShow" class="poster">
+            <img :src="shareImage" />
+            <p v-show="shareImage">长按保存,分享朋友</p>
+        </div>
+        <!-- 加入群聊 -->
+        <div v-show="groupChartShow" class="group-chart-dialog">
+            <img :src="special.service_code" alt="">
+            <div>
+                <div>长按扫码</div>
+                <div>加客服好友进群</div>
+            </div>
+        </div>
+        <!-- 登录弹窗 -->
+        <base-login :login-show="loginShow" :site-name="site_name" @login-close="loginClose"></base-login>
+        <!-- 评价弹窗 -->
+        <evaluate-dialog :dialog-show="dialogShow" :rate-value="rateValue" :image-list="imageList" @rate-change="rateChange" @image-upload="imageUpload" @image-delete="imageDelete"
+                         @evaluate-submit="evaluateSubmit"></evaluate-dialog>
+        <!-- 兑换码 -->
+        <exchange-guide v-if="isBatch && !isPay" :href="'{:url('special/exchange')}?special_id=' + special.id"></exchange-guide>
+        <!-- 完课证书 -->
+        <img :src="certificateImage" class="certificate-image" alt="">
+        <!-- 弹幕 -->
+        <div v-if="barrageList.length" class="barrage">
+            <div>
+                <img :src="barrageList[barrage_index].avatar" alt="">
+            </div>
+            <div>{{ barrageList[barrage_index].nickname }} {{ barrageList[barrage_index].status_name }}</div>
+        </div>
+    </div>
+    <!-- 分享返佣 -->
+    <rebate-guide v-if="rebateMoney" :rebate-money="rebateMoney" @rebate-action="rebateAction"></rebate-guide>
+</div>
+{/block}
+{block name="foot"}
+<script>
+
+    window.overallShare = false;
+    require([
+        'vue',
+        'axios',
+        'helper',
+        'store',
+        'swiper',
+        'components/pay-dialog/index',
+        'moment',
+        'components/evaluate-list/index',
+        'components/evaluate-dialog/index',
+        'components/exchange-guide/index',
+        'components/base-login/index',
+        'components/rebate-guide/index',
+        'aliplayer',
+        'qrcode',
+    ], function (Vue, axios, $h, store, Swiper, PayDialog, moment, EvaluateList, EvaluateDialog, ExchangeGuide, BaseLogin, RebateGuide) {
+        var special = {$special};
+        var site_url = "{$site_url}";
+        var site_name = "{$Auth_site_name}";
+        var now_money = {$now_money};
+        var link_pay_uid = {$link_pay_uid};
+        var pinkId = {$pinkId};
+        var isWechat = {$isWechat? 'true': 'false'};
+        var is_alipay = {$is_alipay? 'true': 'false'};
+        var is_yue = {$is_yue? 'true': 'false'};
+        var wxpayH5 = {$is_h5_wechat_payment_switch? 'true': 'false'};
+        var isPay = {$isPay? 'true': 'false'};
+        var is_member = {$is_member};
+        var orderId = '{$orderId ? $orderId : ""}';
+        var gift = {$gift};
+        var isBatch = {$isBatch? 'true': 'false'};
+        var uid = {$userInfo['uid']? $userInfo['uid'] : 0};
+        var isPink = {$isPink? 'true': 'false'};
+        var BarrageShowTime = {$BarrageShowTime? $BarrageShowTime: 5};
+        var barrage_index = {$barrage_index? $barrage_index: 0};
+        var callback_url = '{$callback_url}';
+        var options = {
+            captionEl: false,
+            fullscreenEl: false,
+            zoomEl: false,
+            arrowEl: false
+        };
+        var comment_switch = {$comment_switch};
+        var memberLink = "{:url('special/member_recharge')}";
+        Vue.use(vuePhotoPreview, options);
+        new Vue({
+            el: '#app',
+            components: {
+                'pay-dialog': PayDialog,
+                'evaluate-list': EvaluateList,
+                'evaluate-dialog': EvaluateDialog,
+                'exchange-guide': ExchangeGuide,
+                'base-login': BaseLogin,
+                'rebate-guide': RebateGuide
+            },
+            filters: {
+                format: function (time, sibling) {
+                    var duration = moment.duration(time * 1000);
+                    var hours = duration.hours();
+                    var siblingHours = sibling ? moment.duration(sibling * 1000).hours() : 0;
+                    return moment({
+                        h: hours,
+                        m: duration.minutes(),
+                        s: duration.seconds()
+                    }).format((hours || siblingHours ? 'HH:' : '') + 'mm:ss');
+                },
+                formatValidity: function (time) {
+                    var duration = moment.duration(Number(time), 'seconds');
+                    var days = Math.floor(duration.asDays());
+                    var hours = duration.hours();
+                    var minutes = duration.minutes();
+                    return (days ? days + '天' : '') + (hours ? hours + '小时' : '') + minutes + '分钟';
+                }
+            },
+            data: {
+                special: special,
+                site_url: site_url,
+                site_name: site_name,
+                isPay: isPay,
+                is_member: is_member,
+                gift: gift,
+                isBatch: isBatch,
+                uid: uid,
+                isPink: isPink,
+                barrageShowTime: BarrageShowTime,
+                barrage_index: barrage_index,
+                barrageList: [],
+                record: [],  // 学习人员
+                recordCoujnt: '',  // 学习人数
+                lecturer: null,
+                specialGroupLists: [],  // 拼团信息
+                specialPinkLists: [],  // 拼团人员
+                tabActive: 1,
+                specialTest1: [],  // 关联练习
+                specialTest2: [],  // 关联考试
+                evaluatePage: 1,
+                evaluateLimit: 16,
+                replyList: [],  // 评价列表
+                payDialogOpen: false,  // 是否显示支付弹窗
+                money: 0,
+                now_money: now_money,
+                link_pay_uid: 0,
+                pay_type_num: -1,
+                pinkId: pinkId,
+                isWechat: isWechat,
+                is_alipay: is_alipay,
+                is_yue: is_yue,
+                templateIds: '',  // 订阅模板id
+                wxpayH5: wxpayH5,
+                shareImage: '',
+                shareShow: false,
+                groupChartShow: false,
+                loginShow: false,
+                url: isWechat ? $h.U({c: 'index', a: 'login'}) : $h.U({c: 'login', a: 'phone_check'}),
+                score: 0,
+                whole: 0,
+                dialogShow: false,
+                rateValue: 5,
+                imageList: [],
+                orderId: orderId,
+                evaluateLoading: false,
+                evaluateFinished: false,
+                playerHeight: 0,
+                currentTime: 0,
+                duration: 0,
+                paused: true,
+                certificateImage: '',
+                specialDownload: [],  // 关联资料
+                isLogin: false,  // 是否登录
+                comment_switch: comment_switch,
+                special_validity: -1,
+                tryShow: true,
+                seeked: false,
+                rebateMoney: 0,
+                memberLink: memberLink
+            },
+            computed: {
+                range: function () {
+                    return Math.ceil(this.currentTime / this.duration * 100);
+                }
+            },
+            watch: {
+                paused: function (paused) {
+                    paused ? this.player.pause() : this.player.play();
+                }
+            },
+            created: function () {
+                var vm = this;
+                this.playerHeight = Math.floor(window.innerWidth * 9 / 16);
+                this.learningRecords();
+                this.lecturerDetails();
+                this.addLearningRecords();
+                this.specialDataDownload();
+                this.specialTestPaper(1);
+                this.specialTestPaper(2);
+                this.inspect();
+                this.rebateAmount();
+                if (this.special.is_pink) {
+                    this.groupLists();
+                    this.pinkIngLists();
+                    this.getBarrageList();
+                }
+                if (comment_switch) {
+                    this.specialReplyData();
+                    this.specialReplyList();
+                }
+                if (!this.isWechat) {
+                    this.getTemplateIds();
+                    mapleWx($jssdk(), function () {
+                        this.onMenuShareAll({
+                            title: vm.special.title,
+                            desc: vm.special.title,
+                            imgUrl: vm.special.image,
+                            link: customWXShare(uid)
+                        });
+                    });
+                }
+                store.baseGet($h.U({
+                    c: 'special',
+                    a: 'special_validity',
+                    q: {
+                        id: this.special.id
+                    }
+                }), function (res) {
+                    vm.special_validity = res.data.data.validity;
+                }, false, true);
+            },
+            mounted: function () {
+                var vm = this;
+                this.$nextTick(function () {
+                    $h.EventUtil.listenTouchDirection(document, function () {
+                        if (vm.tabActive === 4) {
+                            vm.specialReplyList();
+                        }
+                    });
+                });
+            },
+            methods: {
+              parseQuery: function () {
+                var query = {};
+                var search = window.location.search.slice(1);
+                search.split('&').forEach(function (item) {
+                  item = item.split('=');
+                  query[item[0]] = item[1];
+                });
+                return query;
+              },
+              stringifyQuery: function (object) {
+                var query = [];
+                if (!object || object.construct.name !== 'Object') {
+                  return '';
+                }
+                for (var key in object) {
+                  if (Object.hasOwnProperty.call(object, key)) {
+                    query.push([key, object[key]].join('='));
+                  }
+                }
+                return query.join('&');
+              },
+                goTry: function () {
+                    window.location.assign("{:url('special/single_text_detail')}?try=1&id=" + this.special.id);
+                },
+                // 学习人数
+                learningRecords: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'learningRecords',
+                        q: {
+                            id: this.special.id
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        $h.loadClear();
+                        vm.record = data.record;
+                        vm.recordCoujnt = data.recordCoujnt;
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 讲师信息
+                lecturerDetails: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'getLecturer',
+                        q: {
+                            mer_id: this.special.mer_id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.lecturer = res.data.data;
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 拼团消息
+                groupLists: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'groupLists',
+                        q: {
+                            special_id: this.special.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.specialGroupLists = res.data.data;
+                        vm.$nextTick(function () {
+                            new Swiper('.swiper-container', {
+                                direction: 'vertical',
+                                autoplay: true,
+                                loop: true
+                            });
+                        });
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 拼团列表
+                pinkIngLists: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'pinkIngLists',
+                        q: {
+                            id: this.special.id,
+                            pinkId: 0
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        $h.loadClear();
+                        data.forEach(function (item) {
+                            item.duration = 0;
+                            item.stop_time = item.stop_time * 1000;
+                        });
+                        vm.specialPinkLists = data;
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 练习、考试
+                specialTestPaper: function (type) {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.basePost($h.U({
+                        c: 'topic',
+                        a: 'specialTestPaper'
+                    }), {
+                        special_id: this.special.id,
+                        type: type
+                    }, function (res) {
+                        var data = res.data.data;
+                        $h.loadClear();
+                        if (type === 1) {
+                            data.forEach(function (item) {
+                                item.rate = Math.floor(item.done / item.item_number * 100);
+                            });
+                        }
+                        vm['specialTest' + type] = data;
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 评价状态
+                specialReplyData: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'special_reply_data',
+                        q: {
+                            special_id: this.special.id
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        $h.loadClear();
+                        vm.score = data.score;
+                        vm.whole = data.whole;
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 评价列表
+                specialReplyList: function () {
+                    var vm = this;
+                    if (this.evaluateLoading || this.evaluateFinished) {
+                        return;
+                    }
+                    this.evaluateLoading = true;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'special_reply_list',
+                        q: {
+                            special_id: this.special.id,
+                            page: this.evaluatePage++,
+                            limit: this.evaluateLimit
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        vm.evaluateLoading = false;
+                        $h.loadClear();
+                        vm.replyList = vm.replyList.concat(data);
+                        vm.evaluateFinished = vm.evaluateLimit > data.length;
+                    }, function () {
+                        vm.evaluateLoading = false;
+                        $h.loadClear();
+                    });
+                },
+                // 生成分享海报
+                createPoster: function () {
+                    var vm = this;
+                    store.baseGet("{:url('index/login_user')}", function () {
+                      if (vm.shareImage) {
+                          return vm.shareShow = true;
+                      }
+                      Promise.all([
+                          new Promise(function (resolve, reject) {
+                              var image = new Image();
+                              image.crossOrigin = 'anonymous';
+                              image.src = vm.special.poster_image + '?' + new Date().getTime();
+                              image.onload = function () {
+                                  resolve(image);
+                              };
+                              image.onerror = function () {
+                                  reject('error-image');
+                              };
+                          }),
+                          new Promise(function (resolve, reject) {
+                              resolve(new QRCode(document.createElement('canvas'), vm.site_url));
+                          })
+                      ]).then(function (sources) {
+                          var width = sources[0].width;
+                          var height = sources[0].height;
+                          var sWidth;
+                          var sHeight;
+
+                          if (600/740<=width/height) {
+                              sWidth=600;
+                              sHeight=600*(height/width)
+                          }else{
+                              sWidth=740*(width/height)
+                              sHeight=740;
+                          }
+
+                          var canvas = document.createElement('canvas');
+                          var context = canvas.getContext('2d');
+                          canvas.width = 600;
+                          canvas.height = 960;
+
+                          context.fillStyle = '#FFFFFF';
+                          context.fillRect(0, 0, canvas.width, canvas.height);
+
+                          context.drawImage(sources[0], (600-sWidth)/2, (740-sHeight)/2, sWidth, sHeight);
+                          context.drawImage(sources[1]._el.firstElementChild, 108, 775, 150, 150);
+
+                          context.font = '22px sans-serif';
+                          context.fillStyle = '#999999';
+
+                          var text = '邀您加入' + site_name;
+                          var list = [];
+                          var start = 0;
+                          for (var i = 0; i <= text.length; i++) {
+                              if (context.measureText(text.slice(start, i)).width > 198) {
+                                  list.push(text.slice(start, i - 1));
+                                  start = i - 1;
+                              }
+                          }
+                          if (start !== text.length) {
+                              list.push(text.slice(start));
+                          }
+                          if (list.length > 3) {
+                              list.length = 3;
+                              for (var j = 0; j <= list[2].length; j++) {
+                                  if (context.measureText(list[2].slice(0, j) + '……').width > 198) {
+                                      list[2] = list[2].slice(0, j - 1) + '……';
+                                      break;
+                                  }
+                              }
+                          }
+                          list.push('长按识别或扫码进入');
+                          for (var k = 0; k < list.length; k++) {
+                              // context.fillText(list[k], 294, 775 + (150 / list.length) * k);
+                              context.fillText(list[k], 294, 775 + (150 / (list.length + 1)) * (k + 1));
+                          }
+
+                          vm.shareImage = canvas.toDataURL('image/jpeg');
+                          vm.shareShow = true;
+                          canvas = null;
+                      }).catch(function (error) {
+                          $h.pushMsg(error);
+                      });
+                    }, function () {
+                      if (isWechat) {
+                          window.localStorage.setItem('login_back_url', window.location.href);
+                          window.location.assign("{:url('login/index')}");
+                      } else {
+                          vm.loginShow = true;
+                      }
+                    });
+                },
+                // 收藏、取消收藏
+                collect: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet("{:url('index/login_user')}", function (res) {
+                        $h.loadClear();
+                        store.baseGet("{:url('special/collect')}?id=" + vm.special.id, function () {
+                            vm.special.collect = !vm.special.collect;
+                            $h.pushMsg(vm.special.collect ? '收藏成功' : '取消收藏成功');
+                        });
+                    }, function () {
+                        $h.loadClear();
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                changeVal: function (opt) {
+                    if (typeof opt !== 'object') {
+                        opt = {};
+                    }
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                // 点击遮罩层
+                maskClick: function () {
+                    this.shareShow = false;
+                    this.groupChartShow = false;
+                    this.dialogShow = false;
+                    this.certificateImage = '';
+                },
+                // 关闭登录
+                loginClose: function (value) {
+                    this.loginShow = false;
+                    value && this.logComplete();
+                },
+                // 登录完成回调事件
+                logComplete: function () {
+                    var vm = this;
+                    this.isLogin = true;
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'isMember'
+                    }), function (res) {
+                        var data = res.data.data;
+                        vm.is_member = data.is_member;
+                        vm.now_money = data.now_money;
+                    });
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'special_validity',
+                        q: {
+                            id: special.id
+                        }
+                    }), function (res) {
+                        vm.special_validity = res.data.data.validity;
+                    }, false, true);
+                },
+                // 立即购买
+                buy: function (type) {
+                    var vm = this;
+                    this.pay_type_num = type;
+                    store.baseGet("{:url('index/login_user')}", function () {
+                        if (isWechat) {
+                            store.baseGet("{:url('index/user_login')}", function () {
+                                switch (type) {
+                                    case 1:
+                                        if (!this.special.pay_type) {
+                                            return $h.pushMsg('免费的不可以赠送哦');
+                                        }
+                                        if (this.is_member && !this.special.member_pay_type) {
+                                            return $h.pushMsg('会员价免费的不可以赠送哦');
+                                        }
+                                        this.money = this.special.money;
+                                        this.payDialogOpen = true;
+                                        break;
+                                    case 2:
+                                        vm.money = vm.is_member ? vm.special.member_money : vm.special.money;
+                                        vm.payDialogOpen = true;
+                                        break;
+                                    case 3:
+                                        this.money = this.special.pink_money;
+                                        this.payDialogOpen = true;
+                                        break;
+                                    case 4:
+                                        $h.loadFFF();
+                                        store.baseGet($h.U({
+                                            c: 'special',
+                                            a: 'receive_gift',
+                                            q: {
+                                                orderId: this.orderId
+                                            }
+                                        }), function (res) {
+                                            $h.loadClear();
+                                            $h.pushMsg(res.data.msg, function () {
+                                                window.location.assign("{:url('special/grade_special')}");
+                                            });
+                                        }, function () {
+                                            $h.loadClear();
+                                        });
+                                        break;
+                                    case 5:
+                                        if (vm.special.light_type === 1) {
+                                            window.location.assign("{:url('special/single_text_detail')}?try=0&id=" + vm.special.id);
+                                        } else {
+                                            window.location.assign("{:url('special/single_con_detail')}?try=0&id=" + vm.special.id);
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }.bind(this), function () {
+                                vm.loginShow = true;
+                            }, true);
+                        } else {
+                            switch (type) {
+                                case 1:
+                                    if (!this.special.pay_type) {
+                                        return $h.pushMsg('免费的不可以赠送哦');
+                                    }
+                                    if (this.is_member && !this.special.member_pay_type) {
+                                        return $h.pushMsg('会员价免费的不可以赠送哦');
+                                    }
+                                    this.money = this.special.money;
+                                    this.payDialogOpen = true;
+                                    break;
+                                case 2:
+                                    vm.money = vm.is_member ? vm.special.member_money : vm.special.money;
+                                    vm.payDialogOpen = true;
+                                    break;
+                                case 3:
+                                    this.money = this.special.pink_money;
+                                    this.payDialogOpen = true;
+                                    break;
+                                case 4:
+                                    $h.loadFFF();
+                                    store.baseGet($h.U({
+                                        c: 'special',
+                                        a: 'receive_gift',
+                                        q: {
+                                            orderId: this.orderId
+                                        }
+                                    }), function (res) {
+                                        $h.loadClear();
+                                        $h.pushMsg(res.data.msg, function () {
+                                            window.location.assign("{:url('special/grade_special')}");
+                                        });
+                                    }, function () {
+                                        $h.loadClear();
+                                    });
+                                    break;
+                                case 5:
+                                    if (vm.special.light_type === 1) {
+                                        window.location.assign("{:url('special/single_text_detail')}?try=0&id=" + vm.special.id);
+                                    } else {
+                                        window.location.assign("{:url('special/single_con_detail')}?try=0&id=" + vm.special.id);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }.bind(this), function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                // 支付方式回调
+                pay_order: function (data) {
+                    this.orderId = data.data.result.orderId || '';
+                    switch (data.data.status) {
+                        case "PAY_ERROR":
+                        case 'ORDER_EXIST':
+                        case 'ORDER_ERROR':
+                            this.extendOrder(data.msg);
+                            break;
+                        case 'WECHAT_PAY':
+                            this.wechatPay(data.data.result.jsConfig);
+                            break;
+                        case 'WECHAT_H5_PAY':
+                            this.payDialogOpen = false;
+                            var callbackUrl = callback_url + '?type=7&id=' + this.special.id;
+                            var mwebUrl = data.data.result.jsConfig.mweb_url + '&redirect_url=' + encodeURIComponent(callbackUrl);
+                            window.location.assign(mwebUrl);
+                            break;
+                        case 'SUCCESS':
+                            this.successOrder(data.msg);
+                            break;
+                        case 'ZHIFUBAO_PAY':
+                            window.location.assign($h.U({
+                                c: 'alipay',
+                                a: 'index',
+                                q: {
+                                    info: data.data.result,
+                                    params: 'special'
+                                }
+                            }));
+                            break;
+                    }
+                },
+                // 微信支付
+                wechatPay: function (config) {
+                    var vm = this;
+                    mapleWx($jssdk(), function () {
+                        this.chooseWXPay(config, function () {
+                            vm.successOrder();
+                        }, {
+                            fail: vm.extendOrder,
+                            cancel: vm.extendOrder
+                        });
+                    });
+                },
+                // 支付成功
+                successOrder: function (msg) {
+                    var that = this;
+                    $h.showMsg({
+                        title: msg || '支付成功',
+                        icon: 'success',
+                        success: function () {
+                            switch (that.pay_type_num) {
+                                case 1:
+                                    window.location.assign($h.U({
+                                        c: 'special',
+                                        a: 'gift_special',
+                                        q: {
+                                            orderId: that.orderId
+                                        }
+                                    }));
+                                    break;
+                                case 2:
+                                    that.isPay = true;
+                                    that.payDialogOpen = false;
+                                    break;
+                                case 3:
+                                    window.location.assign($h.U({
+                                        c: 'special',
+                                        a: 'pink',
+                                        q: {
+                                            orderId: that.orderId
+                                        }
+                                    }));
+                                    break;
+                            }
+                        }
+                    });
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'special_validity',
+                        q: {
+                            id: special.id
+                        }
+                    }), function (res) {
+                        that.special_validity = res.data.data.validity;
+                    }, function () {
+                    }, true);
+                },
+                updateMaterialStatus: function () {
+                    var that = this;
+                    that.otherLoading = false;
+                    that.otherLoaded = false;
+                    that.where.page = 1;
+                    that.$set(that, 'otherTaskList', []);
+                    that.getCourseList();
+                },
+                // 支付未完成
+                extendOrder: function (msg) {
+                    var that = this;
+                    if (typeof msg === 'object') {
+                        if (msg.errMsg === 'chooseWXPay:cancel') {
+                            msg = '微信支付取消';
+                        } else {
+                            msg = '支付失败';
+                        }
+                    } else {
+                        msg = msg || '支付失败';
+                    }
+                    $h.pushMsg(msg, function () {
+                        that.payDialogOpen = false;
+                        if (that.orderId) {
+                            store.baseGet($h.U({
+                                c: 'special',
+                                a: 'del_order',
+                                q: {
+                                    orderId: that.orderId
+                                }
+                            }));
+                        }
+                    });
+                },
+                // 评分
+                rateChange: function (value) {
+                    this.rateValue = value;
+                },
+                // 上传图片
+                imageUpload: function (file) {
+                    var formData = new FormData();
+                    formData.append('file', file);
+                    axios.post("{:url('auth_api/upload')}", formData).then(function (res) {
+                        var resData = res.data;
+                        if (resData.code === 200) {
+                            this.imageList.push(resData.data.url);
+
+                        } else {
+                            layer.msg(resData.msg);
+                        }
+                    }.bind(this)).catch(function (err) {
+
+                    });
+                },
+                // 删除图片
+                imageDelete: function (index) {
+                    this.imageList.splice(index, 1);
+                },
+                // 提交评价
+                evaluateSubmit: function (text) {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.basePost($h.U({
+                        c: 'special',
+                        a: 'user_comment_special',
+                        q: {
+                            special_id: this.special.id
+                        }
+                    }), {
+                        satisfied_score: this.rateValue,
+                        comment: text.trim(),
+                        pics: this.imageList
+                    }, function (res) {
+                        $h.loadClear();
+                        $h.pushMsg(res.data.msg, function () {
+                            vm.dialogShow = false;
+                            vm.specialReplyData();
+                            vm.evaluateFinished = false;
+                            vm.evaluatePage = 1;
+                            vm.replyList = [];
+                            vm.specialReplyList();
+                        });
+                    }, function () {
+                        $h.loadClear();
+                        vm.dialogShow = false;
+                    });
+                },
+                // 我要评价
+                userEvaluate: function () {
+                    var vm = this;
+                    store.baseGet("{:url('index/login_user')}", function () {
+                        if (this.isPay) {
+                            this.dialogShow = true;
+                        } else {
+                            layer.msg('购买学习后可进行评价');
+                        }
+                    }.bind(this), function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                // 去练习、答题
+                goQuestion: function (question) {
+                    var vm = this;
+                    store.baseGet("{:url('index/login_user')}", function () {
+                        if (question.is_pay || vm.isPay) {
+                            window.location.assign((question.type === 1 ? "{:url('topic/problem_index')}" : "{:url('special/question_index')}") + '?id=' + question.id);
+                        } else {
+                            vm.payDialogOpen = true;
+                        }
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                // 客服
+                customerService: function () {
+                    store.baseGet($h.U({
+                        c: 'public_api',
+                        a: 'public_data'
+                    }), function (res) {
+                        var data = res.data.data;
+                        if (data.customer_service === '3') {
+                            if (data.site_service_phone) {
+                                layer.confirm('是否拨打 <a href="tel:' + data.site_service_phone + '">' + data.site_service_phone + '</a> 进行咨询？', {
+                                    title: false,
+                                    closeBtn: false,
+                                    btn: ['拨打', '取消']
+                                }, function (index) {
+                                    window.location.assign('tel:' + data.site_service_phone);
+                                    layer.close(index);
+                                });
+                            } else {
+                                layer.msg('抱歉，无法联系客服');
+                            }
+                        } else {
+                            window.location.assign($h.U({
+                                c: 'service',
+                                a: 'service_list'
+                            }));
+                        }
+                    });
+                },
+                // 首页
+                goHome: function () {
+                    window.location.assign("{:url('index/index')}");
+                },
+                // 订阅通知模板id
+                getTemplateIds: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'getTemplateIds',
+                        q: {
+                            pay_type_num: this.pay_type_num,
+                            special_id: this.special.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.templateIds = res.data.msg;
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 记录浏览人数
+                addLearningRecords: function () {
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'addLearningRecords',
+                        q: {
+                            id: this.special.id
+                        }
+                    }));
+                },
+                // 去拼团
+                goPink: function (id, uid) {
+                    var params = {
+                        is_help: Number(uid !== this.uid),
+                        special_id: this.special.id,
+                        pink_id: id || this.pinkId,
+                    };
+                    var query = [];
+                    for (var name in params) {
+                        if (Object.hasOwnProperty.call(params, name)) {
+                            query.push(name + '=' + params[name]);
+                        }
+                    }
+                    window.location.assign("{:url('special/pink')}?" + query.join('&'));
+                },
+                // 播放记忆
+                viewing: function (currentTime) {
+                    store.basePost($h.U({
+                        c: 'special',
+                        a: 'viewing'
+                    }), {
+                        special_id: this.special.id,
+                        task_id: 0,
+                        total: this.duration * 1e3,
+                        viewing_time: currentTime * 1e3,
+                        percentage: Math.floor(currentTime / this.duration * 100)
+                    }, false, false, true);
+                },
+                // 发放证书
+                inspect: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'inspect',
+                        q: {
+                            special_id: this.special.id,
+                            is_light: 1
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        layer.confirm('恭喜您达到发放证书要求，是否领取？', {
+                            title: false,
+                            closeBtn: 0,
+                            btn: ['领取', '取消']
+                        }, function (index) {
+                            vm.getTheCertificate();
+                            layer.close(index);
+                        });
+                    }, function () {
+                        $h.loadClear();
+                    }, true);
+                },
+                // 领取证书
+                getTheCertificate: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'getTheCertificate',
+                        q: {
+                            special_id: this.special.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        $h.pushMsg('领取成功<br>证书制作中……', function () {
+                            vm.viewCertificate(res.data.msg);
+                        });
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 证书信息
+                viewCertificate: function (id) {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'topic',
+                        a: 'viewCertificate',
+                        q: {
+                            id: id,
+                            obtain: 1
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.createCertificate(res.data.data);
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 加载图片
+                loadImage: function (path) {
+                    return new Promise(function (resolve, reject) {
+                        var image = new Image();
+                        image.crossOrigin = 'anonymous';
+                        image.src = path + '?' + new Date().getTime();
+                        image.onload = function () {
+                            resolve(image);
+                        };
+                        image.onerror = function () {
+                            reject('error-image');
+                        };
+                    });
+                },
+                // 制作证书
+                createCertificate: function (certificate) {
+                    var vm = this;
+                    $h.loadFFF();
+                    Promise.all([
+                        this.loadImage(certificate.certificate.background),
+                        this.loadImage(certificate.certificate.qr_code)
+                    ]).then(function (images) {
+                        var canvas = document.createElement('canvas');
+                        var context = canvas.getContext('2d');
+
+                        canvas.width = images[0].width;
+                        canvas.height = images[0].height;
+
+                        context.drawImage(images[0], 0, 0);
+                        context.drawImage(images[1], 220, 557, 160, 160);
+
+                        context.fillStyle = 'rgba(255, 255, 255, 1)';
+                        context.fillRect(220, 724, 160, 36);
+
+                        context.font = '20px sans-serif';
+                        context.textAlign = 'center';
+                        context.fillStyle = '#666666';
+                        context.fillText('长按二维码查看', 300, 748);
+
+                        context.font = 'bold 34px sans-serif';
+                        context.fillStyle = '#29466D';
+                        context.fillText(certificate.nickname, 300, 296);
+
+                        context.font = '24px sans-serif';
+                        context.fillText('颁发时间：' + moment(certificate.add_time * 1000).format('YYYY.MM.DD'), 300, 481);
+
+                        context.font = '28px sans-serif';
+                        context.textAlign = 'start';
+                        context.fillStyle = '#333333';
+
+                        for (var i = Math.ceil(certificate.certificate.explain.length % 16); i--;) {
+                            context.fillText(certificate.certificate.explain.substr(i * 16, 16), 83, i * 40 + 370);
+                        }
+
+                        vm.certificateImage = canvas.toDataURL('image/jpeg');
+                        canvas = null;
+                    }).catch(function (err) {
+
+                    });
+                },
+                // 弹幕
+                getBarrageList: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'get_barrage_list',
+                        q: {
+                            special_id: this.special.id
+                        }
+                    }), function (res) {
+                        var barrageLen = 0;
+                        $h.loadClear();
+                        vm.barrageList = res.data.data;
+                        barrageLen = vm.barrageList.length;
+                        if (!barrageLen) {
+                            return;
+                        }
+                        setInterval(function () {
+                            vm.barrage_index++;
+                            if (vm.barrage_index >= barrageLen) {
+                                vm.barrage_index = 0
+                            }
+                            store.baseGet($h.U({
+                                c: 'special',
+                                a: 'set_barrage_index',
+                                q: {
+                                    index: vm.barrage_index
+                                }
+                            }));
+                        }, vm.barrageShowTime * 1000);
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 关联资料
+                specialDataDownload: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'SpecialDataDownload',
+                        q: {
+                            special_id: this.special.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.specialDownload = res.data.data;
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 获取返佣金额
+                rebateAmount: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'rebateAmount',
+                        p: {
+                            id: this.special.id
+                        }
+                    }), function (res) {
+                        vm.rebateMoney = parseFloat(res.data.data.brokeragePrice);
+                    });
+                },
+                rebateAction: function (value) {
+                    switch (value) {
+                        case 'close':
+                            this.rebateMoney = 0;
+                            break;
+                        case 'share':
+                            this.createPoster();
+                            break;
+                    }
+                },
+                handleTry: function () {
+                    var vm = this;
+                    store.baseGet("{:url('index/login_user')}", function () {
+                        if (vm.special.light_type === 1) {
+                            window.location.assign("{:url('special/single_text_detail')}?try=1&id=" + vm.special.id);
+                        } else {
+                            window.location.assign("{:url('special/single_con_detail')}?try=1&id=" + vm.special.id);
+                        }
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                }
+            }
+        });
+    });
+</script>
+{/block}

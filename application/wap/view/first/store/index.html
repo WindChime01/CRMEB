@@ -1,0 +1,219 @@
+{extend name="public/container"}
+{block name="title"}商品列表{/block}
+{block name="head_top"}
+<style>
+    .nothing {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 4rem;
+        height: 4rem;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+    body {
+        padding-bottom: 1.1rem;
+        padding-bottom: calc(1.1rem + constant(safe-area-inset-bottom));
+        padding-bottom: calc(1.1rem + env(safe-area-inset-bottom));
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="store">
+        <div v-if="banner.length" class="banner">
+            <div id="swiper1" class="swiper-container" @click="swiper1Click">
+                <div class="swiper-wrapper">
+                    <div v-for="(item, index) in banner" :key="index" :data-url="item.url" class="swiper-slide">
+                        <img :src="item.pic" :alt="item.title">
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+        <div :style="{ height: isFixed ? offsetHeight + 'px' : 'auto' }">
+            <div ref="tabs" id="tabs" :class="{ fixed: isFixed }" class="swiper-container tabs" @click="swiper2Click">
+                <div class="swiper-wrapper">
+                    <div v-for="(item, index) in categoryList" :key="item.id" :class="{ on: clickedIndex === index }" class="swiper-slide">{{ item.cate_name }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="goods-section">
+            <div class="list">
+                <a v-for="item in goodsList" :key="item.id" class="item" :href="'detail.html?id=' + item.id">
+                    <div class="image">
+                        <img class="img" :src="item.image" alt="">
+                    </div>
+                    <div class="text">
+                        <div class="title">{{ item.store_name }}</div>
+                        <div class="group">
+                            <div class="price">￥<span class="num">{{ item.price }}</span></div>
+                            <div class="sale">已售{{ item.sales }}件</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div v-if="goodsList.length && !loading" class="finished">{{ loadTitle }}</div>
+            <div v-if="finished && !goodsList.length" class="empty">
+                <img src="{__WAP_PATH}zsff/images/empty.png" alt="暂无商品">
+                <div>暂无商品</div>
+            </div>
+        </div>
+    </div>
+    {include file="public/store_menu"}
+</div>
+<script>
+    var banner = {$banner},cId={$cId};
+    require(['vue', 'store', 'helper', 'swiper'], function (Vue, api, $h, Swiper) {
+        new Vue({
+            el: '#app',
+            data: {
+                banner: banner ? banner : [],
+                categoryList: [],
+                goodsList: [],
+                clickedIndex: 0,
+                activeId: cId,
+                loadTitle: '',
+                page: 1,
+                limit: 16,
+                loading:false,
+                finished:false,
+                isFixed: false,
+                offsetTop: 0,
+                offsetHeight: 0
+            },
+            created: function () {
+                var vm = this;
+                this.getCateList();
+                this.getGoodsList();
+                window.onscroll
+                window.addEventListener('scroll', function () {
+                    vm.isFixed = window.pageYOffset >= vm.offsetTop;
+                });
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    this.swiper1 = new Swiper('#swiper1', {
+                        autoplay: true,
+                        loop: true,
+                        spaceBetween: 20,
+                        pagination: {
+                            el: '.swiper-pagination'
+                        }
+                    });
+                    $h.EventUtil.listenTouchDirection(document, function () {
+                        this.getGoodsList();
+                    }.bind(this));
+                });
+            },
+            methods: {
+                // 点击轮播图
+                swiper1Click: function () {
+                    if (this.swiper1.clickedIndex === undefined) {
+                        return;
+                    }
+                    var url = this.banner[this.swiper1.realIndex].url;
+                    if (url.indexOf('http') === -1) {
+                        return;
+                    }
+                    window.location = url;
+                },
+                // 获取分类
+                getCateList: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    api.baseGet($h.U({
+                        c: 'store',
+                        a: 'getcategory'
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.categoryList = [
+                            {
+                                cate_name: '全部',
+                                id: 0
+                            }
+                        ].concat(res.data.data);
+                        vm.$nextTick(function () {
+                            for (var i=0;i<vm.categoryList.length;i++){
+                                if(vm.categoryList[i].id==vm.activeId){
+                                    vm.clickedIndex = i;
+                                }
+                            }
+                            vm.tabs = new Swiper('#tabs', {
+                                freeMode: true,
+                                initialSlide: vm.clickedIndex,
+                                slidesPerView: 'auto',
+                                observer: true,
+                                on: {
+                                    init: function () {
+                                        vm.offsetTop = vm.$refs.tabs.offsetTop;
+                                        vm.offsetHeight = vm.$refs.tabs.offsetHeight;
+                                    }
+                                }
+                            });
+                        });
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 获取商品列表
+                getGoodsList: function (id) {
+                    if (this.loading || this.finished) {
+                        return;
+                    }
+                    this.loadTitle = '';
+                    this.loading = true;
+                    $h.loadFFF();
+                    api.baseGet($h.U({
+                        c: 'store',
+                        a: 'getproductlist',
+                        p: {
+                            cId: this.activeId,
+                            page: this.page++,
+                            limit: this.limit
+                        }
+                    }), function (res) {
+                        this.loading = false;
+                        $h.loadClear();
+                        var data = res.data.data;
+                        this.goodsList = this.goodsList.concat(data);
+                        this.finished = data.length < this.limit;
+                        this.loadTitle = this.finished ? '已全部加载完' : '上拉加载更多';
+                    }.bind(this), function () {
+                        $h.loadClear();
+                        this.loading = false;
+                    }.bind(this));
+                },
+                // 点击商品分类
+                swiper2Click: function () {
+                    if (this.tabs.clickedIndex === undefined || this.loading) {
+                        return;
+                    }
+                    var swiperWidth = this.tabs.width;
+                    var wrapperWidth = this.tabs.$wrapperEl[0].scrollWidth;
+                    var clickedWidth = this.tabs.clickedSlide.offsetWidth;
+                    var clickedLeft = this.tabs.clickedSlide.offsetLeft;
+
+                    this.clickedIndex = this.tabs.clickedIndex;
+
+                    this.tabs.setTransition(300);
+
+                    if (clickedLeft < (swiperWidth - clickedWidth) / 2) {
+                        this.tabs.setTranslate(0);
+                    } else if (clickedLeft > wrapperWidth - (clickedWidth + swiperWidth) / 2) {
+                        this.tabs.setTranslate(swiperWidth - wrapperWidth);
+                    } else {
+                        this.tabs.setTranslate((swiperWidth - clickedWidth) / 2 - clickedLeft);
+                    }
+
+                    this.goodsList = [];
+                    this.page = 1;
+                    this.finished = false;
+                    this.activeId = this.categoryList[this.clickedIndex].id;
+                    this.getGoodsList();
+                }
+            }
+        });
+    });
+</script>
+{/block}

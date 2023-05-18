@@ -1,0 +1,509 @@
+{extend name="public/container"}
+{block name="title"}{$title}{/block}
+{block name="head_top"}
+<style>
+    .course-list.index .swiper-list2 {
+        padding-top: .26rem;
+        padding-bottom: .26rem;
+    }
+
+    .course-list.index .swiper-list2 .item {
+        padding-right: .2rem;
+        padding-left: .2rem;
+    }
+
+    .course-list.index .swiper-list2 .item~.item {
+        margin-top: .26rem;
+    }
+
+    .course-list.index .swiper-list2 .item .pictrue {
+        position: relative;
+        width: 2.5rem;
+        height: 1.4rem;
+        border-radius: .1rem;
+        overflow: hidden;
+    }
+
+    .course-list.index .studyCourse .swiper-list3 .pictrue {
+        position: relative;
+        width: 7.1rem;
+        height: 3.8rem;
+        border-radius: .1rem;
+        margin-right: auto;
+        margin-left: auto;
+        overflow: hidden;
+    }
+
+    .course-list.index .swiper-list2 .item .pictrue img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        pointer-events: none;
+        -webkit-touch-callout: none;
+    }
+
+    .course-list.index .swiper-list2 .item .text {
+        position: relative;
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+        flex: 1;
+        min-width: 0;
+        margin-left: .2rem;
+    }
+
+    .course-list.index .swiper-list2 .item .name {
+        font-weight: 400;
+        font-size: .28rem;
+        line-height: .4rem;
+        color: #333;
+    }
+
+    .course-list.index .swiper-list2 .item .bottom {
+        margin-top: .1rem;
+        flex: 1;
+        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+
+    .course-list.index .swiper-list2 .item .bottom > .acea-row {
+        flex: 1;
+        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+
+    .course-list.index .swiper-list2 .item .bottom .num {
+        flex-shrink: 0;
+        height: .4rem;
+        padding-right: .12rem;
+        padding-left: .12rem;
+        border-radius: .03rem;
+        background-color: rgba(44, 142, 255, .06);
+        font-weight: 400;
+        font-size: .24rem;
+        line-height: .4rem;
+        color: #2c8eff;
+    }
+
+    .course-list.index .swiper-list2 .item .bottom .num~.num {
+        margin-left: .14rem;
+    }
+
+    .course-list.index .swiper-list2 .item .group {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    .course-list.index .swiper-list2 .item .free {
+        font-weight: 400;
+        font-size: .24rem;
+        color: #FF6B00;
+    }
+
+    .course-list.index .swiper-list2 .item .money {
+        font-weight: 500;
+        font-size: .24rem;
+        color: #FF6B00;
+    }
+
+    .course-list.index .swiper-list2 .item .money span {
+        font-size: .32rem;
+        line-height: .45rem;
+    }
+
+    .course-list.index .swiper-list2 .item .total {
+        margin-left: .1rem;
+        font-weight: 400;
+        font-size: .22rem;
+        color: #999;
+    }
+
+    .layout-first {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-lines: multiple;
+        -webkit-flex-wrap: wrap;
+        flex-wrap: wrap;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        justify-content: space-between;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        padding: .29rem .2rem;
+    }
+
+    .layout-first .item {
+        width: 3.45rem;
+        margin-top: .29rem;
+    }
+
+    .layout-first .item:nth-child(-n+2) {
+        margin-top: 0;
+    }
+
+    .layout-first .item .image {
+        position: relative;
+        height: 1.92rem;
+        border-radius: .1rem;
+        overflow: hidden;
+    }
+
+    .layout-first .item .image .img {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    .layout-first .item .text {
+        position: relative;
+        height: 1.61rem;
+        padding-top: .14rem;
+    }
+
+    .layout-first .item .text .name {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-weight: 400;
+        font-size: .28rem;
+        line-height: .4rem;
+        color: #333;
+    }
+
+    .layout-first .item .text .label {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        margin-top: .12rem;
+        overflow: hidden;
+    }
+
+    .layout-first .item .text .label .cell {
+        flex-shrink: 0;
+        height: .4rem;
+        padding-right: .12rem;
+        padding-left: .12rem;
+        border-radius: .1rem;
+        background-color: rgba(44, 142, 255, .06);
+        font-weight: 400;
+        font-size: .2rem;
+        line-height: .4rem;
+        color: #2c8eff;
+    }
+
+    .layout-first .item .text .label .cell~.cell {
+        margin-left: .14rem;
+    }
+
+    .layout-first .item .text .group {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        width: 100%;
+    }
+
+    .layout-first .item .text .group .money {
+        font-weight: 500;
+        font-size: .24rem;
+        color: #FF6B00;
+    }
+
+    .layout-first .item .text .group .money span {
+        font-size: .32rem;
+        line-height: .45rem;
+    }
+
+    .layout-first .item .text .group .free {
+        font-weight: 400;
+        font-size: .24rem;
+        line-height: .45rem;
+        color: #FF6B00;
+    }
+
+    .layout-first .item .text .group .total {
+        margin-left: .1rem;
+        font-weight: 400;
+        font-size: .22rem;
+        color: #999;
+    }
+    .empty {
+        margin-top: 1rem;
+        font-size: .28rem;
+        text-align: center;
+        color: #bbb;
+    }
+
+    .empty img {
+        display: block;
+        width: 4.14rem;
+        height: 3.05rem;
+        margin: 0 auto;
+    }
+
+    .layout-first .item .image .label {
+        position: absolute;
+        right: 0.1rem;
+        bottom: 0.1rem;
+        padding-right: 0.11rem;
+        padding-left: 0.11rem;
+        border-radius: 0.03rem;
+        background-color: rgba(0, 0, 0, .5);
+        font-size: .22rem;
+        line-height: .34rem;
+        color: #fff;
+    }
+</style>
+{/block}
+{block name="content"}
+<div class="course-list index" id="app" v-cloak ref="index" style="-webkit-overflow-scrolling: touch;">
+    <div class="header slider-banner" v-if="swiperlist.length">
+        <ul class="swiper-wrapper">
+            <li class="swiper-slide" v-for="(swiper,index) in swiperlist">
+                <a v-if="swiper.url" :href="swiper.url">
+                    <img :src="swiper.pic" />
+                </a>
+                <img v-else :src="swiper.pic" />
+            </li>
+        </ul>
+        <div class="swiper-pagination"></div>
+    </div>
+    <div class="nav" v-if="Recommendlist.length">
+        <div class="item" :class="where.subject_id==0 ? 'on':''" @click="where.subject_id=0">推荐</div>
+        <div class="item" v-for="item in Recommendlist" :class="where.subject_id==item.id ? 'on':''"
+            @click="where.subject_id=item.id">{{item.title}}</div>
+    </div>
+    <div class="studyCourse" ref="list">
+        <!--宫图-->
+        <div v-if="where.typesetting==2" class="layout-first">
+            <a v-for="(item, index) in updateList" :key="index" class="item" :href="getDetails(item)">
+                <div class="image">
+                    <img :src="item.image" class="img">
+                    <div class="label">{{ item.typeName }}</div>
+                </div>
+                <div class="text">
+                    <div class="name">{{ item.title }}</div>
+                    <div class="label">
+                        <template v-for="(itm, idx) in item.label">
+                            <div v-if="idx < 2" :key="idx" class="cell">{{ itm }}</div>
+                        </template>
+                    </div>
+                    <div class="group">
+                        <template v-if="where.type==0">
+                            <template v-if="item.is_pink">
+                                <div v-if="item.pink_money <= 0" class="free">免费</div>
+                                <div v-else class="money">¥<span>{{item.pink_money}}</span></div>
+                                <span v-if="!item.is_light && item.type!=4" class="total">共{{item.count}}节</span>
+                            </template>
+                            <template v-else>
+                                <div v-if="item.money == 0" class="free">免费</div>
+                                <div v-else class="money">¥<span>{{item.money}}</span></div>
+                                <span v-if="!item.is_light && item.type!=4" class="total">共{{item.count}}节</span>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!--大图-->
+
+        <div class="swiper-list2 swiper-list3" v-else-if="where.typesetting==1">
+            <a class="item acea-row row-between-wrapper" v-for="vo in updateList" :href="getDetails(vo)">
+                <div class="pictrue">
+                    <img :src="vo.image">
+                    <div class="label">{{ vo.typeName }}</div>
+                </div>
+                <div class="text-pic acea-row row-column">
+                    <div class="name line1" v-text="vo.title"></div>
+                    <div class="bottom acea-row row-between-wrapper">
+                        <div class="acea-row row-middle">
+                            <div class="num acea-row row-center-wrapper" v-for="(lab,index) in vo.label"
+                                v-if="index < max" v-text="lab"></div>
+                        </div>
+                        <template v-if="where.type==0">
+                            <template v-if="vo.is_pink">
+                                <div v-if="vo.pink_money <= 0" class="free">免费<span
+                                        style="font-size:.24rem;color:#333;margin-left:.1rem"
+                                        v-if="!vo.is_light && vo.type!=4">{{vo.count}}节</span></div>
+                                <div v-else class="money">¥<span>{{vo.pink_money}}</span><span
+                                        style="font-size:.24rem;color:#333;margin-left:.1rem"
+                                        v-if="!vo.is_light && vo.type!=4">{{vo.count}}节</span></div>
+                            </template>
+                            <template v-else>
+                                <div v-if="vo.money == 0" class="free">免费<span
+                                        style="font-size:.24rem;color:#333;margin-left:.1rem"
+                                        v-if="!vo.is_light && vo.type!=4">{{vo.count}}节</span></div>
+                                <div v-else class="money">¥<span>{{vo.money}}</span><span
+                                        style="font-size:.24rem;color:#333;margin-left:.1rem"
+                                        v-if="!vo.is_light && vo.type!=4">{{vo.count}}节</span></div>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!--小图-->
+        <div class="swiper-list2" v-else-if="where.typesetting==3">
+            <a class="item acea-row" v-for="vo in updateList" :href="getDetails(vo)">
+                <div class="pictrue">
+                    <img :src="vo.image">
+                    <div class="label">{{ vo.typeName }}</div>
+                </div>
+                <div class="text">
+                    <div class="name line1" v-text="vo.title">非常语文课</div>
+                    <div class="bottom acea-row row-middle">
+                        <div class="num" v-for="(lab,index) in vo.label" v-if="index < max" v-text="lab"></div>
+                    </div>
+                    <div class="group acea-row row-middle">
+                        <template v-if="vo.is_pink">
+                            <div v-if="vo.pink_money == 0" class="free">免费</div>
+                            <div v-else class="money">¥<span>{{vo.pink_money}}</span></div>
+                            <span  v-if="!vo.is_light && vo.type!=4" class="total">共{{vo.count}}节</span>
+                        </template>
+                        <template v-else>
+                            <div v-if="vo.money == 0" class="free">免费</div>
+                            <div v-else class="money">¥<span>{{vo.money}}</span></div>
+                            <span v-if="!vo.is_light && vo.type!=4" class="total">共{{vo.count}}节</span>
+                        </template>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!--纯图-->
+        <div class="list" v-else-if="where.typesetting==4">
+            <a class="item" v-for="vo in List" :href="getDetails(vo)" style="display: inherit"><img
+                    :src="vo.image"></a>
+        </div>
+    </div>
+    <p class="loading-line" style="background-color: #ffffff">
+        <span v-show="loading==true" class="fa fa-spinner loadingpic" style="font-size: 0.4rem"></span>
+        <span v-if="List.length" v-text="loadTitle">加载更多</span>
+    </p>
+    <div v-if="loadend && !List.length" class="empty">
+        <img src="{__WAP_PATH}zsff/images/empty.png" alt="暂无课程">
+        <div>暂无课程</div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name='foot'}
+<script>
+    var type={$type},recommend_id={$recommend_id},typesetting={$typesetting},banner={$banner},Recommendlist={$Recommendlist},grade_id={$grade_id};
+    require(['vue','helper','store', 'swiper', '{__WAP_PATH}zsff/js/quick.js'],function(Vue,$h,storeApi,Swiper) {
+        new Vue({
+            el: '#app',
+            data: {
+                where:{
+                    type:type,
+                    recommend_id:recommend_id,
+                    page:1,
+                    limit:10,
+                    typesetting:typesetting,
+                    subject_id:0,
+                },
+                Recommendlist:Recommendlist,
+                swiperlist:banner,
+                loading: false,
+                loadend: false,
+                loadTitle: '上拉加载更多',
+                List:[],
+                max:2
+            },
+            computed: {
+                updateList: function () {
+                    return this.List.map(function (value) {
+                        switch (value.type) {
+                            case 1:
+                                value.typeName = '图文';
+                                break;
+                            case 2:
+                                value.typeName = '音频';
+                                break;
+                            case 3:
+                                value.typeName = '视频';
+                                break;
+                            case 4:
+                                value.typeName = '直播';
+                                break;
+                            case 5:
+                                value.typeName = '专栏';
+                                break;
+                            default:
+                                value.typeName = '其他';
+                                break;
+                        }
+                        return value;
+                    });
+                }
+            },
+            watch:{
+                'where.subject_id':function (n) {
+                    this.where.page=1;
+                    this.loadend=false;
+                    this.$set(this,'List',[]);
+                    this.get_unifiend_list();
+                }
+            },
+            methods:{
+                getDetails:function(vo){
+                    if (this.where.type === 1) {
+                        return $h.U({c:'article',a:'details',q:{id:vo.id}});
+                    }
+                    return vo.is_light ? $h.U({c:'special',a:'single_details',q:{id:vo.id}}) : $h.U({c:'special',a:'details',q:{id:vo.id}});
+                },
+                get_unifiend_list:function () {
+                    if(this.loading) return;
+                    if(this.loadend) return;
+                    this.loadTitle='';
+                    this.loading=true;
+                    storeApi.baseGet($h.U({c:'index',a:'get_unifiend_list',q:this.where}),function (res) {
+                        var list=res.data.data.list;
+                        var List=$h.SplitArray(list,this.List);
+                        this.loading=false;
+                        this.where.page=res.data.data.page;
+                        this.loadend=list.length < this.where.limit;
+                        this.loadTitle=this.loadend ? '我是有底线的': '上拉加载更多';
+                        this.$set(this,'List',List);
+                        this.$nextTick(function () {
+                            this.EventUtil();
+                        }.bind(this))
+                    }.bind(this),function (res) {
+                        this.loadTitle='加载更多';
+                        this.loading=false;
+                    }.bind(this));
+                },
+                EventUtil:function () {
+                    var that=this;
+                    $h.EventUtil.listenTouchDirection(document,function (){
+                        that.loading == false && that.get_unifiend_list();
+                    },false);
+                }
+            },
+            mounted:function () {
+                this.get_unifiend_list();
+                this.$nextTick(function () {
+                    var myBanner = new Swiper('.header', {
+                        pagination: '.swiper-pagination',
+                        paginationClickable: false,
+                        autoplay:2500,
+                        speed: 1000,
+                        autoplayDisableOnInteraction: false
+                    });
+                })
+            }
+        })
+    })
+</script>
+{/block}

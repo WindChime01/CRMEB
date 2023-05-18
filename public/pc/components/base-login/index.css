@@ -1,0 +1,347 @@
+.login-dialog .el-dialog__header {
+    padding: 0;
+}
+
+.login-dialog .el-dialog__body {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    height: 460px;
+    padding: 0;
+}
+
+.login-dialog .el-image {
+    width: 355px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    background-color: #2c8eff;
+}
+
+.login-dialog .el-form {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -moz-box-orient: vertical;
+    -moz-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -moz-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    position: relative;
+}
+
+.login-dialog .el-form-item {
+    margin-bottom: 20px;
+}
+
+.login-dialog .el-radio-button__inner {
+    padding-right: 35px;
+    padding-left: 35px;
+    border: none;
+    font-size: 20px;
+    color: #282828;
+}
+
+.login-dialog .el-radio-button:first-child .el-radio-button__inner {
+    border-left: none;
+}
+
+.login-dialog .el-radio-button__orig-radio:checked+.el-radio-button__inner {
+    background: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    color: #2c8eff;
+}
+
+.login-dialog .el-form-item:first-child .el-form-item__content,
+.login-dialog .el-form-item:nth-child(2) .el-form-item__content {
+    font-size: 20px;
+    color: #282828;
+}
+
+.login-dialog .el-form-item:nth-child(4),
+.login-dialog .el-form-item:nth-child(5),
+.login-dialog .el-form-item:nth-child(6),
+.login-dialog .el-form-item:nth-child(7),
+.login-dialog .el-form-item:nth-child(8),
+.login-dialog .el-form-item:nth-child(9),
+.login-dialog .el-form-item:nth-child(10),
+.login-dialog .el-form-item:nth-child(11) {
+    width: 358px;
+}
+
+.login-dialog .el-input__inner {
+    height: 50px;
+    border-radius: 25px;
+    line-height: 50px;
+}
+
+.login-dialog .el-form-item:nth-child(5) .el-input__inner {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.login-dialog .el-form-item:nth-child(5) .el-input-group__append {
+    border-color: #dbdbdb;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    background-color: transparent;
+}
+
+.login-dialog .el-form-item:nth-child(5) .el-button {
+    width: 112px;
+    padding: 17px 0;
+    border-top-right-radius: 24px;
+    border-bottom-right-radius: 24px;
+    color: #2c8eff;
+}
+
+.login-dialog .el-form-item:nth-child(5) .el-button img {
+    width: 80px;
+    height: 33px;
+    vertical-align: middle;
+}
+
+.login-dialog .el-button.is-disabled,
+.login-dialog .el-button.is-disabled:focus,
+.login-dialog .el-button.is-disabled:hover {
+    color: #ccc;
+}
+
+.login-dialog .el-form-item:nth-child(6) .el-input__inner {
+    padding-right: 90px;
+}
+
+.login-dialog .el-form-item:nth-child(6) .el-input-group__append {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    z-index: 2;
+    width: 90px;
+    border: 0;
+    background-color: transparent;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+.login-dialog .el-form-item:nth-child(6) .el-button {
+    font-size: 12px;
+    color: #999;
+}
+
+.login-dialog .el-form-item:nth-child(9) .el-form-item__content,
+.login-dialog .el-form-item:nth-child(10) .el-form-item__content,
+.login-dialog .el-form-item:nth-child(12) .el-form-item__content,
+.login-dialog .el-form-item:nth-child(13) .el-form-item__content,
+.login-dialog .el-form-item:nth-child(14) .el-form-item__content {
+    line-height: normal;
+}
+
+.login-dialog .el-checkbox__inner {
+    border-radius: 50%;
+}
+
+.login-dialog .el-checkbox__label {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 12px;
+    color: #666;
+}
+
+.login-dialog .el-form-item:nth-child(9) .el-checkbox {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.login-dialog .el-form-item:nth-child(9) .el-checkbox .el-button--text {
+    padding-top: 0;
+    padding-bottom: 0;
+    white-space: pre-line;
+    text-align: left;
+    font-size: 12px;
+    line-height: normal;
+    color: #ff6b00;
+}
+
+.login-dialog .el-form-item:nth-child(9) .el-form-item__content>.el-button--text {
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 12px;
+    color: #999;
+}
+
+.login-dialog .el-form-item:nth-child(10) .el-button {
+    width: 100%;
+    padding-top: 18px;
+    padding-bottom: 18px;
+    border: none;
+    border-radius: 25px;
+    background: -webkit-gradient(linear, left top, right top, from(#409dff), to(#1e85fb));
+    background: -webkit-linear-gradient(left, #409dff 0%, #1e85fb 100%);
+    background: -moz-linear-gradient(left, #409dff 0%, #1e85fb 100%);
+    background: -o-linear-gradient(left, #409dff 0%, #1e85fb 100%);
+    background: linear-gradient(90deg, #409dff 0%, #1e85fb 100%);
+    color: #fff;
+}
+
+.login-dialog .el-form-item:nth-child(10) .el-button+.el-button {
+    margin-left: 0;
+}
+
+.login-dialog .el-form-item:nth-child(11) .el-form-item__content {
+    text-align: center;
+}
+
+.login-dialog .el-form-item:nth-child(11) .el-form-item__content,
+.login-dialog .el-form-item:nth-child(13) .el-form-item__content {
+    color: #ccc;
+}
+
+.login-dialog .el-form-item:nth-child(11) .el-button--text,
+.login-dialog .el-form-item:nth-child(12) .el-button--text,
+.login-dialog .el-form-item:nth-child(13) .el-button--text {
+    padding-top: 0;
+    padding-bottom: 0;
+    color: #2c8eff;
+}
+
+.login-dialog .el-form-item:nth-child(11),
+.login-dialog .el-form-item:nth-child(12),
+.login-dialog .el-form-item:nth-child(13) {
+    margin-bottom: 0;
+}
+
+.login-dialog .el-form-item:nth-child(14) {
+    margin-bottom: 44px;
+}
+
+.login-dialog .el-form-item:nth-child(14) .el-form-item__content {
+    font-size: 20px;
+    line-height: 26px;
+    color: #282828;
+}
+
+.login-dialog .el-form-item.qrcode .el-image {
+    width: 190px;
+    height: 190px;
+    border-radius: 0;
+    vertical-align: middle;
+}
+
+.login-dialog .el-form-item.qrcode .el-form-item__content>div:first-child {
+    position: relative;
+    width: 209px;
+    height: 209px;
+    line-height: 209px;
+    text-align: center;
+}
+
+.login-dialog .el-form-item.qrcode .el-form-item__content>div:last-child {
+    margin-top: 20px;
+    font-size: 14px;
+    line-height: 19px;
+    text-align: center;
+    color: #666666;
+}
+
+.login-dialog .el-form-item.qrcode .el-form-item__content>div:first-child>div:first-child {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 22px;
+    height: 22px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: #CBCBCB transparent transparent #CBCBCB;
+}
+
+.login-dialog .el-form-item.qrcode .el-form-item__content>div:first-child>div:nth-child(2) {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 22px;
+    height: 22px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: #CBCBCB #CBCBCB transparent transparent;
+}
+
+.login-dialog .el-form-item.qrcode .el-form-item__content>div:first-child>div:nth-child(3) {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 22px;
+    height: 22px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: transparent #CBCBCB #CBCBCB transparent;
+}
+
+.login-dialog .el-form-item.qrcode .el-form-item__content>div:first-child>div:nth-child(4) {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 22px;
+    height: 22px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: transparent transparent #CBCBCB #CBCBCB;
+}
+
+.login-dialog .el-dialog__headerbtn {
+    top: -50px;
+    right: -70px;
+    font-size: 40px;
+}
+
+.login-dialog .el-dialog__headerbtn .el-dialog__close {
+    color: #ddd;
+}
+
+.login-dialog .method-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 68px;
+    height: 68px;
+    background: url("../../images/login1.png") left top/100% 100% no-repeat;
+    cursor: pointer;
+}
+
+.login-dialog .method-btn.qrcode-btn {
+    background-image: url("../../images/login2.png");
+}

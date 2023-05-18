@@ -1,0 +1,133 @@
+{extend name="public/container"}
+{block name="title"}地址列表{/block}
+{block name="head_top"}
+<style>
+    body {
+        padding-bottom: 1.18rem;
+        background-color: #f5f5f5;
+    }
+    .nothing {
+        position: absolute;
+        top: 30%;
+        left: 50%;
+        width: 4.14rem;
+        height: 3.36rem;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="address-list">
+        <ul v-if="address && address.length">
+            <li v-for="(item, index) in address" :key="index">
+                <div class="head">
+                    <div>联系人：{{item.real_name}} {{item.phone}}</div>
+                    <div>收货地址：{{item.province}}{{item.city}}{{item.district}}{{item.detail}}</div>
+                </div>
+                <div class="foot">
+                    <label>
+                        <input v-model="picked" :value="item.id" type="radio" name="address" hidden>
+                        <div>设为默认</div>
+                    </label>
+                    <div>
+                        <a :href="$h.U({c:'my',a:'edit_address'})+'?addressId='+item.id"><img src="/wap/first/zsff/images/editor.png">编辑</a>
+                        <a href="javascript:;" @click="remove(item.id)"><img src="/wap/first/zsff/images/trash.png">删除</a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <img v-else class="nothing" src="/wap/first/zsff/images/no_address.png">
+        <div class="footer">
+            <a :href="$h.U({c:'my',a:'edit_address'})"><img src="/wap/first/zsff/images/add-address.png"><span>添加新地址</span></a>
+            <a v-if="isWechat" href="javascript:;" @click="getWxAddress"><img src="/wap/first/zsff/images/weixin.png"><span>导入微信地址</span></a>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    var address = {$address},isWechat={$isWechat ? 'true' : 'false'};
+    require(['vue', 'store', 'helper', 'quick'], function (Vue, api, $h) {
+        var app = new Vue({
+            el: '#app',
+            data: {
+                address: address,
+                picked: '',
+                isWechat: isWechat
+            },
+            watch: {
+                address: {
+                    handler: function (value) {
+                        var result = value.find(function (item) {
+                            return item.is_default;
+                        });
+                        if (result) {
+                            this.picked = result.id;
+                        }
+                    },
+                    immediate: true
+                },
+                picked: function (value) {
+                    this.setDefault(value);
+                }
+            },
+            methods: {
+                setDefault: function (id) {
+                    $h.loadFFF();
+                    api.baseGet($h.U({ c: 'auth_api', a: 'set_user_default_address', q: { addressId: id } }), function () {
+                        $h.loadClear();
+                        $h.pushMsg('设为默认成功');
+                    }.bind(this), function (err) {
+                        $h.loadClear();
+                    }.bind(this));
+                },
+                remove: function (id) {
+                    layer.confirm('是否删除该地址？', {
+                        icon: 3,
+                        title: false,
+                        btn: ['删除', '取消']
+                    }, function (index) {
+                        $h.loadFFF();
+                        api.baseGet($h.U({ c: 'auth_api', a: 'remove_user_address', q: { addressId: id } }), function () {
+                            $h.loadClear();
+                            $h.pushMsg('删除成功');
+                            this.address = this.address.filter(function (value) {
+                                return value.id !== id;
+                            });
+                        }.bind(this), function (err) {
+                            $h.loadClear();
+                        }.bind(this));
+                        layer.close(index);
+                    }.bind(this));
+                },
+                getWxAddress: function () {
+                    mapleWx($jssdk(), function () {
+                        this.openAddress(function (res) {
+                            $h.loadFFF();
+                            api.basePost($h.U({ c: 'auth_api', a: 'edit_user_address' }), {
+                                id: '',
+                                real_name: res.userName,
+                                phone: res.telNumber,
+                                address: {
+                                    province: res.provinceName,
+                                    city: res.cityName,
+                                    district: res.countryName
+                                },
+                                detail: res.detailInfo,
+                                is_default: false
+                            }, function () {
+                                location.reload();
+                            }.bind(this), function (err) {
+                                $h.loadClear();
+                            });
+                        }, function (err) {
+                            $h.pushMsg('导入微信地址失败');
+                        });
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

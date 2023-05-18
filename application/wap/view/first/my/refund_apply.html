@@ -1,0 +1,156 @@
+{extend name="public/container"}
+{block name="title"}申请退款{/block}
+{block name="head_top"}
+<link rel="stylesheet" href="{__STATIC_PATH}plug/layui/css/layui.css"  media="all">
+<script src="{__STATIC_PATH}plug/layui/layui.js" charset="utf-8"></script>
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="refund-apply">
+        {volist name="order.cartInfo" id="cart"}
+        <div class="goods" >
+            <div class="image">
+                <img class="img" src="{$cart.productInfo.image}">
+            </div>
+            <div class="text">
+                <div class="name" >{$cart.productInfo.store_name}</div>
+                <div class="money">
+                    <div class="price">￥<span>{$cart.productInfo.price}</span></div>
+                </div>
+            </div>
+            <div class="number">x{$cart.cart_num}</div>
+        </div>
+        {/volist}
+        <form action="javascript:void(0)">
+            <div class="form-bd">
+                <label>
+                    <div>退款金额</div>
+                    <input value="￥{$order.pay_price}" readonly>
+                </label>
+                <label>
+                    <div>退款原因</div>
+                    <select v-model="refund_reason" style="width: 70%;margin-left: 3%;">
+                        <option value="">选择退款原因</option>
+                        <option v-for="item in reason" :value="item.reason_refund">{{item.reason_refund}}</option>
+                    </select>
+                    <div class="iconfont iconxiangyou"></div>
+                </label>
+                <label>
+                    <div>备注说明</div>
+                    <textarea rows="4" placeholder="填写备注信息" v-model="remarks"></textarea>
+                </label>
+                <div class="upload">
+                    <div><div>上传凭证</div><div>（最多可上传3张）</div></div>
+                    <div>
+                        <ul>
+                            <li v-for="(pic,index) in pics">
+                                <span class="iconfont iconguanbi2" @click="imgdel(index)"></span>
+                                <img :src="pic">
+                            </li>
+                        </ul>
+                        <label  v-show='pics.length < 3' id="test1">
+                            <div class="image">
+                                <img src="{__WAP_PATH}crmeb/images/camera-icon.png">
+                            </div>
+                            <div class="text" >上传凭证</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-ft">
+                <button type="submit" @click="submit">提交</button>
+            </div>
+        </form>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+
+<script>
+    var site_name = '{$Auth_site_name}';
+    var orderId="{$order_id}";
+    require(['vue', 'store', 'helper', 'quick'], function (Vue, api, $h) {
+        var app = new Vue({
+            el: '#app',
+            data: {
+                orderId:orderId,
+                reason:[],
+                refund_reason:'',
+                remarks:'',
+                pics:[]
+            },
+            mounted: function () {
+                var that=this;
+                that.refundReason();
+                layui.use('upload', function () {
+                    var $ = layui.jquery, upload = layui.upload;
+                    upload.render({
+                        elem: '#test1'
+                        , url: "{:url('wap/authApi/upload')}"
+                        , done: function (res) {
+                            //如果上传失败
+                            if (res.code == 400) {
+                                return layer.msg('上传失败');
+                            } else {
+                                that.pics = that.pics.concat(res.data.url);
+                            }
+                        }
+                        , error: function (err) {
+                            console.log(err);
+                        }
+                    });
+                });
+            },
+            methods: {
+                imgdel:function(index){
+                    var that=this;
+                    for(var i=0;i<that.pics.length;i++){
+                        if(index==i){
+                            that.pics.splice(index,1);
+                        }
+                    }
+                },
+                refundReason: function () {
+                    api.baseGet($h.U({c:'auth_api',a:'refund_reason'}),function (res) {
+                        this.reason=res.data.data;
+                    }.bind(this),function (res) {
+                        this.reason=[];
+                    }.bind(this));
+                },
+                submit:function () {
+                    if (!this.refund_reason) {
+                        return  $h.showMsg('请选择退款原因');
+                    }
+                    api.basePost($h.U({c:'auth_api',a:'apply_order_refund',p:{uni:this.orderId}}),{
+                        refund_reason:this.refund_reason,
+                        remarks:this.remarks,
+                        pics:this.pics
+                    },function (res) {
+                        if(res.data.code==200){
+                            $h.showMsg({
+                                title:'申请成功',
+                                icon:'success',
+                                success:function (){
+                                    window.location.href=$h.U({ c: 'special', a: 'order',p:{uni:this.orderId}});
+                                }
+                            });
+                        }
+                    }.bind(this),function (res) {
+                        $h.showMsg({
+                            title:'申请失败',
+                            icon:'error',
+                            success:function (){
+                                location.reload();
+                            }
+                        });
+                    }.bind(this));
+                }
+            }
+        });
+    });
+</script>
+{/block}

@@ -1,0 +1,151 @@
+{extend name="public/container"}
+{block name="title"}练习结果{/block}
+{block name="head"}
+<style>
+    body {
+        padding: .76rem .3rem .46rem;
+        background-color: #F5F5F5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="question-result">
+        <div class="header">
+            <div class="avatar"><img src="{$userInfo.avatar}"></div>
+            <div class="nickname">{$userInfo.nickname}</div>
+            <vue-circle-progress
+                ref="circle"
+                id="circle"
+                :progress="0"
+                :size="133"
+                :reverse="false"
+                line-cap="round"
+                :fill="fill"
+                empty-fill="rgba(213, 224, 236, 0.6)"
+                :animation-start-value="0.0"
+                :start-angle="Math.PI / 2"
+                insert-mode="append"
+                :thickness="5"
+                inner-text="正确率"
+                :show-percent="true"
+                style="text-align: center;margin-top: .5rem;font-size: 0;"
+            ><p>正确率</p></vue-circle-progress>
+            <div class="title">{{ result.title }}</div>
+            <div class="basic">
+                <div class="item">
+                    <div>题目数</div>
+                    <div class="value">{{ result.test_paper_question.length }}</div>
+                </div>
+                <div class="item">
+                    <div>错题数</div>
+                    <div class="value">{{ result.wrong_question }}</div>
+                </div>
+                <div class="item">
+                    <div>未答数</div>
+                    <div class="value">{{ result.not_questions }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="answer">
+            <div class="answer-header">
+                <div>答题情况</div>
+                <div class="prompt">
+                    <div class="item">正确</div>
+                    <div class="item">错误</div>
+                    <div class="item">未答</div>
+                </div>
+            </div>
+            <div class="answer-body">
+                <a v-for="(item, index) in result.test_paper_question" :class="{ no: item.is_correct === 1, ok: item.is_correct === 2 }" href="javascript:">{{ index + 1 }}</a>
+            </div>
+            <div v-if="!footerHidden" class="answer-footer">
+                <a :href="'{:url('topic/problem_sheet')}?from=problem_result&test_id=' + test_id + '&record_id=' + result.id">返回答题卡</a>
+                <!-- <a :href="'{:url('special/question_index')}?id=' + test_id">再考一次</a> -->
+            </div>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    require([
+        'vue',
+        'helper',
+        'store',
+        'vue-circle-progress',
+        'quick'
+    ], function (Vue, $h, $http, VueCircle) {
+        var vm = new Vue({
+            el: '#app',
+            components: {
+                'vue-circle-progress': VueCircle
+            },
+            data: {
+                test_id: 0,
+                result: {
+                    title: '--',
+                    score: 0,
+                    grade: '--',
+                    test_paper_question: [],
+                    wrong_question: 0,
+                    duration_time: '00:00:00'
+                },
+                fill : { gradient: ["rgba(44, 142, 255, 1)", "rgba(44, 142, 255, 0.05)"] },
+                footerHidden: false
+            },
+            created: function () {
+                this.test_id = $h.getParmas('test_id');
+                this.footerHidden = $h.getParmas('from') === 'question_user';
+                this.getResult();
+            },
+            methods: {
+                getResult: function () {
+                    $h.loadFFF();
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'examinationResults',
+                        q: {
+                            test_id: this.test_id,
+                            type: 1
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+
+                        var result = res.data.data;
+                        var questions = result.test_paper_question;
+
+                        var duration = result.duration
+                        var hours = Math.floor(duration / 3600000);
+                        var minutes = Math.floor((duration - hours * 3600000) / 60000);
+                        var seconds = Math.floor((duration - hours * 3600000 - minutes * 60000) / 1000);
+                        if (hours < 10) {
+                            hours = '0' + hours;
+                        }
+                        if (minutes < 10) {
+                            minutes = '0' + minutes;
+                        }
+                        if (seconds < 10) {
+                            seconds = '0' + seconds;
+                        }
+                        result.duration_time = hours + ':' + minutes + ':' + seconds;
+
+                        for (var i = questions.length; i--;) {
+                            if (!Array.isArray(questions[i].userAnswer)) {
+                                Object.assign(questions[i], questions[i].userAnswer);
+                            }
+                        }
+
+                        vm.$refs.circle.updateProgress(parseInt(result.accuracy));
+                        vm.result = result;
+                    }, function () {
+                        window.location.replace($h.U({
+                            c: 'topic',
+                            a: 'question_user'
+                        }));
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

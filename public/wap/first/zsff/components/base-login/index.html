@@ -1,0 +1,54 @@
+<div>
+    <div :class="{ mask: loginShow }" @touchmove.prevent @click="$emit('login-close')"></div>
+    <form :class="{ on: loginShow }" class="base-login">
+        <a v-show="cancelBtn" href="javascript:" @click="$emit('login-close')">
+            <i class="iconfont iconguanbi"></i>
+        </a>
+        <div v-show="state != 3">{{ state == 1 ? '注册账号' : '忘记密码' }}</div>
+        <div v-show="state == 3">
+            <label v-if="!isWeChat">
+                <input v-model="type" :value="1" type="radio" hidden><span>账号登录</span>
+            </label>
+            <label>
+                <input v-model="type" :value="2" type="radio" hidden><span>{{ isWeChat ? '绑定手机号' : '手机登录' }}</span>
+            </label>
+        </div>
+        <label>
+            <i class="iconfont iconshouji"></i>
+            <input v-model.trim="phone" type="tel" maxlength="11" placeholder="请填写账号">
+        </label>
+        <div v-show="state != 3 || type == 2">
+            <label>
+                <i class="iconfont iconyanzhengma"></i>
+                <input v-model.trim="code" type="text" placeholder="请填写验证码">
+            </label>
+            <button type="button" :disabled="count >= 0" id="getCode">{{ count < 0 ? '获取验证码' : '重新获取(' + count + 's)' }}</button>
+        </div>
+        <label v-show="(state != 3 || type == 1)">
+            <i class="iconfont iconmima"></i>
+            <input v-model.trim="pwd" type="password" maxlength="16" :placeholder="pwdPlaceholder">
+        </label>
+        <div v-show="state != 2">
+            <label>
+                <input v-model="agree" type="checkbox" hidden>
+                <i class="iconfont icongouxuan"></i>
+                <span>已阅读并同意</span>
+            </label>
+            <a href="javascript:" @click="goAgree">《{{ siteName }}用户协议》</a>
+        </div>
+        <div>
+            <button v-show="state == 1" type="button" @click="register">立即注册</button>
+            <button v-show="state == 2" type="button" @click="register">确认</button>
+            <button v-show="state == 3" type="button" @click="login">立即登录</button>
+        </div>
+        <div>
+            <span v-show="state == 1">已有账号？</span>
+            <a v-show="state != 3" href="javascript:" @click="state = 3">立即登录</a>
+            <a v-show="state == 3 && !isWeChat" href="javascript:" @click="state = 1">立即注册</a>
+            <a v-show="state == 3 && !isWeChat" href="javascript:" @click="state = 2">忘记密码？</a>
+        </div>
+        <div v-if="hasCopyright" class="copyright">{{ nncnL_crmeb_copyright }}</div>
+        <div v-else class="copyright">© 2014-2022 <a href="http://www.crmeb.com">www.crmeb.com</a></div>
+    </form>
+    <div id="captcha"></div>
+</div>

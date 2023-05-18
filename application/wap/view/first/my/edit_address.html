@@ -1,0 +1,119 @@
+{extend name="public/container"}
+{block name="title"}添加地址{/block}
+{block name="head_top"}
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="add-address">
+        <form action="javascript:void(0)" @submit="addAddress">
+            <div class="section">
+                <label>
+                    <div>姓名</div>
+                    <input v-model="realName" type="text" placeholder="请输入姓名">
+                </label>
+                <label>
+                    <div>联系电话</div>
+                    <input v-model="phone" type="tel" maxlength="11" placeholder="请输入联系电话">
+                </label>
+                <label>
+                    <div>所在地区</div>
+                    <input v-model="area" placeholder="请选择" readonly @focus="show = true">
+                    <img src="/wap/first/zsff/images/location_fill.png">
+                </label>
+                <label>
+                    <div>详细地址</div>
+                    <textarea v-model="detail" placeholder="请填写具体地址" rows="1"></textarea>
+                </label>
+            </div>
+            <div class="section">
+                <label>
+                    <input v-model="isDefault" type="checkbox" hidden>
+                    <div class="checkbox">
+                        <img v-if="isDefault" src="/wap/first/zsff/images/checkbox02.png">
+                        <img v-else src="/wap/first/zsff/images/checkbox01.png">
+                    </div>
+                    设置为默认地址
+                </label>
+            </div>
+            <div class="btn">
+                <button type="submit">立即保存</button>
+            </div>
+        </form>
+    </div>
+    <quick-menu></quick-menu>
+    <yd-cityselect v-model="show" :callback="result" :items="district" :provance="provance" />
+</div>
+<script src="{__PLUG_PATH}reg-verify.js"></script>
+<script>
+    var addressInfo = {$addressInfo},cartId={$cartId};
+    require(['vue', 'store', 'helper', 'ydui', 'static/plug/ydui/province_city_area', 'quick'], function (Vue, api, $h, ydui, district) {
+        Vue.use(ydui.default);
+        var app = new Vue({
+            el: '#app',
+            data: {
+                id: addressInfo.id || '',
+                realName: addressInfo.real_name || '',
+                phone: addressInfo.phone || '',
+                address: {
+                    province: addressInfo.province || '',
+                    city: addressInfo.city || '',
+                    district: addressInfo.district || ''
+                },
+                detail: addressInfo.detail || '',
+                isDefault: addressInfo.is_default === 1 || false,
+                show: false,
+                district: district,
+                cartId:cartId,
+                provance: addressInfo.province
+            },
+            computed: {
+                area: function () {
+                    var address = this.address,
+                        area = '';
+                    if (address.province && address.city && address.district) {
+                        area += address.province + ' ' + address.city + ' ' + address.district;
+                    }
+                    return area;
+                }
+            },
+            methods: {
+                addAddress: function () {
+                    if ($reg.isEmpty(this.realName)) {
+                        return $h.returnErrorMsg('请输入姓名');
+                    } else if (!$reg.isPhone(this.phone)) {
+                        return $h.returnErrorMsg('请输入正确的手机号');
+                    } else if ($reg.isEmpty(this.address.province) || $reg.isEmpty(this.address.city) || $reg.isEmpty(this.address.district)) {
+                        return $h.returnErrorMsg('请选择所在地区');
+                    } else if ($reg.isEmpty(this.detail)) {
+                        return $h.returnErrorMsg('请输入详细地址');
+                    } else {
+                        $h.loadFFF();
+                        api.basePost($h.U({ c: 'auth_api', a: 'edit_user_address' }), {
+                            id: this.id,
+                            real_name: this.realName,
+                            phone: this.phone,
+                            address: this.address,
+                            detail: this.detail,
+                            is_default: this.isDefault
+                        }, function () {
+                            location.href = this.cartId ? "{:url('wap/special/confirm_order')}?cartId=" + this.cartId : $h.U({ c: 'my', a: 'address' });
+                        }.bind(this), function (err) {
+                            $h.loadClear();
+                        }.bind(this));
+                    }
+                },
+                result: function (ret) {
+                    this.address.province = ret.itemName1;
+                    this.address.city = ret.itemName2;
+                    this.address.district = ret.itemName3;
+                }
+            }
+        });
+    });
+</script>
+{/block}

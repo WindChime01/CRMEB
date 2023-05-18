@@ -1,0 +1,161 @@
+{extend name="public/container"}
+{block name="title"}新闻列表{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="news-list-page">
+        <div class="swiper-container" @click="clickSlide">
+            <div class="swiper-wrapper">
+                <div v-for="(item, index) in category" :key="item.id" :class="{ on: index === clickedIndex }" class="swiper-slide">{{ item.title }}</div>
+            </div>
+        </div>
+        <template v-if="newsList.length">
+            <ul>
+                <li v-for="item in newsList" :key="item.id">
+                    <a :href="'{:url('article/news_detail')}?id=' + item.id">
+                        <div class="text">
+                            <div class="name">{{ item.title }}</div>
+                            <div class="wrap">
+                                <div class="hot-wrap">
+                                    <div class="hot" v-for="itm in item.label">{{itm}}</div>
+                                </div>
+                                <div class="browse">
+                                    <span class="iconfont iconliulanliang"></span>{{ item.visit | format }}
+                                </div>
+                            </div>
+                        </div>
+                        <img :src="item.image_input">
+                    </a>
+                </li>
+            </ul>
+            <div v-if="finished" class="prompt">没有更多了~</div>
+        </template>
+        <img v-else-if="!loading && page === 2" class="empty" src="/wap/first/zsff/images/no_data_available.png">
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    require([
+        'vue',
+        'helper',
+        'store',
+        'swiper',
+        'quick'
+    ], function (Vue, $h, api, Swiper) {
+        var app = new Vue({
+            el: '#app',
+            data: {
+                newsList: [],
+                page: 1,
+                limit: 15,
+                loading: false,
+                finished: false,
+                swiperOptions: {
+                    slidesPerView: 'auto',
+                    observer: true,
+                    observeParents: true,
+                    observeSlideChildren: true
+                },
+                category: [],
+                clickedIndex: 0
+            },
+            filters: {
+                format: function (value) {
+                    if (value) {
+                        return value;
+                    } else {
+                        return 0;
+                    }
+                }
+            },
+            created: function () {
+                this.getCategory();
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    this.swiper = new Swiper('.swiper-container', this.swiperOptions);
+
+                    $h.EventUtil.listenTouchDirection(document, function () {
+                        !this.loading && this.getNewsList();
+                    }.bind(this), false);
+                });
+            },
+            methods: {
+                // 点击分类
+                clickSlide: function () {
+                    var width = this.swiper.width;
+                    var scrollWidth = this.swiper.$wrapperEl[0].scrollWidth;
+                    var offsetLeft = this.swiper.clickedSlide.offsetLeft;
+                    var offsetWidth = this.swiper.clickedSlide.offsetWidth;
+
+                    this.swiper.setTransition(300);
+
+                    if (offsetLeft < (width - offsetWidth) / 2) {
+                        this.swiper.setTranslate(0);
+                    } else if (offsetLeft > scrollWidth - (width + offsetWidth) / 2) {
+                        this.swiper.setTranslate(width - scrollWidth);
+                    } else {
+                        this.swiper.setTranslate((width - offsetWidth) / 2 - offsetLeft);
+                    }
+
+                    this.clickedIndex = this.swiper.clickedIndex;
+                    this.newsList = [];
+                    this.page = 1;
+                    this.finished = false;
+
+                    this.getNewsList();
+                },
+                // 新闻列表
+                getNewsList: function () {
+                    var that = this;
+                    if (that.loading || that.finished) {
+                        return;
+                    }
+                    that.loading = true;
+                    $h.loadFFF();
+                    api.baseGet($h.U({
+                        c: 'article',
+                        a: 'get_unifiend_list',
+                        q: {
+                            page: that.page++,
+                            limit: that.limit,
+                            cid: this.category.length ? this.category[this.clickedIndex].id : 0
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        that.newsList = that.newsList.concat(data);
+                        that.finished = that.limit > data.length;
+                        that.loading = false;
+                        $h.loadClear();
+                    }, function (err) {
+                        that.loading = false;
+                        $h.loadClear();
+                    });
+                },
+                // 获取分类
+                getCategory: function () {
+                    this.loading = true;
+                    $h.loadFFF();
+                    api.baseGet($h.U({
+                        c: 'article',
+                        a: 'getArticleCate'
+                    }), function (res) {
+                        app.loading = false;
+                        $h.loadClear();
+                        var data = res.data.data;
+                        data.unshift({
+                            id: 0,
+                            title: '全部'
+                        });
+                        app.category = data;
+                        app.getNewsList();
+                    }, function (err) {
+                        app.loading = false;
+                        $h.loadClear();
+                        console.error(err);
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

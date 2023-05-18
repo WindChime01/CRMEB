@@ -1,0 +1,186 @@
+.evaluate-dialog {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 56;
+    max-height: 90%;
+    padding: .5rem .3rem .4rem;
+    padding: .5rem .3rem -webkit-calc(.4rem + constant(safe-area-inset-bottom));
+    padding: .5rem .3rem -moz-calc(.4rem + constant(safe-area-inset-bottom));
+    padding: .5rem .3rem calc(.4rem + constant(safe-area-inset-bottom));
+    padding: .5rem .3rem -webkit-calc(.4rem + env(safe-area-inset-bottom));
+    padding: .5rem .3rem -moz-calc(.4rem + env(safe-area-inset-bottom));
+    padding: .5rem .3rem calc(.4rem + env(safe-area-inset-bottom));
+    border-top-left-radius: .3rem;
+    border-top-right-radius: .3rem;
+    background-color: #fff;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    -webkit-transition: -webkit-transform .3s;
+    transition: -webkit-transform .3s;
+    -o-transition: -o-transform .3s;
+    -moz-transition: transform .3s, -moz-transform .3s;
+    transition: transform .3s;
+    transition: transform .3s, -webkit-transform .3s, -moz-transform .3s, -o-transform .3s;
+    transition: transform .3s, -webkit-transform .3s;
+    -webkit-transform: translateY(100%);
+    -moz-transform: translateY(100%);
+     -ms-transform: translateY(100%);
+      -o-transform: translateY(100%);
+         transform: translateY(100%);
+}
+
+.evaluate-dialog.on {
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+     -ms-transform: translateY(0);
+      -o-transform: translateY(0);
+         transform: translateY(0);
+}
+
+.evaluate-dialog .rate-section {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: -moz-box;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            -moz-box-align: center;
+         align-items: center;
+    font-size: .28rem;
+    color: #282828;
+}
+
+.evaluate-dialog .rate-section div:nth-child(2) {
+    margin-right: .3rem;
+    margin-left: .2rem;
+    font-size: .36rem;
+    color: #ccc;
+}
+
+.evaluate-dialog .icondengji-shixin ~ .icondengji-shixin {
+    margin-left: .16rem;
+}
+
+.evaluate-dialog .icondengji-shixin.on {
+    color: #ff6b00;
+}
+
+.evaluate-dialog .rate-section div:last-child {
+    font-size: .24rem;
+    color: #aaa;
+}
+
+.evaluate-dialog .custom-section {
+    padding: .3rem;
+    border-radius: .1rem;
+    margin-top: .5rem;
+    background-color: #fafafa;
+}
+
+.evaluate-dialog textarea {
+    display: block;
+    width: 100%;
+    resize: none;
+    font-size: .28rem;
+}
+
+.evaluate-dialog textarea::-webkit-input-placeholder {
+    color: #bbb;
+}
+
+.evaluate-dialog textarea::-webkit-input-placeholder,
+.evaluate-dialog textarea::placeholder {
+    color: #bbb;
+}
+
+.evaluate-dialog .custom-section div {
+    margin-top: .6rem;
+    margin-right: -0.32rem;
+    margin-bottom: -0.32rem;
+}
+
+.evaluate-dialog .custom-section div::after {
+    content: " ";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.evaluate-dialog li {
+    position: relative;
+    float: left;
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-right: .32rem;
+    margin-bottom: .32rem;
+}
+
+.evaluate-dialog img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: .06rem;
+    -o-object-fit: cover;
+       object-fit: cover;
+    pointer-events: none;
+}
+
+.evaluate-dialog a {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: .36rem;
+    height: .36rem;
+    border-radius: 50%;
+    margin-top: -0.12rem;
+    margin-right: -0.12rem;
+    background: #2c8eff url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA1klEQVQ4T63TLVJDUQyG4edUlBkQrQYcawGDKCuAVbCE7gBThwAUi4BKNCyBH4nChknnlCnl3jt0bmPPyZvkS74SETs4wjs+SymhIyKiYBf7eCsRcYApnnGXoDZITR7hBBNcJSBpp7jAHDdNkLXkczzgOgHZ0pKaD38gnX9y3K4PVY7WAll9ES2QW3zhGI3d/QBaIE91OylYoz6/ACuQcVX5EgPcY4bX9Q1tF9Cgw/9H6CVirzX2PqQep/y4POV0VZrpZUMzneVq0wvDauePDey8h8O08zdMV6S1c4zvwQAAAABJRU5ErkJggg==") center/.16rem no-repeat;
+}
+
+.evaluate-dialog label {
+    float: left;
+    width: 1.4rem;
+    height: 1.4rem;
+    border: 1px solid #ddd;
+    border-radius: .06rem;
+    margin-right: .32rem;
+    margin-bottom: .32rem;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+         box-sizing: border-box;
+    font-size: 0;
+    line-height: 1.4rem;
+    text-align: center;
+}
+
+.evaluate-dialog label span {
+    display: inline-block;
+    padding-top: .5rem;
+    background: url("data:image/png;base64,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") center top/.46rem no-repeat;
+    vertical-align: middle;
+    font-size: .22rem;
+    line-height: 1.5;
+    color: #bbb;
+}
+
+.evaluate-dialog button {
+    display: block;
+    width: 100%;
+    height: .86rem;
+    border-radius: .43rem;
+    margin-top: .55rem;
+    background: -webkit-gradient(linear, left top, right top, from(#409DFF), to(#1E85FB));
+    background: -webkit-linear-gradient(left, #409DFF 0%, #1E85FB 100%);
+    background: -moz-linear-gradient(left, #409DFF 0%, #1E85FB 100%);
+    background: -o-linear-gradient(left, #409DFF 0%, #1E85FB 100%);
+    background: linear-gradient(90deg, #409DFF 0%, #1E85FB 100%);
+    font-family: inherit;
+    font-weight: normal;
+    font-size: .3rem;
+    color: #fff;
+}

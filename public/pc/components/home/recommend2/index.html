@@ -1,0 +1,25 @@
+<div class="recommend recommend2">
+    <div class="head">
+        <div>{{ recommend.title }}<span>{{ recommend.explain }}</span></div>
+        <el-link :href="$router.teacher_list" :underline="false">更多<i class="el-icon-arrow-right el-icon--right"></i></el-link>
+    </div>
+    <el-row :gutter="20">
+        <el-col v-for="item in recommend.list" :key="item.id" :span="6">
+            <a :href="$router.teacher_detail +'?id=' + item.id">
+                <el-image :src="item.lecturer_head" fit="cover">
+                    <div slot="error" class="image-slot">
+                        <i class="el-icon-picture-outline"></i>
+                    </div>
+                </el-image>
+                <div>{{ item.lecturer_name }}<span>{{ item.label[0] }}</span></div>
+                <div>
+                    <div>{{ item.lecturer_name }}</div>
+                    <div>
+                        <el-tag v-for="label in item.label" :key="label">{{ label }}</el-tag>
+                    </div>
+                    <div>{{ item.explain }}</div>
+                </div>
+            </a>
+        </el-col>
+    </el-row>
+</div>

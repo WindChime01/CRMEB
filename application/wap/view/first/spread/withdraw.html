@@ -1,0 +1,241 @@
+{extend name="public/container"}
+{block name="title"}佣金提现{/block}
+{block name="head"}
+<style>
+body {background: #FFFFFF;}
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="withdraw">
+    <div class="tab">
+        <div v-for="item in tabs" :key="item.value" :class="{ on: extract_type === item.value }" class="item" @click="extract_type = item.value">
+            <div><i :class="'iconfont ' + item.icon"></i></div>
+            <div>{{ item.name }}</div>
+        </div>
+    </div>
+    <div class="content">
+        <label v-show="extract_type == 'bank'">
+            <div>持卡人</div>
+            <input v-model.trim="name" type="text" placeholder="请填写持卡人姓名">
+        </label>
+        <label v-show="extract_type == 'bank'">
+            <div>卡号</div>
+            <input v-model="cardnum" type="number" placeholder="请填写卡号">
+        </label>
+        <label v-show="extract_type == 'bank'">
+            <div>银行</div>
+            <input :value="bankname" placeholder="请选择银行" readonly @focus="invokePicker">
+        </label>
+        <label v-show="extract_type == 'weixin'">
+            <div>微信号</div>
+            <input v-model.trim="weixin" type="text" placeholder="请填写微信号">
+        </label>
+        <label v-show="extract_type == 'alipay'">
+            <div>用户名</div>
+            <input v-model.trim="name" type="text" placeholder="请填写您的支付宝用户名">
+        </label>
+        <label v-show="extract_type == 'alipay'">
+            <div>账号</div>
+            <input v-model.trim="alipay_code" type="text" placeholder="请填写您的支付宝账号">
+        </label>
+        <label>
+            <div>提现</div>
+            <input type="number" placeholder="最低提现金额{$extract_min_money}" @input="inputMoney">
+        </label>
+        <div class="tip">当前可提现金额: {{ brokerage_price }}</div>
+        <div class="btn">
+            <button type="button" @click="withdraw">提现</button>
+        </div>
+    </div>
+    <div :class="{ mask: dialogShow }"></div>
+    <div :class="{ show: dialogShow }" class="dialog">
+        <img src="{__WAP_PATH}zsff/images/withdraw.png">
+        <div>提现申请已提交，等待人工审核</div>
+        <button type="button" @click="confirm">知道了</button>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'picker', 'quick'], function (Vue, $h, store, Picker) {
+        var extract_bank = {$extract_bank};
+        var token = '{$token}';
+        var tabs = [
+            {
+                name: '银行卡',
+                icon: 'iconyinhangqia',
+                value: 'bank'
+            },
+            {
+                name: '支付宝',
+                icon: 'iconicon34',
+                value: 'alipay'
+            },
+            {
+                name: '微信',
+                icon: 'iconweixin1',
+                value: 'weixin'
+            },
+            {
+                name: '余额',
+                icon: 'iconicon-test',
+                value: 'yue'
+            }
+        ];
+        var pickerData = extract_bank.map(function (item) {
+            return {
+                text: item.bank_name,
+                value: item.id
+            };
+        });
+        var search = window.location.search.slice(1);
+        var query = {};
+        search.split('&').forEach(function (item) {
+            item = item.split('=');
+            query[item[0]] = item[1];
+        });
+        if (query.mer_id) {
+            for (var i = tabs.length; i--;) {
+                if (tabs[i].value === 'yue') {
+                    tabs.splice(i, 1);
+                    break;
+                }
+            }
+        }
+        new Vue({
+            el: '#app',
+            data: {
+                brokerage_price: {$brokerage_price},
+                extract_min_money: {$extract_min_money},
+                extract_type: 'bank',
+                name: '',
+                cardnum: '',
+                bankname: '',
+                weixin: '',
+                alipay_code: '',
+                money: {$extract_min_money},
+                dialogShow: false,
+                tabs: tabs
+            },
+            watch: {
+                extract_type: function (value) {
+                    this.money = '';
+                    switch (value) {
+                        case 'bank':
+                            this.name = '';
+                            this.cardnum = '';
+                            this.bankname = '';
+                            break;
+                        case 'alipay':
+                            this.name = '';
+                            this.alipay_code = '';
+                            break;
+                        case 'weixin':
+                            this.weixin = '';
+                            break;
+                    }
+                }
+            },
+            created: function () {
+                var vm = this;
+                this.picker = new Picker({
+                    data: [pickerData]
+                });
+                this.picker.on('picker.select', this.pickerSelect);
+            },
+            methods: {
+                pickerSelect: function (data) {
+                    var findBank = extract_bank.find(function (item) {
+                        return item.id === data[0];
+                    });
+                    this.bankname = findBank.bank_name;
+                },
+                invokePicker: function (event) {
+                    if (!extract_bank.length) {
+                        event.target.blur();
+                        return $h.pushMsg('暂无可以选择的银行<br>请选择其他方式进行提现');
+                    }
+                    this.picker.show();
+                },
+                withdraw: function () {
+                    var vm = this;
+                    var data = {
+                        extract_type: this.extract_type
+                    };
+                    if (!this.brokerage_price) {
+                        return $h.pushMsg('当前可提现金额:<br>' + this.brokerage_price);
+                    }
+                    // 银行卡
+                    if (this.extract_type === 'bank') {
+                        if (!extract_bank.length) {
+                            return $h.pushMsg('暂无可以选择的银行<br>请选择其他方式进行提现');
+                        }
+                        if (!this.name) {
+                            return $h.pushMsg('请填写持卡人姓名');
+                        }
+                        if (!this.cardnum) {
+                            return $h.pushMsg('请填写卡号');
+                        }
+                        if (!this.bankname) {
+                            return $h.pushMsg('请选择银行');
+                        }
+                        data.name = this.name;
+                        data.cardnum = this.cardnum;
+                        data.bankname = this.bankname;
+                    }
+                    // 支付宝
+                    if (this.extract_type === 'alipay') {
+                        if (!this.name) {
+                            return $h.pushMsg('请填写您的支付宝用户名');
+                        }
+                        if (!this.alipay_code) {
+                            return $h.pushMsg('请填写您的支付宝账号');
+                        }
+                        data.name = this.name;
+                        data.alipay_code = this.alipay_code;
+                    }
+                    // 微信
+                    if (this.extract_type === 'weixin') {
+                        if (!this.weixin) {
+                            return $h.pushMsg('请填写微信号');
+                        }
+                        data.weixin = this.weixin;
+                    }
+                    if (this.money === '') {
+                        return $h.pushMsg('请填写提现金额');
+                    }
+                    if (this.extract_min_money > this.money) {
+                        return $h.pushMsg('最低提现金额：<br>' + this.extract_min_money);
+                    }
+                    if (this.extract_min_money > this.money) {
+                        return $h.pushMsg('当前可以提现金额:<br>' + this.brokerage_price);
+                    }
+                    data.money = this.money;
+                    if (query.mer_id) {
+                        data.business = 1;
+                    }
+                    store.basePost($h.U({
+                        c: 'spread',
+                        a: 'save_withdraw',
+                        q: {
+                            token: token
+                        }
+                    }), data, function (res) {
+                        vm.dialogShow = true;
+                    }, function (err) {
+                        $h.pushMsg(err.data.msg);
+                    });
+                },
+                confirm: function () {
+                    this.dialogShow = false;
+                    window.location.reload();
+                },
+                inputMoney: function (event) {
+                    this.money = event.target.value = event.target.value.replace(/\D*(\d*)(\.?)(\d{0,2})\d*/, '$1$2$3');
+                }
+            }
+        });
+    });
+</script>
+{/block}

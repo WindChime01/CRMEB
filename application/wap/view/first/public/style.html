@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="{__PLUG_PATH}captcha/css/verify.css">
+<link rel="stylesheet" href="{__WAP_PATH}zsff/css/reset.css" />
+<link rel="stylesheet" href="{__WAP_PATH}zsff/css/base.css">
+<link rel="stylesheet" href="{__WAP_PATH}zsff/iconfont/iconfont.css?v=211" />
+<link rel="stylesheet" href="{__WAP_PATH}zsff/css/style.css?v=211" />
+<link rel="stylesheet" href="/system/frame/css/font-awesome.min.css" media="all">
+<!-- <script src="{__PLUG_PATH}jquery-1.10.2.min.js"></script> -->
+<script src="{__PLUG_PATH}captcha/js/jquery.min.js"></script>
+<script src="{__PLUG_PATH}layer/layer.js"></script>
+<script src="{__WAP_PATH}zsff/iconfont/iconfont1/iconfont.js?v=211"></script>
+<script src="{__WAP_PATH}zsff/iconfont/iconfont3/iconfont.js?v=211"></script>
+<script src="{__WAP_PATH}zsff/js/media_750.js"></script>
+<script src="{__WAP_PATH}zsff/js/font.js"></script>
+<script src="{__PLUG_PATH}captcha/js/crypto-js.js"></script>
+<script src="{__PLUG_PATH}captcha/js/ase.js"></script>
+<script src="{__PLUG_PATH}captcha/js/verify.js"></script>
+<script>
+  (function (global) {
+    var isWechat = '{$isWechat}';
+    var prefix = global.location.hostname.replaceAll('.', '_') + '_';
+    function customWXShare(uid) {
+      var search = window.location.search.slice(1);
+      var searchArr = search.split('&');
+      var searchObj = {};
+      var query = [];
+      var link = global.location.origin + global.location.pathname;
+      searchArr.forEach(function (item) {
+        item = item.split('=');
+        item[1] && (searchObj[item[0]] = item[1]);
+      });
+      uid && (searchObj['spread_uid'] = uid);
+      for (var key in searchObj) {
+        query.push([key, searchObj[key]].join('='));
+      }
+      return link + '?' + query.join('&');
+    }
+    global['isWechat'] = !!isWechat;
+    global['isWechat'] && (global['customWXShare'] = customWXShare);
+  })(window);
+</script>

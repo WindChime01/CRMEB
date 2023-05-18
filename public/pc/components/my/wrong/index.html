@@ -1,0 +1,144 @@
+<div class="my-wrong">
+    <el-tabs v-model="tabName">
+        <el-tab-pane label="全部">
+            <div class="all">
+                <a v-for="item in questionList" :key="item.id" href="javascript:" class="item" @click="lookQuestion(item.id)">
+                    <div class="item-head">
+                        <i class="iconfont icondati"></i>
+                        <div class="title">{{ item.title }}</div>
+                        <button @click.stop="masterQuestion(item)">
+                            <i :class="item.is_master ? 'iconyizhangwo' : 'iconweizhangwo'" class="iconfont"></i>
+                        </button>
+                    </div>
+                    <div class="item-body">
+                        <span class="tag">{{ item.questionType }}</span>
+                        {{ item.stem }}
+                    </div>
+                </a>
+            </div>
+            <el-pagination :page-size="limit" :total="total" :current-page.sync="page" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page
+                           @current-change="handleCurrentChange">
+                <el-empty v-if="!questionList.length && finished" description=" "></el-empty>
+        </el-tab-pane>
+        <el-tab-pane label="未掌握">
+            <div class="no">
+                <a v-for="item in questionList" :key="item.id" href="javascript:" class="item" @click="lookQuestion(item.id)">
+                    <div class="item-head">
+                        <i class="iconfont icondati"></i>
+                        <div class="title">{{ item.title }}</div>
+                        <button @click.stop="masterQuestion(item)">
+                            <i class="iconfont iconweizhangwo"></i>
+                        </button>
+                    </div>
+                    <div class="item-body">
+                        <span class="tag">{{ item.questionType }}</span>
+                        {{ item.stem }}
+                    </div>
+                </a>
+            </div>
+            <el-pagination :page-size="limit" :total="total" :current-page.sync="page" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page
+                           @current-change="handleCurrentChange">
+                <el-empty v-if="!questionList.length && finished" description=" "></el-empty>
+        </el-tab-pane>
+        <el-tab-pane label="已掌握">
+            <div class="yes">
+                <a v-for="item in questionList" :key="item.id" href="javascript:" class="item" @click="lookQuestion(item.id)">
+                    <div class="item-head">
+                        <i class="iconfont icondati"></i>
+                        <div class="title">{{ item.title }}</div>
+                        <button @click.stop="masterQuestion(item)">
+                            <i class="iconfont iconyizhangwo"></i>
+                        </button>
+                    </div>
+                    <div class="item-body">
+                        <span class="tag">{{ item.questionType }}</span>
+                        {{ item.stem }}
+                    </div>
+                </a>
+            </div>
+            <el-pagination :page-size="limit" :total="total" :current-page.sync="page" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page
+                           @current-change="handleCurrentChange">
+                <el-empty v-if="!questionList.length && finished" description=" "></el-empty>
+        </el-tab-pane>
+    </el-tabs>
+    <el-dialog :visible.sync="visible" width="1000px" @close="dialogClose">
+        <div class="question">
+            <div class="question-body">
+                <div class="title">
+                    <span class="tag">{{ question.questionType }}</span>
+                    {{ question.stem }}
+                </div>
+                <div v-if="question.image" class="title-image">
+                    <img :src="question.image">
+                </div>
+                <ul v-if="question.is_img" class="images">
+                    <li v-for="(option, key) in question.option" :key="key" class="option">
+                        <img :src="option" alt="">
+                        <label>
+                            <input type="radio" hidden>
+                            <span :class="{
+                                right: question.user_answer.indexOf(key) !== -1 && question.answer.indexOf(key) !== -1,
+                                wrong: question.user_answer.indexOf(key) !== -1 && question.answer.indexOf(key) === -1,
+                            }">{{ key }}</span>
+                        </label>
+                    </li>
+                </ul>
+                <ul v-else class="options">
+                    <li v-for="(option, key) in question.option" :key="key" class="option">
+                        <label>
+                            <input type="radio" hidden>
+                            <span :class="{
+                                right: question.user_answer.indexOf(key) !== -1 && question.answer.indexOf(key) !== -1,
+                                wrong: question.user_answer.indexOf(key) !== -1 && question.answer.indexOf(key) === -1,
+                            }">{{ key }}</span>
+                        </label>
+                        <div>{{ option }}</div>
+                    </li>
+                </ul>
+                <div :class="{ correct: question.user_answer === question.answer }" class="analysis">
+                    <div class="upper">
+                        <i :class="question.user_answer === question.answer ? 'iconzhengque' : 'iconcuowu'" class="iconfont"></i>
+                        回答{{ question.user_answer === question.answer ? '正确' : '错误' }}
+                    </div>
+                    <div class="answer">
+                        正确答案:
+                        <span class="value">{{ question.answer }}</span>
+                    </div>
+                    <div class="answer checked">
+                        您的答案:
+                        <span class="value">{{ question.user_answer }}</span>
+                    </div>
+                    <div class="degree">
+                        试题难度:
+                        <i v-for="item in 5" :class="item <= question.difficulty ? 'icondengji-shixin' : 'icondengji-kongxin'" class="iconfont"></i>
+                    </div>
+                    <div class="content">
+                        <div>答案解析:</div>
+                        <div class="value" v-html="question.analysis"></div>
+                    </div>
+                    <div v-if="question.special && question.special.length" class="special">
+                        <div>关联知识点:</div>
+                        <div class="value">
+                            <a v-for="special in question.special" :key="special.id"
+                               :href="(special.is_light ? $router.single_detail : $router.special_detail) + '?id=' + special.id" class="item">{{ special.title }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="question-foot">
+                <button class="master" @click="masterQuestion(question)">
+                    <i :class="question.is_master ? 'iconyizhangwo' : 'iconweizhangwo'" class="iconfont"></i>
+                    {{ question.is_master ? '已' : '未' }}掌握
+                </button>
+                <button class="delete" @click="deleteQuestion">
+                    <i class="iconfont iconshanchu"></i>
+                    删除
+                </button>
+                <div class="button-wrap">
+                    <button :disabled="!index" class="button" @click="changeQuestion(-1)">上一题</button>
+                    <button :disabled="index === idList.length - 1" class="button fill" @click="changeQuestion(1)">下一题</button>
+                </div>
+            </div>
+        </div>
+    </el-dialog>
+</div>

@@ -1,0 +1,55 @@
+{
+  "_from": "qrcodejs",
+  "_id": "qrcodejs@1.0.0",
+  "_inBundle": false,
+  "_integrity": "sha1-r6tenoWFIfhZrjNtLtD5/S52zKc=",
+  "_location": "/qrcodejs",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "qrcodejs",
+    "name": "qrcodejs",
+    "escapedName": "qrcodejs",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/qrcodejs/-/qrcodejs-1.0.0.tgz",
+  "_shasum": "afab5e9e858521f859ae336d2ed0f9fd2e76cca7",
+  "_spec": "qrcodejs",
+  "_where": "F:\\",
+  "author": {
+    "name": "davidshimjs"
+  },
+  "bugs": {
+    "url": "https://github.com/davidshimjs/qrcodejs/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "QRCode.js is javascript library for making QRCode",
+  "homepage": "https://github.com/davidshimjs/qrcodejs",
+  "keywords": [
+    "qrcode"
+  ],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/angular/material/blob/master/LICENSE"
+    }
+  ],
+  "main": "index",
+  "name": "qrcodejs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/llyys/qrcodejs.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.0"
+}

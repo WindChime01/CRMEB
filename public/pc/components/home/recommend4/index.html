@@ -1,0 +1,32 @@
+<div class="news-push">
+    <div class="title">
+        <div>新闻资讯<span>探索更多未知可能</span></div>
+        <el-link :href="$router.news_list" :underline="false">更多<i class="el-icon-arrow-right el-icon--right"></i></el-link>
+    </div>
+    <div class="content">
+        <div style="padding-left: 0;">
+            <a v-for="item in recommend.list" :key="item.id" :href="$router.news_detail + '?id=' + item.id">
+                <el-image :src="item.image_input" fit="cover">
+                    <div slot="error" class="image-slot">
+                        <i class="el-icon-picture-outline"></i>
+                    </div>
+                </el-image>
+                <div>
+                    <div>
+                        <div>{{ item.title }}</div>
+                        <div>{{ item.synopsis }}</div>
+                    </div>
+                    <div><span><i class="el-icon-view"></i>{{ item.visit }}</span><span><i class="el-icon-time"></i>{{ item.add_time }}</span></div>
+                </div>
+            </a>
+        </div>
+        <div>
+            <div>最新资讯</div>
+            <div>
+                <a v-for="(item, index) in articleList" :key="item.id" :href="$router.news_detail + '?id=' + item.id">
+                    <span>{{ index + 1 }}</span>{{ item.title }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

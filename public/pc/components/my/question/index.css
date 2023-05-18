@@ -1,0 +1,208 @@
+.my-question .el-tabs__header .el-tabs__nav-wrap::after {
+    display: block;
+    background-color: #F5F5F5;
+}
+
+.my-question .el-tabs .el-tabs__header {
+    margin-bottom: 0;
+}
+
+.my-question .problem {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-align-content: flex-start;
+    -ms-flex-line-pack: start;
+    align-content: flex-start;
+    padding: 30px 0 0 30px;
+}
+
+.my-question .problem .item {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -moz-box-orient: vertical;
+    -moz-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 370px;
+    height: 200px;
+    padding: 20px 20px 29px;
+    border-radius: 8px;
+    margin: 0 15px 15px 0;
+    background-color: #FFFFFF;
+    -webkit-box-shadow: 0px 2px 15px rgba(79, 109, 143, 0.15);
+    box-shadow: 0px 2px 15px rgba(79, 109, 143, 0.15);
+}
+
+.my-question .problem .title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-size: 18px;
+    line-height: 27px;
+    color: #282828;
+}
+
+.my-question .problem .message {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    margin-top: 18px;
+}
+
+.my-question .problem .message .cell {
+    margin-left: 13px;
+    font-size: 14px;
+    line-height: 19px;
+    color: #999999;
+}
+
+.my-question .problem .message .cell:first-child {
+    margin-left: 0;
+}
+
+.my-question .problem .message .cell.light {
+    color: #FF6B00;
+}
+
+.my-question .problem .button-group {
+    font-size: 0;
+}
+
+.my-question .problem .button {
+    height: 30px;
+    padding: 0 17px;
+    border: 1px solid #2C8EFF;
+    border-radius: 15px;
+    margin-left: 10px;
+    background-color: #FFFFFF;
+    font-size: 14px;
+    color: #2C8EFF;
+}
+
+.my-question .problem .button:first-child {
+    margin-left: 0;
+}
+
+.my-question .problem .button.fill {
+    background-color: #2C8EFF;
+    color: #FFFFFF;
+}
+
+.my-question .question {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    padding: 30px 0 0 30px;
+}
+
+.my-question .question .item {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    width: 555px;
+    height: 186px;
+    border-radius: 8px;
+    margin: 0 30px 30px 0;
+    -webkit-box-shadow: 0 2px 15px rgba(79, 109, 143, 0.15);
+    box-shadow: 0 2px 15px rgba(79, 109, 143, 0.15);
+}
+
+.my-question .question .image {
+    width: 330px;
+    height: 186px;
+}
+
+.my-question .question .image img {
+    width: 100%;
+    height: 100%;
+}
+
+.my-question .question .text {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -moz-box-orient: vertical;
+    -moz-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+}
+
+.my-question .question .title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    padding: 15px 20px 0;
+    font-size: 18px;
+    line-height: 25px;
+    color: #282828;
+}
+
+.my-question .question .message {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    padding: 10px 0 0 20px;
+    font-size: 14px;
+    line-height: 20px;
+    color: #999999;
+}
+
+.my-question .question .button-group {
+    padding: 0 0 20px 20px;
+    font-size: 0;
+}
+
+.my-question .question .button {
+    height: 30px;
+    padding: 0 17px;
+    border: 1px solid #2C8EFF;
+    border-radius: 15px;
+    margin-left: 10px;
+    background-color: #FFFFFF;
+    font-size: 14px;
+    color: #2C8EFF;
+}
+
+.my-question .question .button:first-child {
+    margin-left: 0;
+}
+
+.my-question .question .button.fill {
+    background-color: #2C8EFF;
+    color: #FFFFFF;
+}

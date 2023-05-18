@@ -1,0 +1,298 @@
+{extend name="public/container"}
+{block name="title"}我的收藏{/block}
+{block name='head_top'}
+<style>
+    .mask .box {
+        position: relative;
+    }
+
+    .mask .box .iconfont {
+        color: #ffffff;
+        font-size: 0.4rem;
+        left: 50%;
+        margin-left: -0.2rem;
+        bottom: 0.3rem
+    }
+
+    .public_list .item .text {
+        -webkit-align-self: flex-start;
+        align-self: flex-start;
+    }
+
+    .loading {
+        font-size: .4rem;
+        text-align: center;
+        color: #999;
+    }
+
+    .loaded {
+        font-size: .28rem;
+        line-height: .72rem;
+        text-align: center;
+        color: #999;
+    }
+
+    .nothing {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 4.14rem;
+        height: 3.36rem;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div :style="{ paddingTop: paddingTop + 'px' }" class="favorite">
+        <div v-if="type" ref="tabbar" class="tabbar">
+            <div :class="{ on: active === 1 }" @click="tab(1)">资料</div>
+            <div :class="{ on: active === 0 }" @click="tab(0)">课程</div>
+        </div>
+        <div v-if="makeGradeList.length" :class="{ material: active }" class="list">
+            <a v-for="item in makeGradeList" :key="item.id" :href="item.path">
+                <div>
+                    <img :src="item.image" alt="">
+                    <div v-if="!active">{{type==1 ?  item.types :  item.type}}</div>
+                </div>
+                <div>
+                    <div>{{ item.title }}</div>
+                    <template v-if="active">
+                        <div :class="{ money: item.pay_type }">
+                            <template v-if="item.pay_type">
+                                ￥<span>199.00</span>
+                            </template>
+                            <template v-else>
+                                免费
+                            </template>
+                        </div>
+                        <div>
+                            <div>{{ item.ficti + item.sales }}人已下载</div>
+                            <button type="button">去下载</button>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <div v-if="item.label.length">
+                            <template v-for="(label, index) in item.label">
+                                <div v-if="index < 2" :key="index">{{ label }}</div>
+                            </template>
+                        </div>
+                        <div>
+                            <div :class="{ money: item.pay_type }">
+                                <template v-if="item.pay_type">
+                                    ￥<span>{{ item.is_pink ? item.pink_money : item.money }}</span>
+                                </template>
+                                <template v-else>
+                                    免费
+                                </template>
+                            </div>
+                            <div v-if="!item.is_light && item.types !== 4">共{{ item.count }}节</div>
+                        </div>
+                    </template>
+                </div>
+            </a>
+        </div>
+        <div v-show="loading" class="loading">
+            <span class="fa fa-spinner"></span>
+        </div>
+        <div v-if="loadend && gradeList.length" class="loaded">已全部加载</div>
+        <div v-if="loadend && !gradeList.length" >
+            {if $type}
+            <img class="nothing"  src="/wap/first/zsff/images/no_collection.png">
+            {else}
+            <img class="nothing"  src="/wap/first/zsff/images/no_data_available.png">
+            {/if}
+        </div>
+    </div>
+    <div class="my-course" ref="app">
+        <base-login :login-show="loginShow" :site-name="site_name" @login-close="loginClose"></base-login>
+        <div class="mask" @touchmove.prevent style="z-index: 100;" v-show="isfollow">
+            <h4>立即绑定微信公众号用户</h4>
+            <div class="code">
+                <img :src="codeUrl" class="image" alt="">
+            </div>
+            <div class="button" @click="skip">跳过</div>
+        </div>
+        {if !$subscribe && !empty($userInfo) && $is_official_account_switch}
+        <div class="groupCode" v-if="is_code">
+            <div class="ewmCon">
+                <div class="code"><img :src="wechat_qrcode"></div>
+                <div class="codeTip">扫码关注公众号</div>
+                <div class="iconfont iconguanbi2" @click="clone"></div>
+            </div>
+        </div>
+        <div class="mask" style="align-items:center;display: flex;" v-if="is_code" @click="clone"></div>
+        <div style="height: 1.0rem"></div>
+        {/if}
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    var wechat_qrcode = '{$subscribeQrcode}', type = {$type},site_name = '{$Auth_site_name}';
+    require(['vue', 'helper', 'store', 'special-type', 'components/base-login/index','quick'], function (Vue, $h, storeApi, specialType, BaseLogin) {
+        new Vue({
+            el: '#app',
+            components: {
+                'base-login': BaseLogin
+            },
+            data: {
+                site_name:site_name,
+                navlist: [{title: '我的课程'}, {title: '我的收藏'}],
+                loadend: false,
+                loading: false,
+                active: 0,
+                type: type,
+                gradeList: [],
+                min: 2,
+                page: 1,
+                limit: 10,
+                count: 0,
+                codeUrl: '',
+                loginShow: false,
+                isfollow: false,
+                url: $h.U({c: 'login', a: 'phone_check'}),
+                wechat_qrcode: wechat_qrcode,
+                is_code: $h.getCookie('QRCODE') ? false : true,
+                paddingTop: 0
+            },
+            computed: {
+                makeGradeList: function () {
+                    return this.gradeList.map(function (value) {
+                        if(this.type){
+                            value.types = specialType[value.type];
+                        }
+                        if ('is_light' in value) {
+                            if (value.is_light) {
+                                value.path = "{:url('special/single_details')}?id=" + value.s_id;
+                            } else {
+                                value.path = "{:url('special/details')}?id=" + value.s_id + (this.type ? '' : '#tash');
+                            }
+                        } else {
+                            value.path = "{:url('special/data_details')}?id=" + value.id;
+                        }
+                        return value;
+                    });
+                }
+            },
+            watch: {
+                active: function () {
+                    this.$set(this, 'gradeList', []);
+                    this.page = 1;
+                    this.loadend = false;
+                    this.getGradeList();
+                }
+            },
+            mounted: function () {
+                var that = this;
+                storeApi.baseGet($h.U({c: 'index', a: 'login_user'}), function (res) {
+                    that.getGradeList();
+                }, function () {
+                    that.loginShow = true;
+                });
+                if (type == 1) {
+                    this.active = 1;
+                }
+                this.$nextTick(function () {
+                    if (this.type) {
+                        this.paddingTop = this.$refs.tabbar.clientHeight;
+                    }
+                });
+            },
+            methods: {
+                clone: function () {
+                    this.is_code = false;
+                    $h.setCookie('QRCODE', 1, 1576237948);
+                },
+                skip: function () {
+                    this.isfollow = false;
+                    this.loginShow = false;
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 800);
+                },
+                loginClose: function (val) {
+                    this.loginShow = false;
+                    val && this.logComplete();
+                },
+                logComplete: function (data) {
+                    var that = this;
+                    if (!data.isfollow) {
+                        this.codeUrl = data.url;
+                        this.isfollow = true;
+                        var qcode_id = data.qcode_id;
+                        var interval = setInterval(function () {
+                            app.baseGet($h.U({c: 'index', a: 'qcode_login', q: {qcode_id: qcode_id}}), function (res) {
+                                clearInterval(interval);
+                                that.isfollow = false;
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 800);
+                            }, null, true);
+                        }, 1000);
+                    } else {
+                        that.loginShow = false;
+                        window.location.reload();
+                    }
+                },
+                //所有插件回调处理事件
+                changeVal: function (opt) {
+                    if (typeof opt != 'object') opt = {};
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                getTashUrl: function (id) {
+                    return $h.U({c: 'special', a: 'details', q: {id: id}}) + (this.active == 0 ? '#tash' : '');
+                },
+                EventUtil: function () {
+                    var that = this;
+                    that.$nextTick(function () {
+                        $h.EventUtil.listenTouchDirection(document, function () {
+                            that.loading == false && that.getGradeList();
+                        }, false);
+                    })
+                },
+                // 获取课程
+                getGradeList: function () {
+                    var that = this;
+                    if (that.loading) return;
+                    if (that.loadend) return;
+                    that.loading = true;
+                    storeApi.baseGet($h.U({
+                        c: 'special',
+                        a: 'get_grade_list',
+                        q: {
+                            active: this.active,
+                            page: this.page,
+                            limit: this.limit
+                        }
+                    }), function (res) {
+                        var list = res.data.data.list;
+                        that.gradeList.push.apply(this.gradeList, list);
+                        this.loadend = list.length < this.limit;
+                        this.page = res.data.data.page;
+                        this.loading = false;
+                        this.$set(this, 'gradeList', this.gradeList);
+                        this.EventUtil();
+                    }.bind(this), function () {
+                        that.loading = false;
+                    });
+                },
+                tab: function (active) {
+                    if (this.loading) {
+                        return;
+                    }
+                    this.active = active;
+                    this.gradeList = [];
+                    this.page = 1;
+                    this.loadend = false;
+                    this.getGradeList();
+                }
+            }
+        });
+    })
+</script>
+{/block}

@@ -1,0 +1,213 @@
+{extend name="public/container"}
+{block name="title"}我的证书{/block}
+{block name="head"}
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+
+    .honor-list-page ul {
+        padding: .2rem .3rem;
+    }
+
+    .honor-list-page li {
+        padding-right: .3rem;
+        padding-left: .3rem;
+        border-radius: .12rem;
+        background-color: #fff;
+    }
+
+    .honor-list-page li ~ li {
+        margin-top: .2rem;
+    }
+
+    .honor-list-page li .name {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        padding-top: .3rem;
+        padding-bottom: .3rem;
+        font-size: .3rem;
+        color: #282828;
+    }
+
+    .honor-list-page li .name img {
+        width: .25rem;
+        margin-right: .05rem;
+        pointer-events: none;
+        -webkit-touch-callout: none;
+    }
+
+    .honor-list-page li .desc {
+        display: -webkit-box;
+        display: flex;
+        -webkit-box-pack: justify;
+        justify-content: space-between;
+        -webkit-box-align: center;
+        align-items: center;
+        height: 1.48rem;
+        border-top: 1px dashed #e3e3e3;
+        font-size: .3rem;
+        color: #9e9e9e;
+    }
+
+    .honor-list-page li .attr {
+        display: -webkit-box;
+        display: flex;
+        margin-left: -.3rem;
+        font-size: .24rem;
+        text-align: center;
+        color: #999;
+    }
+
+    .honor-list-page li .cell {
+        position: relative;
+        padding-right: .35rem;
+        padding-left: .35rem;
+    }
+
+    .honor-list-page li .cell::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        height: .4rem;
+        border-left: 1px solid rgba(0, 0, 0, .05);
+        -webkit-transform: translateY(-50%);
+        transform: translateY(-50%);
+    }
+
+    .honor-list-page li .cell:first-child::before {
+        display: none;
+    }
+
+    .honor-list-page li a {
+        height: .5rem;
+        padding-right: .27rem;
+        padding-left: .27rem;
+        border: 1px solid #2c8eff;
+        border-radius: .25rem;
+        font-size: .24rem;
+        line-height: .5rem;
+        text-align: center;
+        color: #2c8eff;
+    }
+
+    .empty {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 4.14rem;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        -webkit-touch-callout: none;
+        pointer-events: none;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="honor-list-page">
+        <ul v-if="certificateList.length">
+            <li v-for="item in certificateList" :key="item.id">
+                <div class="name">
+                    <img src="{__WAP_PATH}zsff/images/question01.png">{{ item.content. title }}
+                </div>
+                <div class="desc">
+                    <div v-if="item.obtain === 1">您已学完关联的所有课程/专栏</div>
+                    <div v-else class="attr">
+                        <div class="cell">
+                            题目数
+                            <div>{{ item.content.item_number }}</div>
+                        </div>
+                        <div class="cell">
+                            错题数
+                            <div>{{ item.content.wrong_question }}</div>
+                        </div>
+                        <div class="cell">
+                            本次用时
+                            <div>{{ item.content.duration | formatTime }}</div>
+                        </div>
+                    </div>
+                    <a :href="'{:url('topic/certificate_detail')}?obtain=' + item.obtain + '&id=' + item.id">查看证书</a>
+                </div>
+            </li>
+        </ul>
+        <img v-else-if="page > 1 && !loading" class="empty" src="{__WAP_PATH}zsff/images/no_certificate.png">
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    require([
+        'vue',
+        'helper',
+        'store',
+        'quick'
+    ], function (Vue, $h, $http) {
+        var vm = new Vue({
+            el: '#app',
+            filters: {
+                formatTime: function (time) {
+                    var hour = Math.floor(time / 3600000);
+                    var minute = Math.floor((time - hour * 3600000) / 60000);
+                    var second = Math.floor((time - hour * 3600000 - minute * 60000) / 1000);
+
+                    if (hour < 10) {
+                        hour = '0' + hour;
+                    }
+                    if (minute < 10) {
+                        minute = '0' + minute;
+                    }
+                    if (second < 10) {
+                        second = '0' + second;
+                    }
+
+                    return hour + ':' + minute + ':' + second;
+                }
+            },
+            data: {
+                page: 1,
+                limit: 15,
+                loading: false,
+                finished: false,
+                certificateList: []
+            },
+            watch: {
+                loading: function (val) {
+                    val ? $h.loadFFF() : $h.loadClear();
+                }
+            },
+            created: function () {
+                this.getCertificateList();
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    $h.EventUtil.listenTouchDirection(document, function () {
+                        vm.getCertificateList();
+                    });
+                });
+            },
+            methods: {
+                getCertificateList: function () {
+                    if (this.loading || this.finished) {
+                        return;
+                    }
+                    this.loading = true;
+                    $http.basePost($h.U({
+                        c: 'topic',
+                        a: 'getUserCertificate'
+                    }), {
+                        page: this.page++,
+                        limit: this.limit
+                    }, function (res) {
+                        var certificateList = res.data.data;
+                        vm.certificateList = vm.certificateList.concat(certificateList);
+                        vm.loading = false;
+                        vm.finished = vm.limit > certificateList.length;
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

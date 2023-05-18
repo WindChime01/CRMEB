@@ -1,0 +1,310 @@
+{extend name="public/container" /}
+{block name="title"}考试结果{/block}
+{block name="head"}
+<style>
+    .certificate-image {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        z-index: 56;
+        width: 6rem;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+    body {
+        padding: .76rem .3rem .46rem;
+        background-color: #F5F5F5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="question-result">
+        <div class="header">
+            <div class="avatar"><img src="{$userInfo.avatar}"></div>
+            <div class="nickname">{$userInfo.nickname}</div>
+            <vue-circle-progress
+                ref="circle"
+                id="circle"
+                :progress="0"
+                :size="133"
+                :reverse="false"
+                line-cap="round"
+                :fill="fill"
+                empty-fill="rgba(213, 224, 236, 0.6)"
+                :animation-start-value="0.0"
+                :start-angle="Math.PI / 2"
+                insert-mode="append"
+                :thickness="5"
+                inner-text="正确率"
+                :show-percent="true"
+                style="text-align: center;margin-top: .5rem;font-size: 0;"
+            >
+                <p>正确率</p>
+            </vue-circle-progress>
+            <div class="title">{{ result.title }}</div>
+            <div v-if="result.is_score" class="scores">
+                <div class="score">
+                    <div class="name">本次得分</div>
+                    <div class="value">{{ result.score }}</div>
+                </div>
+                <div v-if="result.grade" class="score grade">
+                    <div class="name">评分标准</div>
+                    <div class="value">{{ result.grade }}</div>
+                </div>
+            </div>
+            <div class="basic">
+                <div class="item">
+                    <div>题目数</div>
+                    <div class="value">{{ result.test_paper_question.length }}</div>
+                </div>
+                <div class="item">
+                    <div>错题数</div>
+                    <div class="value">{{ result.wrong_question }}</div>
+                </div>
+                <div class="item">
+                    <div>未答数</div>
+                    <div class="value">{{ result.not_questions }}</div>
+                </div>
+                <div class="item">
+                    <div>本次用时</div>
+                    <div class="value">{{ result.duration_time }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="answer">
+            <div class="answer-header">
+                <div>答题情况</div>
+                <div class="prompt">
+                    <div class="item">正确</div>
+                    <div class="item">错误</div>
+                    <div class="item">未答</div>
+                </div>
+            </div>
+            <div class="answer-body">
+                <a v-for="(item, index) in result.test_paper_question" :class="{ no: item.is_correct === 1, ok: item.is_correct === 2 }" href="javascript:">{{ index + 1 }}</a>
+            </div>
+            <div v-if="!footerHidden" class="answer-footer">
+                <a :href="'{:url('topic/question_sheet')}?is_analysis=1&test_id=' + test_id + '&record_id=' + result.id">查看解析</a>
+                <a :href="'{:url('special/question_index')}?id=' + test_id">再考一次</a>
+            </div>
+        </div>
+        <div :class="{ mask: imgSrc }" @touchmove.prevent @click="imgSrc = ''"></div>
+        <img v-if="imgSrc" :src="imgSrc" class="certificate-image">
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    require([
+        'vue',
+        'helper',
+        'store',
+        'vue-circle-progress',
+        'axios',
+        'moment',
+        'quick'
+    ], function (Vue, $h, $http, VueCircle, axios, moment) {
+        var vm = new Vue({
+            el: '#app',
+            components: {
+                'vue-circle-progress': VueCircle
+            },
+            data: {
+                test_id: 0,
+                result: {
+                    title: '--',
+                    score: 0,
+                    grade: '--',
+                    test_paper_question: [],
+                    wrong_question: 0,
+                    duration_time: '00:00:00'
+                },
+                fill : { gradient: ["rgba(44, 142, 255, 1)", "rgba(44, 142, 255, 0.05)"] },
+                footerHidden: false,
+                imgSrc: ''
+            },
+            created: function () {
+                this.test_id = $h.getParmas('test_id');
+                this.footerHidden = $h.getParmas('from') === 'question_user';
+                this.getResult();
+
+                $h.delCookie('exam_time');
+            },
+            methods: {
+                // 获取答题结果
+                getResult: function () {
+                    $h.loadFFF();
+                    return $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'examinationResults',
+                        q: {
+                            test_id: this.test_id,
+                            type: 2
+                        }
+                    }), function (res) {
+                        var result = res.data.data;
+                        var questions = result.test_paper_question;
+
+                        var duration = result.duration
+                        var hours = Math.floor(duration / 3600000);
+                        var minutes = Math.floor((duration - hours * 3600000) / 60000);
+                        var seconds = Math.floor((duration - hours * 3600000 - minutes * 60000) / 1000);
+                        if (hours < 10) {
+                            hours = '0' + hours;
+                        }
+                        if (minutes < 10) {
+                            minutes = '0' + minutes;
+                        }
+                        if (seconds < 10) {
+                            seconds = '0' + seconds;
+                        }
+                        result.duration_time = hours + ':' + minutes + ':' + seconds;
+
+                        for (var i = questions.length; i--;) {
+                            if (!Array.isArray(questions[i].userAnswer)) {
+                                Object.assign(questions[i], questions[i].userAnswer);
+                            }
+                        }
+
+                        vm.$refs.circle.updateProgress(parseInt(result.accuracy));
+                        vm.result = result;
+                        $h.loadClear();
+
+                        vm.getInspect();
+                    }, function () {
+                        window.location.replace($h.U({
+                            c: 'topic',
+                            a: 'question_user'
+                        }));
+                    });
+                },
+                // 是否可以发放证书
+                getInspect: function () {
+                    $h.loadFFF();
+                    axios.get($h.U({
+                        c: 'topic',
+                        a: 'inspect',
+                        q: {
+                            test_id: this.test_id
+                        }
+                    })).then(function (res) {
+                        $h.loadClear();
+                        if (200 === res.data.code) {
+                            layer.confirm('恭喜您已达到证书发放标准，是否领取?', {
+                                title: false,
+                                closeBtn: 0,
+                                btn: ['领取', '取消']
+                            }, function (index) {
+                                vm.getCertificate();
+                                layer.close(index);
+                            });
+                        }
+                    }).catch(function () {
+                        $h.loadClear();
+                    });
+                },
+                // 领取证书
+                getCertificate: function () {
+                    $h.loadFFF();
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'getTheCertificate',
+                        q: {
+                            test_id: this.test_id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        layer.msg('领取成功<br>证书正在生成…', {
+                            anim: 0
+                        }, function () {
+                            vm.getCertificateInfo(res.data.msg);
+                        });
+                    }, function (err) {
+                        $h.loadClear();
+                        console.error(err);
+                    });
+                },
+                // 获取证书信息
+                getCertificateInfo: function (id) {
+                    $h.loadFFF();
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'viewCertificate',
+                        q: {
+                            id: id,
+                            obtain: 2
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.createCertificate(res.data.data);
+                    }, function (err) {
+                        $h.loadClear();
+                        console.error(err);
+                    });
+                },
+                // 加载图片
+                loadImage: function (path) {
+                    return new Promise(function (resolve, reject) {
+                        var image = new Image();
+                        image.crossOrigin = 'anonymous';
+                        image.onload = function () {
+                            resolve(image);
+                        };
+                        image.onerror = function () {
+                            reject('error-image');
+                        };
+                        image.src = path + '?' + new Date().getTime();
+                    });
+                },
+                // 生成证书图片
+                createCertificate: function (certificate) {
+                    $h.loadFFF();
+                    Promise.all([
+                        this.loadImage(certificate.certificate.background),
+                        this.loadImage(certificate.certificate.qr_code)
+                    ]).then(function (images) {
+                        var canvas = document.createElement('canvas');
+                        var context = canvas.getContext('2d');
+
+                        canvas.width = images[0].width;
+                        canvas.height = images[0].height;
+
+                        context.drawImage(images[0], 0, 0);
+                        context.drawImage(images[1], 220, 557, 160, 160);
+
+                        context.fillStyle = 'rgba(255, 255, 255, 1)';
+                        context.fillRect(220, 724, 160, 36);
+
+                        context.font = '20px sans-serif';
+                        context.textAlign = 'center';
+                        context.fillStyle = '#666666';
+                        context.fillText('长按二维码查看', 300, 748);
+
+                        context.font = 'bold 34px sans-serif';
+                        context.fillStyle = '#29466D';
+                        context.fillText(certificate.nickname, 300, 296);
+
+                        context.font = '24px sans-serif';
+                        context.fillText('颁发时间：' + moment(certificate.add_time * 1000).format('YYYY.MM.DD'), 300, 481);
+
+                        context.font = '28px sans-serif';
+                        context.textAlign = 'start';
+                        context.fillStyle = '#333333';
+
+                        for (var i = Math.ceil(certificate.certificate.explain.length % 16); i--;) {
+                            context.fillText(certificate.certificate.explain.substr(i * 16, 16), 83, i * 40 + 370);
+                        }
+
+                        vm.imgSrc = canvas.toDataURL('image/jpeg');
+                        canvas = null;
+                        $h.loadClear();
+                    }).catch(function (error) {
+                        $h.loadClear();
+                        console.error(error);
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

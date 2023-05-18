@@ -1,0 +1,167 @@
+{extend name="public/container"}
+{block name='head_top'}
+<style>
+    body {
+        background: #F5F5F5;
+    }
+</style>
+{/block}
+{block name="title"}我的推广人{/block}
+{block name="content"}
+<div v-cloak id="app" class="my-promoter">
+    <div class="header">
+        <div class="search-info">
+            <div class="search">
+                <form @submit.prevent>
+                    <div :class="{ zIndex: zIndex }">
+                        <i class="iconfont iconsousuo"></i>
+                        <input v-model.trim="search" placeholder="输入昵称或手机号搜索" id="search" @focus="zIndex = true" @keyup.enter="keyupEnter">
+                    </div>
+                    <label :class="{ zIndex: zIndex }" for="search">
+                        <i class="iconfont iconsousuo"></i>
+                        <span>输入昵称或手机号搜索</span>
+                    </label>
+                </form>
+            </div>
+            <div class="info">
+                <ul>
+                    <li>
+                        <div>推广人数</div>
+                        <div>{$data.one_spread_count}</div>
+                    </li>
+                    <li>
+                        <div>直推订单</div>
+                        <div>{$data.order_count}</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="caption">
+            <div>推广人信息</div>
+            <div v-show="!action">订单数/金额</div>
+            <div v-show="action">操作管理</div>
+        </div>
+    </div>
+    <div class="main">
+        <ul>
+            <li v-for="(item, index) in spreadList">
+                <div>
+                    <img :src="item.avatar" alt="">
+                </div>
+                <div>
+                    <div>{{ item.nickname }}</div>
+                    <div>{{ item.phone }}</div>
+                </div>
+                <div v-show="!action">
+                    <div>直推<span>{{ item.sellout_count }}</span>单</div>
+                    <div>共{{ item.sellout_money }}元</div>
+                </div>
+                <div v-show="action" @click="removeSpread(item, index)">移除</div>
+            </li>
+        </ul>
+        <div v-if="!spreadList.length && finished" class="empty">
+            <img src="{__WAP_PATH}zsff/images/empty.png" alt="暂无数据">
+            <div>暂无数据</div>
+        </div>
+    </div>
+    <div class="footer">
+        <button type="button" @click="action = !action">{{ action ? '取消学员管理' : '学员管理' }}</button>
+        <button type="button" @click="goPosterSpread">推广学员</button>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'quick'], function (Vue, helper, store) {
+        var is_promoter = {$userInfo.is_promoter ? : 0};
+        var isPromoter = {$isPromoter};
+        new Vue({
+            el: '#app',
+            data: {
+                now_money_order: 'desc',
+                page: 1,
+                limit: 16,
+                search: '',
+                spreadList: [],
+                finished: false,
+                action: false,
+                zIndex: false
+            },
+            created: function () {
+                var vm = this;
+                vm.getSpreadList();
+                helper.EventUtil.listenTouchDirection(document, function () {
+                    vm.getSpreadList();
+                });
+            },
+            methods: {
+                // 推广信息
+                getSpreadList: function () {
+                    var vm = this;
+                    if (vm.finished) {
+                        return;
+                    }
+                    helper.loadFFF();
+                    store.baseGet(helper.U({
+                        c: 'spread',
+                        a: 'spread_list',
+                        q: {
+                            special_order: '',
+                            now_money_order: 'desc',
+                            page: vm.page++,
+                            limit: vm.limit,
+                            search: vm.search
+                        }
+                    }), function (res) {
+                        var list = res.data.data.list;
+                        helper.loadClear();
+                        vm.spreadList = vm.spreadList.concat(list);
+                        vm.finished = vm.limit > list.length;
+                    }, function () {
+                        helper.loadClear();
+                    });
+                },
+                // 点击移除
+                removeSpread: function (spread, index) {
+                    var vm = this;
+                    layer.open({
+                        content: '确认移除吗，确认后不可恢复哦~',
+                        btn: ['确定', '取消'],
+                        yes: function(i){
+                            layer.close(i);
+                            helper.loadFFF();
+                            store.baseGet(helper.U({
+                                c: 'spread',
+                                a: 'remove_spread',
+                                q: {
+                                    uid: spread.uid
+                                }
+                            }), function (res) {
+                                helper.loadClear();
+                                vm.spreadList.splice(index, 1);
+                                helper.pushMsg(res.data.msg);
+                            }, function () {
+                                helper.loadClear();
+                            });
+                        }
+                    });
+                },
+                // 点击推广学员
+                goPosterSpread: function () {
+                    window.location.href = "{:url('poster_spread')}";
+                },
+                keyupEnter: function () {
+                    if (!this.search) {
+                        return;
+                    }
+                    this.finished = false;
+                    this.page = 1;
+                    this.spreadList = [];
+                    this.getSpreadList();
+                }
+            }
+        });
+    });
+</script>
+{/block}

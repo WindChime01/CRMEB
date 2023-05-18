@@ -1,0 +1,17 @@
+<div class="recommend6">
+    <div class="recommend-head">
+        <div class="title">{{ recommend.title }}</div>
+        <div class="subtitle">{{ recommend.explain }}</div>
+        <el-link :href="$router.question_category + '?type=1'" :underline="false">更多<i class="el-icon-arrow-right el-icon--right"></i></el-link>
+    </div>
+    <div class="recommend-body">
+        <a v-for="item in recommend.list" :key="item.id" :href="$router.problem_index + '?id=' + item.id" class="item">
+            <div class="title">{{ item.title }}</div>
+            <div class="group">
+                <div class="total">共{{ item.item_number }}题</div>
+                <div class="people">{{ item.count }}人已答题</div>
+                <div class="button"><i class="iconfont icon-19-lianxi"></i>练习</div>
+            </div>
+        </a>
+    </div>
+</div>

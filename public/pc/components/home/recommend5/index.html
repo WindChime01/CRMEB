@@ -1,0 +1,70 @@
+<el-row :gutter="24" class="system-push">
+    <!-- 课程排行 -->
+    <el-col :span="8">
+        <div class="rank">
+            <div class="title">
+                <div>课程<span>排行</span><span>热门课程，好评推荐</span></div>
+                <el-link :href="$router.special_cate" :underline="false" icon="el-icon-arrow-right"></el-link>
+            </div>
+            <div class="content">
+                <a v-for="item in rankList" :key="item.id" :href="(item.is_light ? $router.single_detail : $router.special_detail) + '?id=' + item.id">
+                    <el-image :src="item.image" fit="cover">
+                        <div slot="error" class="image-slot">
+                            <i class="el-icon-picture-outline"></i>
+                        </div>
+                    </el-image>
+                    <div>
+                        <div>{{ item.title }}</div>
+                        <div>{{ item.browse_count }}人已学</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </el-col>
+    <!-- 好课推荐 -->
+    <el-col v-if="goodList.length" :span="8">
+        <div class="hot">
+            <div class="title">
+                <div>好课<span>推荐</span><span>热门课程，好评推荐</span></div>
+                <el-link :href="$router.special_cate" :underline="false" icon="el-icon-arrow-right"></el-link>
+            </div>
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+                    <div v-for="item in goodList" :key="item.id" class="swiper-slide">
+                        <a :href="(item.is_light ? $router.single_detail : $router.special_detail) + '?id=' + item.id">
+                            <img :src="item.image" :alt="item.title">
+                            <div>
+                                <div>{{ item.title }}</div>
+                                <div v-if="item.pay_type">￥<span>{{ item.money }}</span></div>
+                                <div v-else class="free">免费</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </el-col>
+    <!-- 新课首推 -->
+    <el-col :span="8">
+        <div class="new">
+            <div class="title">
+                <div>新课<span>首推</span><span>优质好课等你来选</span></div>
+                <el-link :href="$router.special_cate" :underline="false" icon="el-icon-arrow-right"></el-link>
+            </div>
+            <div class="content">
+                <a v-for="item in newList" :key="item.id" :href="(item.is_light ? $router.single_detail : $router.special_detail) + '?id=' + item.id">
+                    <el-image :src="item.image" fit="cover">
+                        <div slot="error" class="image-slot">
+                            <i class="el-icon-picture-outline"></i>
+                        </div>
+                    </el-image>
+                    <div>
+                        <div>{{ item.title }}</div>
+                        <div v-if="item.pay_type">￥<span>{{ item.money }}</span></div>
+                        <div v-else>免费</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </el-col>
+</el-row>

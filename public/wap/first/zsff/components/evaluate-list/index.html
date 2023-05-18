@@ -1,0 +1,19 @@
+<ul class="evaluate-list">
+    <li v-for="item in evaluateList" :key="item">
+        <div>
+            <div>
+                <img :src="item.avatar" :alt="item.avatar">
+            </div>
+            <div>{{ item.nickname | convertName }}<span v-if="item.is_selected">精选</span></div>
+            <div><span v-for="star in 5" :key="star" :class="{ on: star <= item.star }" class="iconfont iconxing"></span></div>
+            <div>{{ item.add_time }}</div>
+        </div>
+        <div>{{ item.comment || '此用户未填写评价内容' }}</div>
+        <div v-if="item.pics.length" class="img-group">
+            <img v-for="photo in item.pics" :key="photo" :src="photo" :alt="photo" preview="0" preview-text="描述文字">
+        </div>
+        <div v-if="item.merchant_reply_content" class="reply">
+            <div><span>官方回复</span>：{{ item.merchant_reply_content }}</div>
+        </div>
+    </li>
+</ul>

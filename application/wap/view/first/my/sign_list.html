@@ -1,0 +1,134 @@
+{extend name="public/container"}
+{block name="title"}我的报名{/block}
+{block name="head"}
+<style>
+    body {
+        background: #F5F5F5;
+    }
+    .price-wrap {
+        display: flex;
+        align-items: center;
+        font-size: .24rem;
+        line-height: .33rem;
+        color: #FF6B00;
+    }
+    .price-wrap .price {
+        flex: 1;
+        font-weight: bold;
+        font-size: .24rem;
+        line-height: .45rem;
+        color: #FF6B00;
+    }
+    .price-wrap .price span {
+        font-size: .32rem;
+    }
+    .activity-list li > div > div > div:last-child {
+        font-weight: normal;
+    }
+</style>
+{/block}
+{block name="content"}
+<div class="activity-list" v-cloak id="app">
+    <div class="tab">
+        <div v-for="(item, index) in navs" :key="index" :class="{ on: navActive === index }" @click="navActives(index)">{{ item }}</div>
+    </div>
+    <div class="content">
+        <ul v-if="activityList.length">
+            <li v-for="(item, index) in activityList" :key="index" @click="activityDetails(item.order_id)">
+                <div>
+                    <div>单号：{{item.order_id}}</div>
+                    <div v-if="item.status==0">待核销</div>
+                    <div v-else-if="item.status==1">已核销</div>
+                </div>
+                <div>
+                    <div>
+                        <img :src="item.image" alt="">
+                    </div>
+                    <div>
+                        <div>{{ item.title }}</div>
+                        <div><i class="iconfont icondidian"></i>{{ item.province }}{{ item.city }}{{ item.district }}{{ item.detail }}</div>
+                        <div class="price-wrap">
+                            <div class="price">￥<span>{{ item.pay_price }}</span></div>
+                            <div>{{ item.upUnmber }}人参加</div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <div v-if="!activityList.length && loadend" class="empty">
+            <img src="{__WAP_PATH}zsff/images/empty.png" alt="暂无数据">
+            <div>暂无数据</div>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'store', 'helper', '{__WAP_PATH}zsff/js/quick.js'], function (Vue, store, $h) {
+        var app = new Vue({
+            el: '#app',
+            data: {
+                navs: ['全部', '待核销', '已核销'],
+                navActive: 0,
+                activityList: [],
+                loading: false,
+                loadend: false,
+                page: 1,
+                limit: 20,
+                loadTitle:''
+            },
+            mounted: function () {
+                this.getActivitySignList();
+                this.$nextTick(function () {
+                    this.init();
+                });
+            },
+            methods: {
+                navActives: function (index) {
+                    var that = this;
+                    that.navActive = index;
+                    that.page = 1;
+                    that.loading = false;
+                    that.loadend = false;
+                    that.activityList = [];
+                    that.getActivitySignList();
+                },
+                init: function () {
+                    var that = this;
+                    window.addEventListener('scroll', function () {
+                        var clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight,
+                            scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight,
+                            scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                        if (clientHeight + scrollTop >= scrollHeight) {
+                            that.getActivitySignList();
+                        }
+                    });
+                },
+                activityDetails: function (order_id) {
+                    return window.location.href=$h.U({ c: 'my', a: 'sign_my_order', q: {order_id: order_id } });
+                },
+                // 获取活动列表
+                getActivitySignList: function () {
+                    var that = this;
+                    if (that.loading) return;
+                    if (that.loadend) return;
+                    that.loading = true;
+                    store.baseGet($h.U({ c: 'activity', a: 'activitySignInList', p: { page: that.page, limit: that.limit, navActive: that.navActive } }), function (res) {
+                        var list = res.data.data;
+                        that.activityList.push.apply(that.activityList, list);
+                        that.loadend = list.length < that.limit;
+                        that.loadTitle = that.loadend ? '已全部加载完' : '上拉加载更多';
+                        that.page = that.page + 1;
+                        that.loading = false;
+                        that.$set(this, 'activityList', that.activityList);
+                    }, function (res) {
+                        that.loadTitle = '上拉加载更多';
+                        that.loading = false;
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

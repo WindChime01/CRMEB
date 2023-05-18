@@ -1,0 +1,27 @@
+{extend name="public/container"}
+{block name="title"}{$title}{/block}
+{block name="head_top"}
+<style>
+    .content {
+        padding: 0.3rem;
+    }
+    .content img{
+        width: 100%;
+    }
+</style>
+{/block}
+{block name="content"}
+<div class="search-page" id="app">
+    <div class="content">
+        {$content}
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    require(['vue','{__WAP_PATH}zsff/js/quick.js'], function (Vue) {
+        new Vue({
+            el: '#app',
+        });
+    });
+</script>
+{/block}

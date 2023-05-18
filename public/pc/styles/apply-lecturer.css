@@ -1,0 +1,118 @@
+.el-form {
+    width: 1200px;
+    padding: 40px 0 70px 225px;
+    margin: 30px auto;
+    background-color: #FFFFFF;
+}
+
+.el-form .el-form-item {
+    margin-bottom: 30px;
+}
+
+.el-form-item .el-form-item__label {
+    font-size: 16px;
+    color: #666666;
+}
+
+.el-form-item .el-input,
+.el-form-item .el-textarea {
+    width: 400px;
+}
+
+.el-form .el-form-item.is-error .el-input__inner {
+    border-color: #FF6B00;
+}
+
+.avatar-uploader {
+    display: inline-block;
+}
+
+.avatar-uploader .el-upload {
+    border: 1px solid #FF6B00;
+    border-radius: 4px;
+    background-color: #F5F5F5;
+}
+
+.avatar-uploader:only-child .el-upload {
+    border-color: #D6D6D6;
+}
+
+.avatar-uploader .el-upload:hover {
+    border-color: #C0C4CC;
+}
+
+.el-upload .avatar-uploader-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 26px;
+    line-height: 80px;
+    color: #D8D8D8;
+}
+
+.avatar-uploader .avatar {
+    width: 80px;
+    height: 80px;
+    vertical-align: middle;
+}
+
+.honor-tip {
+    font-size: 16px;
+    color: #666666;
+}
+
+.honor-tip span {
+    margin-left: 5px;
+    font-size: 12px;
+    color: #999999;
+}
+
+.honor-uploader {
+    margin: 18px 152px 0 0;
+}
+
+.el-form .el-input .el-input-group__append {
+    background-color: transparent;
+}
+
+.el-form .el-input .el-input-group__append button.el-button {
+    width: 112px;
+    padding: 12px 0;
+    color: #2C8EFF;
+}
+
+.el-form .el-input .el-input-group__append .el-button.is-disabled {
+    color: #C0C4CC;
+}
+
+.el-form .el-tag {
+    margin-right: 10px;
+}
+
+.el-button--small:first-child {
+    border-color: #FF6B00;
+}
+
+.el-button--small:only-child {
+    border-color: #DCDFE6;
+}
+
+.el-upload.el-upload--picture-card {
+    width: 160px;
+    height: 160px;
+    border-style: solid;
+    border-color: #D6D6D6;
+    border-radius: 4px;
+    background-color: #F9F9F9;
+}
+
+.el-upload.el-upload--picture-card:hover, .el-upload.el-upload--picture-card:focus {
+    border-color: #C0C4CC;
+}
+
+.el-upload-list.el-upload-list--picture-card .el-upload-list__item {
+    width: 160px;
+    height: 160px;
+    border-radius: 4px;
+    margin: 0 30px 34px 0;
+    vertical-align: middle;
+}

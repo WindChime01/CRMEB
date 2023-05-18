@@ -1,0 +1,126 @@
+<div class="my-coin">
+    <div class="total">
+        <ul>
+            <li>
+                <div>我的金币(个)：</div>
+                <div>{{ user_gold_num }}</div>
+            </li>
+            <li>
+                <div>累计充值(个)：</div>
+                <div>{{ recharge }}</div>
+            </li>
+            <li>
+                <div>累计消费(个)：</div>
+                <div>{{ consumption }}</div>
+            </li>
+        </ul>
+    </div>
+    <el-tabs v-if="activeName === 'currency'" v-model="active1">
+        <el-tab-pane label="充值" name="first">
+            <div class="recharge">
+                <div class="section">
+                    <div>充值数量</div>
+                    <div>
+                        <label v-for="(item, index) in recharge_price_list" :key="item">
+                            <input v-model="filterData.picked" :value="index" type="radio" hidden>
+                            <div>
+                                <div :style="{ backgroundImage: 'url(' + gold_image + ')' }">{{ item }}</div>
+                                <div>￥{{ item / gold_rate }}</div>
+                                <i class="el-icon-check"></i>
+                            </div>
+                        </label>
+                        <div class="input-number-wrap">
+                            <div>
+                                <input v-model.number="custom" type="number" max="9999999" min="1" @focus="inputNumberFocus"><span>元</span>
+                            </div>
+                            <div :style="{ backgroundImage: 'url(' + gold_image + ')'}">{{ customIcon }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section">
+                    <div>支付方式</div>
+                    <div>
+                        <label v-if="isYue">
+                            <input v-model="filterData.payType" type="radio" value="yue" hidden>
+                            <div>
+                                <div>
+                                    余额支付
+                                    <div>余额：￥{{ nowMoney }}</div>
+                                </div>
+                                <i class="el-icon-check"></i>
+                            </div>
+                        </label>
+                        <label v-if="isWechat">
+                            <input v-model="filterData.payType" type="radio" value="weixin" hidden>
+                            <div>
+                                <div>微信支付</div>
+                                <i class="el-icon-check"></i>
+                            </div>
+                        </label>
+                        <label v-if="isAlipay">
+                            <input v-model="filterData.payType" type="radio" value="zhifubao" hidden>
+                            <div>
+                                <div>支付宝支付</div>
+                                <i class="el-icon-check"></i>
+                            </div>
+                        </label>
+                    </div>
+                    <div>
+                        <div v-show="!isReset" ref="qrcode"></div>
+                        <div v-show="!isReset" class="pay-tip">
+                            请用{{ filterData.payType === 'weixin' ? '微信' : '支付宝' }}扫码支付，支付<span>{{ (filterData.picked === -1 ? custom : (recharge_price_list[filterData.picked]) / gold_rate) }}</span>元
+                        </div>
+                        <el-button v-show="isReset" @click="create_order" :disabled="!filterData.payType">去支付</el-button>
+                    </div>
+                </div>
+            </div>
+        </el-tab-pane>
+        <el-tab-pane label="明细" name="second">
+            <el-tabs v-model="active2">
+                <el-tab-pane label="全部" name="">
+                    <ul v-if="goldList1.length">
+                        <li v-for="(item, index) in goldList1" :key="index">
+                            <div>
+                                <div>{{ item.title }}</div>
+                                <div>{{ item.add_time }}</div>
+                            </div>
+                            <div :class="{ red: item.pm }">{{ item.pm ? '+' : '-' }}￥{{ item.number }}</div>
+                        </li>
+                    </ul>
+                    <div v-else class="empty"></div>
+                    <el-pagination :page-size="limit" :total="total1" :current-page.sync="page1" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page
+                                   @current-change="user_gold_num_list1"></el-pagination>
+                </el-tab-pane>
+                <el-tab-pane label="收入明细" name="1">
+                    <ul v-if="goldList3.length">
+                        <li v-for="(item, index) in goldList3" :key="index">
+                            <div>
+                                <div>{{ item.title }}</div>
+                                <div>{{ item.add_time }}</div>
+                            </div>
+                            <div :class="{ red: item.pm }">{{ item.pm ? '+' : '-' }}￥{{ item.number }}</div>
+                        </li>
+                    </ul>
+                    <div v-else class="empty"></div>
+                    <el-pagination :page-size="limit" :total="total3" :current-page.sync="page3" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page
+                                   @current-change="user_gold_num_list3"></el-pagination>
+                </el-tab-pane>
+                <el-tab-pane label="支出明细" name="2">
+                    <ul v-if="goldList2.length">
+                        <li v-for="(item, index) in goldList2" :key="index">
+                            <div>
+                                <div>{{ item.title }}</div>
+                                <div>{{ item.add_time }}</div>
+                            </div>
+                            <div>{{ item.pm ? '+' : '-' }}￥{{ item.number }}</div>
+                        </li>
+                    </ul>
+                    <div v-else class="empty"></div>
+                    <el-pagination :page-size="limit" :total="total2" :current-page.sync="page2" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page
+                                   @current-change="user_gold_num_list2"></el-pagination>
+                </el-tab-pane>
+                <div class="detail-tip"><i class="el-icon-warning"></i>系统仅显示您两年之内的余额明细，更早的余额明细不再显示</div>
+            </el-tabs>
+        </el-tab-pane>
+    </el-tabs>
+</div>

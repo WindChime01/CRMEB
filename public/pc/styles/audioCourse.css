@@ -1,0 +1,350 @@
+.prism-player .prism-cc-btn {
+    display: none;
+}
+
+.prism-player .prism-setting-list .prism-setting-item.prism-setting-cc {
+    display: none;
+}
+
+.prism-player .prism-setting-list .prism-setting-item.prism-setting-audio {
+    display: none;
+}
+
+.prism-player .prism-setting-list .prism-setting-item.prism-setting-quality {
+    display: none;
+}
+
+.prism-player .prism-setting-list .prism-setting-item.prism-setting-quality {
+    display: none;
+}
+
+body {
+  background: #F9F9F9;
+}
+
+.layout {
+  background: #fff;
+}
+
+.container {
+  width: 1200px;
+  padding-bottom: 30px;
+  margin: auto;
+}
+
+.el-breadcrumb {
+  padding-top: 30px;
+  font-size: 14px;
+}
+
+.container_title>div {
+  margin-right: 4px;
+}
+
+.container_title>div:nth-last-child(1) {
+  color: #999999;
+}
+
+.container_content {
+  margin-top: 20px;
+}
+
+.container_content_title {
+  font-size: 22px;
+  color: #282828;
+  font-weight: bold;
+  margin-bottom: 21px;
+}
+
+.container_content_message {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  height: 488px;
+}
+
+.container_content_message_viAndAu {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+     -moz-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+}
+
+.container_content_message_viAndAu .el-image {
+  width: 100%;
+  height: 100%;
+}
+
+.container_content_message_viAndAu_viAndAuBox {
+    position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.container_content_message_viAndAu_viAndAuBox .el-image {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.container_content_message_viAndAu_viAndAuBox .try {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  z-index: 12;
+  padding: 5px 8px 5px 7px;
+  border-radius: 12px;
+  background-color: rgba(0, 0, 0, .6);
+  font-size: 11px;
+  line-height: 1;
+  color: #FFFFFF;
+}
+
+.container_content_message_viAndAu_viAndAuPlay {
+  width: 100%;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  -webkit-transition: .3s;
+  -o-transition: .3s;
+  -moz-transition: .3s;
+  transition: .3s;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+     -moz-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.viAndAuPlay_play {
+  color: #fff;
+}
+
+.container_content_message_viAndAu:hover .container_content_message_viAndAu_viAndAuPlay {
+  bottom: 0;
+}
+
+.container_content_message_list {
+  width: 330px;
+  height: 100%;
+  background: #333333;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+     -moz-box-orient: vertical;
+     -moz-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.container_content_message_list_title {
+  padding: 0 20px;
+  height: 50px;
+  background: #2D2D2D;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.container_content_message_list_title_item {
+  cursor: pointer;
+  height: 100%;
+  font-size: 14px;
+  line-height: 50px;
+  text-align: center;
+  color: #fff;
+  border-bottom: 2px solid #2C8EFF;
+}
+
+.container_content_message_list_content {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+     -moz-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  overflow: auto;
+}
+
+.container_content_message_list_content::-webkit-scrollbar {
+  /*滚动条整体样式*/
+  width: 1px;
+  /*高宽分别对应横竖滚动条的尺寸*/
+  height: 1px;
+}
+
+.container_content_message_list_content::-webkit-scrollbar-thumb {
+  /*滚动条里面小方块*/
+  border-radius: 10px;
+  background-color: skyblue;
+  background-image: -webkit-linear-gradient(45deg,
+      rgba(255, 255, 255, 0.2) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.2) 75%,
+      transparent 75%,
+      transparent);
+}
+
+.container_content_message_list_content::-webkit-scrollbar-track {
+  /*滚动条里面轨道*/
+  -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+          box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  background: #ededed;
+  border-radius: 10px;
+}
+
+.container_content_message_list_content_item {
+  height: 61px;
+  padding: 0 29px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+     -moz-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  cursor: pointer;
+}
+
+.container_content_message_list_content_item_label {
+  width: 20px;
+  height: 16px;
+  background: #454545;
+  opacity: 1;
+  border-radius: 2px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+     -moz-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+     -moz-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  font-size: 12px;
+  margin-right: 10px;
+  position: relative;
+  top: 1px;
+}
+
+.container_content_message_list_content_item_label .iconfont {
+  -webkit-transform: scale(0.7);
+     -moz-transform: scale(0.7);
+      -ms-transform: scale(0.7);
+       -o-transform: scale(0.7);
+          transform: scale(0.7);
+}
+
+.container_content_message_list_content_item_value {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+       -moz-box-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  -o-text-overflow: ellipsis;
+     text-overflow: ellipsis;
+     color: #2C8EFF;
+}
+
+.container_content_message_list_content_item_value>span {
+  color: #999999;
+  white-space: nowrap;
+}
+
+.container_content_message_list_content_item:hover {
+  background: #000;
+}
+
+.active .iconfont {
+  color: #fff;
+}
+
+.active .container_content_message_list_content_item_label {
+  background: #2C8EFF;
+}
+
+.active .container_content_message_list_content_item_value>span {
+  color: #2C8EFF;
+}
+
+.container_courseDetils {
+  padding: 30px;
+  background: #fff;
+  margin-top: 30px;
+}
+
+.container_courseDetils_title {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+     -moz-box-orient: vertical;
+     -moz-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+     -moz-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+     -moz-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+    margin-bottom: 40px;
+}
+
+.container_courseDetils_title div:nth-child(2) {
+  width: 50px;
+  height: 4px;
+  background: #2C8EFF;
+  margin-top: 19px;
+}
+
+.container_courseDetils_content {
+    line-height: normal;
+}
+
+.container_courseDetils_content img,
+.container_courseDetils_content video,
+.container_courseDetils_content audio {
+    max-width: 100%;
+}

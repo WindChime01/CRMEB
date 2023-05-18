@@ -1,0 +1,306 @@
+.layout {
+    width: 1200px;
+    margin: 0 auto;
+}
+
+.el-breadcrumb {
+    padding: 30px 0 20px;
+}
+
+.one {
+    background-color: #FFFFFF;
+}
+
+.activity {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 30px;
+}
+
+.activity .el-image {
+    width: 300px;
+    height: 168px;
+    border-radius: 8px;
+}
+
+.activity .info {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+       -moz-box-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    padding: 10px 0 0 30px;
+}
+
+.activity .title {
+    font-weight: bold;
+    font-size: 22px;
+    line-height: 29px;
+    color: #282828;
+}
+
+.activity .attr {
+    margin-top: 20px;
+    font-size: 16px;
+    line-height: 21px;
+    color: #666666;
+}
+
+.activity .attr div {
+    margin-top: 10px;
+}
+
+.activity .attr div:first-child {
+    margin-top: 0;
+}
+
+.activity .attr .iconfont {
+    margin-right: 10px;
+    font-size: 16px;
+    color: #2C8EFF;
+}
+
+.activity .money {
+    font-size: 18px;
+    color: #FF6B00;
+}
+
+.activity .money span {
+    font-size: 28px;
+}
+
+.userinfo {
+    position: relative;
+    padding: 30px 0 50px 38px;
+}
+
+.userinfo::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 30px;
+    left: 30px;
+    border-top: 1px solid #F5F6F6;
+}
+
+.userinfo .title {
+    font-size: 18px;
+    line-height: 24px;
+    color: #282828;
+}
+
+.el-form {
+    margin-top: 30px;
+}
+
+.el-form.el-form--inline .el-form-item {
+    margin-right: 40px;
+    margin-bottom: 30px;
+}
+
+.el-form .el-form-item__content {
+    padding-left: 26px;
+}
+
+.el-form .el-form-item.required .el-form-item__content::before {
+    content: "*";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #FF0000;
+}
+
+.el-form .el-input__inner {
+    width: 400px;
+    height: 42px;
+    background-color: #F9F9F9;
+}
+
+.el-form .el-input__inner::-webkit-input-placeholder {
+    color: #CCCCCC;
+}
+
+.el-form .el-input__inner:-moz-placeholder {
+    color: #CCCCCC;
+}
+
+.el-form .el-input__inner::-moz-placeholder {
+    color: #CCCCCC;
+}
+
+.el-form .el-input__inner:-ms-input-placeholder {
+    color: #CCCCCC;
+}
+
+.el-form .el-input__inner::-ms-input-placeholder {
+    color: #CCCCCC;
+}
+
+.el-form .el-input__inner::placeholder {
+    color: #CCCCCC;
+}
+
+.two {
+    margin-top: 30px;
+    background-color: #FFFFFF;
+}
+
+.two .title {
+    padding: 30px 38px;
+    font-size: 18px;
+    line-height: 24px;
+    color: #282828;
+}
+
+.two .group {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 0 30px;
+}
+
+.two label {
+    margin-left: 20px;
+}
+
+.two label:first-child {
+    margin-left: 0;
+}
+
+.two input + div {
+    position: relative;
+    width: 220px;
+    height: 86px;
+    border: 1px solid #D4D4D4;
+    border-radius: 8px;
+    line-height: 84px;
+    text-align: center;
+}
+
+.two input + div > div {
+    display: inline-block;
+    background-position: left center;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+    text-align: left;
+}
+
+.balance > div > div {
+    padding-left: 48px;
+    background-image: url("../images/yue.png");
+    -o-background-size: 36px 36px;
+       background-size: 36px 36px;
+}
+
+.balance > div > div div:first-child {
+    font-size: 16px;
+    line-height: 21px;
+    color: #4E4E4E;
+}
+
+.balance > div > div div:last-child {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 19px;
+    color: #969696;
+}
+
+.wxpay > div > div {
+    padding-left: 50px;
+    background-image: url("../images/wxpay.png");
+    -o-background-size: 38px 33px;
+       background-size: 38px 33px;
+    font-size: 16px;
+    color: #4E4E4E;
+}
+
+.alipay > div > div {
+    padding-left: 48px;
+    background-image: url("../images/alipay.png");
+    -o-background-size: 36px 36px;
+       background-size: 36px 36px;
+    font-size: 16px;
+    color: #4E4E4E;
+}
+
+input:checked + div {
+    border-color: #2C8EFF;
+}
+
+input:checked + div::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    border-width: 17px 16px ;
+    border-style: solid;
+    border-color: transparent #2C8EFF #2C8EFF transparent;
+    border-radius: 6px;
+}
+
+.el-icon-check {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    color: #FFFFFF;
+}
+
+.two .action {
+    height: 480px;
+    line-height: 480px;
+    text-align: center;
+}
+
+.qrcode {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.qrcode div:first-child {
+    width: 250px;
+    height: 250px;
+}
+
+.qrcode div:first-child img {
+    width: 100%;
+    height: 100%;
+}
+
+.qrcode > div:last-child {
+    margin-top: 30px;
+    font-size: 18px;
+    line-height: 24px;
+    color: #666666;
+}
+
+.qrcode > div > span {
+    vertical-align: middle;
+    font-weight: bold;
+    font-size: 30px;
+    color: #FF6B00;
+}
+
+.action .el-button {
+    width: 180px;
+    height: 46px;
+    padding: 0;
+    border-color: #2C8EFF;
+    border-radius: 23px;
+    background-color: #2C8EFF;
+    font-size: 16px;
+    color: #FFFFFF;
+}
+
+.action .el-button:focus, .action .el-button:hover {
+    border-color: #2C8EFF;
+    background-color: #2C8EFF;
+    color: #FFFFFF;
+}

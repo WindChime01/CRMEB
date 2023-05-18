@@ -1,0 +1,424 @@
+{extend name="public/container"}
+{block name="title"}{$titles}{/block}
+{block name="head_top"}
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+
+    .question-index-page .panel a.pay-btn {
+        display: -webkit-box;
+        display: flex;
+        padding-left: .21rem;
+        border-radius: .37rem;
+        background-color: rgba(232, 243, 255, 1);
+        overflow: hidden;
+        color: #2C8EFF;
+    }
+
+    .question-index-page .panel a.pay-btn>div:first-child {
+        -webkit-box-flex: 1;
+        flex: 1;
+        display: -webkit-box;
+        display: flex;
+        min-width: 0;
+    }
+
+    .question-index-page .panel a.pay-btn>div>div:first-child {
+        font-weight: bold;
+        font-size: .24rem;
+    }
+
+    .question-index-page .panel a.pay-btn>div>div:first-child span {
+        font-size: .4rem;
+    }
+
+    .question-index-page .panel a.pay-btn>div>div:last-child {
+        margin-left: .1rem;
+        font-size: .2rem;
+    }
+
+    .question-index-page .panel a.pay-btn>div:last-child {
+        position: relative;
+        width: 1.47rem;
+        padding-right: .2rem;
+        background-color: #2C8EFF;
+        font-size: .28rem;
+        color: #FFFFFF;
+    }
+
+    .question-index-page .panel a.pay-btn>div:last-child::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 100%;
+        bottom: 0;
+        width: .2rem;
+        border-width: .37rem .1rem .37rem .1rem;
+        border-style: solid;
+        border-color: transparent #2C8EFF #2C8EFF transparent;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="question-index-page">
+        <div class="panel">
+            <div class="name">{{ question.title }}</div>
+            <ul>
+                <li>
+                    <div><span>{{ question.txamination_time }}</span>分钟</div>
+                    <div>建议用时</div>
+                </li>
+                <li>
+                    <div><span>{{ question.total_score }}</span>分</div>
+                    <div>试卷总分</div>
+                </li>
+                <li v-if="question.surplus != -1" class="surplus">
+                    <div><span>{{ question.surplus }}</span>次</div>
+                    <div>答题次数</div>
+                </li>
+            </ul>
+            <div class="desc">
+                {{ question.answer + question.fake_sales }}人已答题
+                <div>
+                    试题难度：
+                    <span v-for="star in 5" :key="star" :class="star <= question.difficulty ? 'icondengji-shixin' : 'icondengji-kongxin'" class="iconfont"></span>
+                </div>
+            </div>
+            <div>
+                <template v-if="question.isPay">
+                    <a v-if="!status" href="javascript:" @click="handleAnswer">开始做题</a>
+                    <a v-if="status === 1" href="javascript:" @click="handleAnswer">再次做题</a>
+                    <a v-if="status === 2" href="javascript:" @click="handleAnswer">继续做题</a>
+                </template>
+                <a v-else class="pay-btn" href="javascript:" @click="handlePay">
+                    <div>
+                        <div>￥<span>{{ question.money }}</span></div>
+                        <div>会员价:￥{{ question.member_money }}</div>
+                    </div>
+                    <div>支付答题</div>
+                </a>
+            </div>
+        </div>
+        <div class="intro">
+            <div>题型介绍：</div>
+            <ol>
+                <li>单选题（选项中只有1个正确答案)；</li>
+                <li>多选题（选项中至少有2个正确答案)；</li>
+                <li>判断题（选项中只有1个正确答案)。</li>
+            </ol>
+        </div>
+        <div class="intro">
+            <div>考前必读：</div>
+            <ol>
+                <li>答题者准备好后，可点击“开始做题”按钮开始考试；</li>
+                <li>做题前可看题目前的标签，明白此题是单选题、多选题还是判断题；</li>
+                <li>作答完所有的题目点击“提交考试”按钮，即可查看自己的考试结果。</li>
+            </ol>
+        </div>
+    </div>
+    <!-- 支付弹窗 -->
+    <pay-dialog :open.sync="payDialogOpen" :money="isMember ? question.member_money : question.money" :now_money="now_money" :pay_type_num="pay_type_num" :special_id="id" :template-id="templateId"
+                :is-wechat="isWechat" :wxpay-h5="wxpayH5" :is-alipay="is_alipay" :is-balance="is_yue" :is-member="isMember" :member-money="question.member_money" :member-link="memberLink"
+                @change="onChange"></pay-dialog>
+    <quick-menu></quick-menu>
+    <base-login :login-show="loginShow" :site-name="site_name" @login-close="logComplete"></base-login>
+</div>
+{/block}
+{block name='foot'}
+<script>
+    var wechat_share=<?php echo isset($overallShareWechat) ? $overallShareWechat : '{}'; ?>;
+    var titles = "{$titles}";
+    var uid = "{$uid}", id = "{$id}";
+    window.overallShare = false;
+    require(['vue', 'helper', 'store', 'components/pay-dialog/index', 'components/base-login/index', 'quick'], function (Vue, $h, $http, PayDialog, BaseLogin) {
+        var is_alipay = {$is_alipay};
+        var is_yue = {$is_yue};
+        var wxpayH5 = {$is_h5_wechat_payment_switch? 'true': 'false'};
+        var callback_url = '{$callback_url}';
+        var memberLink = "{:url('special/member_recharge')}";
+        var site_name = '{$Auth_site_name}';
+        var vm = new Vue({
+            el: '#app',
+            components: {
+                'pay-dialog': PayDialog,
+                'base-login': BaseLogin,
+            },
+            data: {
+                id: id,
+                question: {
+                    title: '--',
+                    txamination_time: '--',
+                    total_score: '--',
+                    answer: 0,
+                    fake_sales: 0,
+                    isPay: true
+                },
+                isMember: {$is_member},
+                isWechat: !!'{$isWechat}',
+                templateId: '',
+                payDialogOpen: false,  // 是否显示支付弹窗
+                money: 0,
+                now_money: {$now_money},
+                pay_type_num: 60,
+                special_id: 0,
+                orderId: '',
+                wxpayH5: wxpayH5,
+                is_alipay: is_alipay,
+                is_yue: is_yue,
+                memberLink: memberLink,
+                status: -1,
+                e_id: 0,
+                loginShow: false,
+                site_name: site_name
+            },
+            created: function () {
+                this.getDetail();
+                this.getStatus();
+                if (this.isWechat) {
+                    this.$wx = mapleWx($jssdk());
+                    this.subscribe();
+                }
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    mapleWx($jssdk(), function () {
+                        this.onMenuShareAll({
+                            title: titles,
+                            desc: titles,
+                            imgUrl: wechat_share.wechat_share_img,
+                            link: location.origin + "{:url('special/question_index')}?spread_uid=" + uid + "&id=" + vm.id
+                        });
+                    });
+                });
+            },
+            methods: {
+                getDetail: function () {
+                    $h.loadFFF();
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'testPaperDetails',
+                        q: {
+                            id: this.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        var data = res.data.data;
+                        vm.question = data;
+                    });
+                },
+                getStatus: function () {
+                    var vm = this;
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'situationRecord',
+                        q: {id: this.id}
+                    }), function (res) {
+                        vm.status = res.data.data;
+                    });
+                },
+                getAnswer: function () {
+                    var vm = this;
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'userAnswer',
+                        q: {
+                            test_id: this.id,
+                            type: 2
+                        }
+                    }), function (res) {
+                        vm.e_id = res.data.data;
+                        window.location.assign($h.U({
+                            c: 'topic',
+                            a: 'question_detail',
+                            q: {
+                                test_id: vm.id,
+                                e_id: vm.e_id
+                            }
+                        }));
+                    });
+                },
+                getAnswerAgain: function () {
+                    var vm = this;
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'takeTheTestAgain',
+                        q: {
+                            test_id: this.id,
+                            type: 2
+                        }
+                    }), function (res) {
+                        vm.e_id = res.data.data;
+                        window.location.assign($h.U({
+                            c: 'topic',
+                            a: 'question_detail',
+                            q: {
+                                test_id: vm.id,
+                                e_id: vm.e_id
+                            }
+                        }));
+                    });
+                },
+                getAnswerContinue: function () {
+                    var vm = this;
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'continueAnswer',
+                        q: {
+                            test_id: this.id,
+                            type: 2
+                        }
+                    }), function (res) {
+                        vm.e_id = res.data.data;
+                        window.location.assign($h.U({
+                            c: 'topic',
+                            a: 'question_detail',
+                            q: {
+                                test_id: vm.id,
+                                e_id: vm.e_id
+                            }
+                        }));
+                    });
+                },
+                subscribe: function () {
+                    $h.loadFFF();
+                    $http.baseGet($h.U({
+                        c: 'special',
+                        a: 'getTemplateIds',
+                        q: {
+                            pay_type_num: this.pay_type_num,
+                            special_id: this.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.templateId = res.data.msg;
+                    });
+                },
+                onChange: function (obj) {
+                    if (typeof obj != 'object') {
+                        obj = {};
+                    }
+                    var action = obj.action || '';
+                    var value = obj.value || '';
+                    this[action] && this[action](value);
+                },
+                pay_order: function (data) {
+                    this.orderId = data.data.result.orderId || '';
+                    switch (data.data.status) {
+                        case 'WECHAT_PAY':
+                            this.wechatPay(data.data.result.jsConfig);
+                            break;
+                        case 'WECHAT_H5_PAY':
+                            vm.payDialogOpen = false;
+                            var callbackUrl = callback_url + '?type=6&id=' + this.id;
+                            var mwebUrl = data.data.result.jsConfig.mweb_url + '&redirect_url=' + encodeURIComponent(callbackUrl);
+                            window.location.href = mwebUrl;
+                            break;
+                        case 'ZHIFUBAO_PAY':
+                            location.href = $h.U({
+                                m: 'wap',
+                                c: 'alipay',
+                                a: 'index',
+                                q: {
+                                    info: data.data.result,
+                                    params: 'testpaper'
+                                }
+                            });
+                            break;
+                        case 'SUCCESS':
+                            this.successOrder(data.msg);
+                            break;
+                        default:
+                            this.extendOrder(data.msg);
+                            break;
+                    }
+                },
+                wechatPay: function (config) {
+                    this.$wx.chooseWXPay(config, function () {
+                        vm.successOrder();
+                    }, {
+                        fail: vm.extendOrder,
+                        cancel: vm.extendOrder
+                    });
+                },
+                successOrder: function (msg) {
+                    $h.showMsg({
+                        title: msg ? msg : '支付成功',
+                        icon: 'success',
+                        success: function () {
+                            vm.payDialogOpen = false;
+                            vm.question.isPay = true;
+                        }
+                    });
+                },
+                extendOrder: function (msg) {
+                    if (typeof msg === 'object') {
+                        if (msg.errMsg === 'chooseWXPay:cancel') {
+                            msg = '微信支付取消';
+                        } else {
+                            msg = '支付失败';
+                        }
+                    } else {
+                        msg = msg || '支付失败';
+                    }
+                    $h.pushMsg(msg, function () {
+                        vm.payDialogOpen = false;
+                    });
+                },
+                handlePay: function () {
+                    var vm = this;
+                    $http.baseGet("{:url('index/login_user')}", function () {
+                        if (isWechat) {
+                            $http.baseGet("{:url('index/user_login')}", function () {
+                                vm.payDialogOpen = true;
+                            }, function () {
+                                vm.loginShow = true;
+                            });
+                        } else {
+                            vm.payDialogOpen = true;
+                        }
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    });
+                },
+                logComplete: function () {
+                    this.loginShow = false;
+                    this.getDetail();
+                    this.getStatus();
+                },
+                handleAnswer: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    $http.baseGet($h.U({
+                        c: 'index',
+                        a: 'login_user'
+                    }), function () {
+                        $h.loadClear();
+                        switch (vm.status) {
+                            case 0:
+                                vm.getAnswer();
+                                break;
+                            case 1:
+                                vm.getAnswerAgain();
+                                break;
+                            case 2:
+                                vm.getAnswerContinue();
+                                break;
+                        }
+                    }, function () {
+                        vm.loginShow = true;
+                    }, true);
+                }
+            }
+        });
+    });
+</script>
+{/block}

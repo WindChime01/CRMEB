@@ -1,0 +1,24 @@
+<div class="my-material">
+    <template v-if="materialList.length">
+        <el-row :gutter="20">
+            <el-col v-for="(item, index) in materialList" :key="index" :span="6">
+                <a :href="$router.material_detail + '?id=' + item.id">
+                    <el-image :src="item.image" fit="cover"></el-image>
+                    <div>
+                        <div class="title">{{ item.title }}</div>
+                        <div class="money-vip">
+                            <template v-if="item.pay_type">
+                                <div class="money">￥<span>{{ item.money }}</span></div>
+                                <div class="vip">￥{{ item.member_money }}</div>
+                            </template>
+                            <div v-else class="money free">免费</div>
+                        </div>
+                        <div>{{ item.ficti + item.sales }}次下载</div>
+                    </div>
+                </a>
+            </el-col>
+        </el-row>
+        <el-pagination :page-size="limit" :total="total" :current-page.sync="page" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page @current-change="my_material_list"></el-pagination>
+    </template>
+    <div v-else class="empty"></div>
+</div>

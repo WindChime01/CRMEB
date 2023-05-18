@@ -1,0 +1,258 @@
+{extend name="public/container"}
+{block name="title"}资料列表{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div :style="{ paddingTop: headerHeight + 'px' }" class="material-cate">
+        <div ref="header" class="header">
+            <div>
+                <div>
+                    {if $homeLogo}
+                    <img :src="homeLogo" alt="">
+                    {else}
+                    <img src="/wap/first/zsff/images/crmeb.png">
+                    {/if}
+                </div>
+                <form action="" @submit.prevent="search">
+                    <input v-model.trim="searchValue" type="text" placeholder="输入资料名称">
+                    <input type="submit" value="搜索">
+                </form>
+            </div>
+            <div id="swiper1" class="swiper-container">
+                <div class="swiper-wrapper">
+                    <div v-for="(item, index) in cateList" :key="item.id" :class="{ on: supIndex === index }" class="swiper-slide">{{ item.title }}</div>
+                </div>
+            </div>
+            <div id="swiper2" class="swiper-container">
+                <div class="swiper-wrapper">
+                    <div v-for="(item, index) in subList" :key="item.id" :class="{ on: subIndex === index }" class="swiper-slide">{{ item.title }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="list">
+            <a v-for="item in materialList" :key="item.id" :href="'{:url('special/data_details')}?id=' + item.id">
+                <div>
+                    <img :src="item.image" alt="">
+                </div>
+                <div>
+                    <div>{{ item.title }}</div>
+                    <div :class="{ money: item.pay_type }">
+                        <template v-if="item.pay_type">
+                            ￥<span>{{ item.money }}</span>
+                        </template>
+                        <template v-else>
+                            免费
+                        </template>
+                    </div>
+                    <div>
+                        <div>{{ item.ficti + item.sales }}人已下载</div>
+                        <button type="button">去下载</button>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div v-if="loading" class="loading">
+            <i class="fa fa-spinner fa-spin"></i>
+        </div>
+        <div v-if="finished && materialList.length" class="finished">已全部加载完</div>
+        <div v-if="(!subList.length && !loading) || (finished && !materialList.length)" class="empty">
+            <img src="{__WAP_PATH}zsff/images/empty.png" alt="暂无数据">
+            <div>暂无数据</div>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'swiper', 'store', 'quick'], function (Vue, Swiper, $http) {
+        var homeLogo = '{$homeLogo}';
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                page: 1,
+                limit: 16,
+                loading: false,
+                finished: false,
+                materialList: [],
+                headerHeight: 0,
+                searchValue: '',
+                homeLogo: homeLogo,
+                cateList: [],
+                supIndex: 0,
+                subIndex: 0
+            },
+            computed: {
+                subList: function () {
+                    if (!this.cateList.length) {
+                        return [];
+                    }
+                    return this.cateList[this.supIndex].children;
+                }
+            },
+            created: function () {
+                this.getMaterialCate();
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    $h.EventUtil.listenTouchDirection(document, function () {
+                        vm.getMaterialList();
+                    });
+                    this.supSwiper = new Swiper('#swiper1', {
+                        slidesPerView: 'auto',
+                        freeMode: true,
+                        observer: true
+                    });
+                    this.subSwiper = new Swiper('#swiper2', {
+                        slidesPerView: 'auto',
+                        freeMode: true,
+                        observer: true
+                    });
+                    this.supSwiper.on('tap', this.supTab);
+                    this.subSwiper.on('tap', this.subTab);
+                });
+            },
+            updated: function () {
+                this.getHeaderHeight();
+            },
+            methods: {
+                getHeaderHeight: function () {
+                    this.headerHeight = this.$refs.header.clientHeight;
+                },
+                // 获取分类
+                getMaterialCate: function () {
+                    this.loading = true;
+                    $http.baseGet($h.U({
+                        c: 'material',
+                        a: 'get_material_cate'
+                    }), function (res) {
+                        vm.loading = false;
+                        var data = res.data.data;
+                        var children = [];
+                        data.forEach(function (item) {
+                            children = children.concat(item.children);
+                        });
+                        data.unshift({
+                            children: children,
+                            id: 0,
+                            pid: 0,
+                            title: '全部'
+                        });
+                        data.forEach(function (item) {
+                            item.children.unshift({
+                                id: 0,
+                                pid: item.id,
+                                title: '全部'
+                            });
+                        });
+                        vm.cateList = data;
+                        vm.getMaterialList();
+                    }, function () {
+                        vm.loading = false;
+                    });
+                },
+                // 获取列表
+                getMaterialList: function () {
+                    if (this.loading || this.finished) {
+                        return;
+                    }
+                    if (this.searchValue) {
+                        this.pid = 0;
+                        this.cate_id = 0;
+                    } else {
+                        if (!this.subList.length) {
+                            return;
+                        }
+                        this.pid = this.cateList[this.supIndex].id;
+                        this.cate_id = this.subList[this.subIndex].id;
+                    }
+                    this.loading = true;
+                    $http.basePost($h.U({
+                        c: 'material',
+                        a: 'get_material_list'
+                    }), {
+                        pid: this.pid,
+                        cate_id: this.cate_id,
+                        search: this.searchValue,
+                        page: this.page++,
+                        limit: this.limit
+                    }, function (res) {
+                        var materialList = res.data.data;
+                        vm.loading = false;
+                        vm.materialList = vm.materialList.concat(materialList);
+                        vm.finished = vm.limit > materialList.length;
+                    }, function () {
+                        vm.loading = false;
+                    });
+                },
+                // 搜索
+                search: function () {
+                    if (!this.searchValue || this.loading) {
+                        return;
+                    }
+                    this.materialList = [];
+                    this.finished = false;
+                    this.page = 1;
+                    this.getMaterialList();
+                },
+                // 切换
+                supTab: function () {
+                    if (this.supSwiper.clickedIndex === undefined || this.supSwiper.clickedIndex === this.supIndex || this.loading) {
+                        return;
+                    }
+                    var swiperWidth = this.supSwiper.width;
+                    var wrapperWidth = this.supSwiper.$wrapperEl[0].scrollWidth;
+                    var clickedWidth = this.supSwiper.clickedSlide.offsetWidth;
+                    var clickedLeft = this.supSwiper.clickedSlide.offsetLeft;
+
+                    this.supIndex = this.supSwiper.clickedIndex;
+
+                    this.supSwiper.setTransition(300);
+
+                    if (clickedLeft < (swiperWidth - clickedWidth) / 2) {
+                        this.supSwiper.setTranslate(0);
+                    } else if (clickedLeft > wrapperWidth - (clickedWidth + swiperWidth) / 2) {
+                        this.supSwiper.setTranslate(swiperWidth - wrapperWidth);
+                    } else {
+                        this.supSwiper.setTranslate((swiperWidth - clickedWidth) / 2 - clickedLeft);
+                    }
+                    this.supIndex = this.supSwiper.clickedIndex;
+                    this.subIndex = 0;
+                    this.materialList = [];
+                    this.finished = false;
+                    this.page = 1;
+                    this.searchValue = '';
+                    this.getMaterialList();
+                },
+                subTab: function () {
+                    if (this.subSwiper.clickedIndex === undefined || this.subSwiper.clickedIndex === this.subIndex || this.loading) {
+                        return;
+                    }
+                    var swiperWidth = this.subSwiper.width;
+                    var wrapperWidth = this.subSwiper.$wrapperEl[0].scrollWidth;
+                    var clickedWidth = this.subSwiper.clickedSlide.offsetWidth;
+                    var clickedLeft = this.subSwiper.clickedSlide.offsetLeft;
+
+                    this.subIndex = this.subSwiper.clickedIndex;
+
+                    this.subSwiper.setTransition(300);
+
+                    if (clickedLeft < (swiperWidth - clickedWidth) / 2) {
+                        this.subSwiper.setTranslate(0);
+                    } else if (clickedLeft > wrapperWidth - (clickedWidth + swiperWidth) / 2) {
+                        this.subSwiper.setTranslate(swiperWidth - wrapperWidth);
+                    } else {
+                        this.subSwiper.setTranslate((swiperWidth - clickedWidth) / 2 - clickedLeft);
+                    }
+
+                    this.subIndex = this.subSwiper.clickedIndex;
+                    this.materialList = [];
+                    this.finished = false;
+                    this.page = 1;
+                    this.searchValue = '';
+                    this.getMaterialList();
+                }
+            }
+        });
+    });
+</script>
+{/block}

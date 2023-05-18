@@ -1,0 +1,145 @@
+{extend name="public/container"}
+{block name="title"}卡密激活{/block}
+{block name="head"}
+<style>
+    body {
+        background-color: #F5F5F5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="exchange-page">
+        <div class="title-section">
+            <div class="text">激活会员卡</div>
+        </div>
+        <form class="form-section" @submit.prevent="onSubmit">
+            <label class="label">
+                <span class="iconfont iconqiahao"></span>
+                <input v-model="member_code" class="input" maxlength="18" placeholder="请输入卡号">
+            </label>
+            <label class="label password">
+                <span class="iconfont iconkahao"></span>
+                <input v-model="member_pwd" class="input" type="password" placeholder="请输入密码">
+            </label>
+            <button class="button" type="submit">确认激活</button>
+        </form>
+        <div v-if="interests.length" class="power-section">
+            <div class="title">
+                <div class="text">会员尊享权益</div>
+            </div>
+            <div class="list">
+                <div v-for="item in interests" :key="item.id" class="item">
+                    <div class="img-wrap">
+                        <img class="img" :src="item.pic">
+                    </div>
+                    <div class="name">{{ item.name }}</div>
+                    <div class="info">{{ item.explain }}</div>
+                </div>
+            </div>
+        </div>
+        <div v-if="description.length" class="explain-section">
+            <div class="title">会员说明：</div>
+            <ol>
+                <li v-for="item in description" :key="item.id">{{ item.text }}</li>
+            </ol>
+        </div>
+    </div>
+    <base-login :login-show="loginShow" :site-name="site_name" @login-close="logComplete"></base-login>
+</div>
+<script>
+    var site_name = '{$Auth_site_name}', isWechat = {$isWechat? 'true': 'false'};
+    require(['vue', 'helper', 'store', 'components/base-login/index'], function (Vue, $h, api, BaseLogin) {
+        var app = new Vue({
+            el: '#app',
+            components: {
+                'base-login': BaseLogin
+            },
+            data: {
+                description: [],
+                interests: [],
+                member_code: '',
+                member_pwd: '',
+                loginShow: false,
+                url: isWechat ? $h.U({c: 'index', a: 'login'}) : $h.U({c: 'login', a: 'phone_check'}),
+                site_name: site_name
+            },
+            created: function () {
+                this.init();
+            },
+            methods: {
+                init: function () {
+                    var that = this;
+                    $h.loadFFF();
+                    api.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'merberDatas'
+                    }), function (res) {
+                        var data = res.data.data;
+                        $h.loadClear();
+                        that.description = data.description;
+                        that.interests = data.interests;
+                    }, function (err) {
+                        $h.loadClear();
+                        $h.pushMsg(err);
+                    });
+                },
+                onSubmit: function () {
+                    var that = this;
+                    $h.loadFFF();
+                    api.baseGet("{:url('index/login_user')}", function (res) {
+                        $h.loadClear();
+                        if (!that.member_code) {
+                            return $h.pushMsg('请输入卡号');
+                        }
+                        if (that.member_code.length !== 18) {
+                            return $h.pushMsg('请输入正确的卡号');
+                        }
+                        if (!that.member_pwd) {
+                            return $h.pushMsg('请输入密码');
+                        }
+                        if (that.member_pwd.length !== 5) {
+                            return $h.pushMsg('请输入正确的密码');
+                        }
+                        api.basePost("{:url('auth_api/confirm_activation')}", {
+                            member_code: that.member_code,
+                            member_pwd: that.member_pwd
+                        }, function (res) {
+                            $h.showMsg({
+                                title: res.data.msg,
+                                icon: 'success',
+                                success: function () {
+                                    window.location.assign("{:url('special/member_recharge')}");
+                                }
+                            });
+                        });
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            that.loginShow = true;
+                        }
+                    }, true);
+                },
+                changeVal: function (opt) {
+                    if (typeof opt != 'object') opt = {};
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                loginClose: function (value) {
+                    this.loginShow = false;
+                    value && this.logComplete();
+                },
+                logComplete: function () {
+                    this.loginShow = false;
+                },
+                enter: function () {
+                    this.appear = false;
+                }
+            }
+        });
+    });
+</script>
+{/block}

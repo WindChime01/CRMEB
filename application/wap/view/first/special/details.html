@@ -1,0 +1,2891 @@
+{extend name="public/container"}
+{block name="title"}{$title}{/block}
+{block name="head_top"}
+<link rel="stylesheet" type="text/css" href="{__WAP_PATH}zsff/css/video-js.min.css" />
+<script src="{__WAP_PATH}zsff/js/video.min.js"></script>
+<script src="{__WAP_PATH}zsff/js/zh-CN.js"></script>
+<link rel="stylesheet" href="{__PLUG_PATH}vue-photo-preview/skin.css">
+<script src="{__PLUG_PATH}vue-photo-preview/vue-photo-preview.js"></script>
+<style>
+    body {
+        padding-bottom: 1rem;
+        padding-bottom: calc(1rem + constant(safe-area-inset-bottom));
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+
+    .video-js .vjs-big-play-button {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .navCon {
+        position: relative;
+        padding: 0 0.3rem;
+    }
+
+    .swiper-details .swiper-nav .free {
+        position: absolute;
+        font-size: 0.2rem;
+        color: #fff;
+        left: 67%;
+        top: 0;
+        margin-top: -0.5rem;
+        animation: stone linear 1s infinite alternate;
+        -webkit-animation: free linear 1s infinite alternate;
+    }
+
+    .swiper-details .swiper-nav .free .freeCon {
+        width: 1.1rem;
+        height: 0.4rem;
+        border-radius: 0.05rem;
+        background-color: #ea2f2f;
+        position: relative;
+        left: 0.5rem
+    }
+
+    .swiper-details .swiper-nav .free .freeCon:after {
+        content: "";
+        width: 0;
+        height: 0;
+        border-left: 0.1rem solid transparent;
+        border-right: 0.1rem solid transparent;
+        border-top: 0.13rem solid #ea2f2f;
+        position: absolute;
+        bottom: -0.1rem;
+        left: 50%;
+        margin-left: -0.1rem;
+    }
+
+    @keyframes free {
+        from {
+            transform: scale(1);
+        }
+
+        to {
+            transform: scale(0.9);
+        }
+    }
+
+    @-webkit-keyframes stone {
+        from {
+            transform: scale(1);
+        }
+
+        to {
+            transform: scale(0.9);
+        }
+    }
+
+    /*这里开始*/
+    .video_footer_img {
+        width: 0.4rem;
+        height: 0.4rem;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .video_footer_img img {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .video_footer_img2 {
+        width: 0.4rem;
+        height: 0.4rem;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .video_footer_img2 img {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .video_footer_tit {
+        font-weight: 400;
+        font-size: 0.18rem;
+        line-height: .36rem;
+        color: #666;
+    }
+
+    .video_footer_left {
+        width: .9rem;
+        height: 1rem;
+        line-height: 1rem;
+        text-align: center;
+    }
+
+    .video_footer_left .cont {
+        display: inline-block;
+        vertical-align: middle;
+        font-weight: 400;
+        font-size: .18rem;
+        line-height: .36rem;
+        color: #666;
+    }
+
+    .video_footer_btn {
+        -webkit-flex: 1;
+        flex: 1;
+        height: 0.76rem;
+        border-radius: 37px;
+    }
+
+    .video_footer_btn_left {
+        width: 50%;
+        height: 100%;
+        border-radius: 37px 0px 0px 37px;
+        background: #FF6B00;
+    }
+
+    .video_footer_btn_right {
+        width: 50%;
+        height: 100%;
+        border-radius: 0px 37px 37px 0px;
+        background: linear-gradient(90deg, rgba(64, 157, 255, 1) 0%, rgba(30, 133, 251, 1) 100%);
+    }
+
+    .video_footer_btn_left_pic {
+        font-size: 0.28rem;
+        line-height: .22rem;
+        color: #fff;
+        text-align: center;
+    }
+
+    .video_footer_btn_left_num {
+        font-size: 0.2rem;
+        line-height: .2rem;
+        color: #fff;
+        text-align: center;
+    }
+
+    .video_footer_btn_left_pic+.video_footer_btn_left_num {
+        margin-top: .09rem;
+    }
+
+    footer .video_footer_btn .on {
+        width: 100% !important;
+        border-radius: 37px !important;
+    }
+
+    video {
+        width: 100%
+    }
+
+    .labelItem {
+        font-size: 0.24rem;
+        color: #999;
+        font-weight: 400;
+        background-color: #F2F8FF;
+        padding: 0.04rem 0.1rem;
+        border-radius: 0.06rem;
+        color: #2C8EFF;
+    }
+
+    .catalogue {
+        background-color: #fff;
+    }
+
+    .video-listn {
+        background-color: #fff;
+    }
+
+    .teacher {
+        margin-top: .16rem;
+        background-color: #fff;
+    }
+
+    .teacher .teacher-hd {
+        padding: .2rem .3rem 0;
+        font-weight: bold;
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #333;
+    }
+
+    .teacher .teacher-bd {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        padding: .28rem .3rem .3rem;
+    }
+
+    .teacher .teacher-bd .img {
+        width: 1.1rem;
+        height: 1.1rem;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .teacher .teacher-bd .text {
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+        flex: 1;
+        min-width: 0;
+        margin-right: .08rem;
+        margin-left: .2rem;
+    }
+
+    .teacher .teacher-bd .name {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-weight: bold;
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #282828;
+    }
+
+    .teacher .teacher-bd .label {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        margin-top: .06rem;
+    }
+
+    .teacher .teacher-bd .label .cell {
+        height: .34rem;
+        padding: 0 .12rem;
+        border-radius: .04rem;
+        background-color: #fff7e6;
+        font-size: .22rem;
+        line-height: .34rem;
+        color: #feb720;
+    }
+
+    .teacher .teacher-bd .label .cell~.cell {
+        margin-left: .1rem;
+    }
+
+    .teacher .teacher-bd .attr {
+        margin-top: .09rem;
+        font-size: .22rem;
+        line-height: .37rem;
+        color: #385270;
+    }
+
+    .teacher .teacher-bd .iconfont {
+        font-size: .2rem;
+        color: #999;
+    }
+
+    .teacher-section {
+        border-top: .14rem solid #f5f5f5;
+    }
+
+    .teacher-table {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        height: 1.5rem;
+    }
+
+    .teacher-table .item {
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+        flex: 1;
+        position: relative;
+        min-width: 0;
+        font-size: 0.24rem;
+        text-align: center;
+        color: #999999;
+    }
+
+    .teacher-table .item:last-child::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 0.02rem;
+        height: 0.4rem;
+        background-color: #e8e8e8;
+        -webkit-transform: translateY(-50%);
+        transform: translateY(-50%);
+    }
+
+    .teacher-table .item .learn {
+        font-size: 0;
+    }
+
+    .teacher-table .item .learn span {
+        font-size: .24rem;
+    }
+
+    .teacher-table .item .learn span:nth-child(2) {
+        font-weight: bold;
+        font-size: .28rem;
+    }
+
+    .teacher-table>div:last-child>div:first-child {
+        margin-bottom: 0.06rem;
+    }
+
+    .teacher-table .num {
+        font-size: 0.38rem;
+        color: #333333;
+    }
+
+    .teacher-table img {
+        width: 0.5rem;
+        height: 0.5rem;
+        border: 2px solid #FFFFFF;
+        border-radius: 50%;
+        margin-left: -0.15rem;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        background-color: #2C8EFF;
+        vertical-align: middle;
+        object-fit: cover;
+        pointer-events: none;
+        -webkit-touch-callout: none;
+    }
+
+    .teacher-detail-wrap {
+        padding: 0 0.3rem 0.3rem;
+    }
+
+    .teacher-detail-wrap a {
+        display: block;
+        padding: 0.3rem;
+        border-radius: 0.04rem;
+        background-color: #f9fafc;
+    }
+
+    .teacher-detail-wrap .iconfont {
+        color: #666666;
+    }
+
+    .teacher-detail-wrap .detail-hd {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+    }
+
+    .teacher-detail-wrap .detail-hd .head {
+        width: 0.9rem;
+        height: 0.9rem;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    .teacher-detail-wrap .detail-hd img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .teacher-detail-wrap .detail-hd .text {
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+        flex: 1;
+        min-width: 0;
+        margin: 0 0.18rem;
+        font-weight: bold;
+        font-size: 0.3rem;
+        color: #282828;
+    }
+
+    .teacher-detail-wrap .detail-hd span {
+        display: inline-block;
+        height: 0.34rem;
+        padding: 0 0.12rem;
+        border-radius: 0.1rem;
+        background-color: #FFF0E5;
+        font-weight: normal;
+        font-size: 0.2rem;
+        line-height: 0.34rem;
+        color: #FF6B00;
+    }
+
+    .teacher-detail-wrap .detail-hd span~span {
+        margin-left: .1rem;
+    }
+
+    .teacher-detail-wrap .detail-bd {
+        margin-top: 0.2rem;
+        font-size: 0.26rem;
+        line-height: 0.38rem;
+        color: #666666;
+    }
+
+    .scroll-section {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        margin-top: 0.14rem;
+        background-color: #FFFCF6;
+        font-size: 0.24rem;
+    }
+
+    .scroll-section .label {
+        width: 2rem;
+        padding-left: 0.75rem;
+        background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAsCAYAAAAehFoBAAADgklEQVRYR+2ZQXbaMBCG/zFdkFXJCaqcoOkJCpu+mk3TE4ScoOQEISdIcoLQE6Td4Pe6SXKCkhNEvQFZNRuYPsmykRQbY6CVF2UHNvKn8a9/RiPCX/hwIrrMuADhEMAdtXBKH+R0F4+iXQxij8GJOGNg5IzLmNEeDqgnZ9s+b2fAfCs6/IwbAN0iKGJ8pr781ghgI4EbEDoZEANfoSJL+KJ+Y+C8FUs38hvQbx3hAgk8ETCkWI7niRgRcNYI4BIJPFALg2yBNQa4TAJRG0N7YdUF5kQMGLgGY0p76BUt0tqSWCUBX5J1gRcTcQfCez1OCbQG5kQcMzCoXAOMjvHW7FZHAtsC80QcMWmnSZkZV62+HNrjEk/EkAkXlbDeDcoFfAlsC6z+P5+Iy8xZ1HffDmmRiEcAogZw7gJV/6kriWw8RxqAjGJ5kF1TwJx/AXpVEAAkxVKucR82BTYOpJ7x2rdEBziKZe1FuAp8U2AtDcvDVQKK+nJfS8SO8L8C5kQIVRwxYdaK5UnRpHWUf2MKwhsNCpyoZBQE2Il8gRPkLpH5cvrD9yiWR0GAffsqK4z0mwCUKegPtbEfBNhodEzAsWFxnMCWyCIRqo5+m1tcCA1b9iV9jVZ5ebAIa7uyNKoSUSuWL7KtrluAWz0Rxn1o4KVGLeuyo+wBT4MCK7DFROSyKLNVJ7mF1LABzis0auFd0Wb1P3BZel4nNdvFV+Ml4SWGpyiW+SbWynZLlwAegi467w0029ZMcfOYtQbK0rNd0KtWQbAIzxNxTdm2jHEf9WVhA2YxET+zbZmeVAhbszOcKR17FMs7f/E2pviZJyIvfFZ1hJwiPmh5+UMc8hwjZkh/V5y7Q1rALzUesoBfta3KrnlbpF9RX+qNchANVwG/cBAT3cYC284ARh7dFNiqlqpmbmrSGUUY0Ud5VXX/Oqm5oGBf2l26+XQcZOPOjz4KSF9VaY+iLrBvd0UOkvXWBsxr9NbShrXeX+XRJlxSLM+Lol0X2GsGFiaT2o0T04tTnXTdlTHgU3qFE7+WrQts9fkeqI3uTtqtZi+mGiHjvDVquAkY2dGuC6zHvhWdVYc3tSPs7LfSzufLaBNOVardBLhqIW8FnEWEnzEG8MmZDONSLfLGHcrkMk6b0Qp8qW1rBo069nLyf0G0ATxRG6JRB4uOHNLmh5KEssCVxwpVmvWv/wGVY//ZbDJkGgAAAABJRU5ErkJggg==") 0.3rem center/0.26rem 0.22rem no-repeat;
+        color: #FEB720;
+    }
+
+    .scroll-section .swiper-container {
+        position: relative;
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+        flex: 1;
+        min-width: 0;
+        height: 0.62rem;
+        padding-left: 0.16rem;
+        line-height: 0.62rem;
+    }
+
+    .scroll-section .swiper-container::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 1px;
+        height: 0.24rem;
+        border-left: 1px solid #999999;
+        -webkit-transform: translateY(-50%);
+        transform: translateY(-50%);
+    }
+
+    .process-section {
+        margin-top: .14rem;
+        background-color: #FFFFFF;
+    }
+
+    .process-section .title {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        height: .86rem;
+        padding-right: .3rem;
+        padding-left: .3rem;
+        font-size: .28rem;
+        color: #282828;
+    }
+
+    .process-section .list {
+        display: -webkit-box;
+        display: flex;
+        -webkit-box-pack: justify;
+        justify-content: space-between;
+        -webkit-box-align: center;
+        align-items: center;
+        height: 1.1rem;
+        padding-right: .3rem;
+        padding-left: .3rem;
+        border-top: 1px solid #EEEEEE;
+    }
+
+    .process-section .list .item {
+        padding-right: 0 !important;
+    }
+
+    .process-section .list .item~.item {
+        padding-left: .67rem;
+        border: none !important;
+        background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAAoCAYAAACrUDmFAAAGKklEQVRoQ91a3W8U1xX/nXvvrGcnXhwEdgIlKSp22sSO8ceWGKsJS1pBhKhUVeC3PvSp/TP2L8hLnvoQ5SlShJGiSCiv3lAFTDS7yDYmFnaiQojs2vhz2a/ZmXuqY60j4jhpsBdp4nncPXPv/Z3f+b5DiNFz586dRLVaPeC6rtFa16Moqi0tLVXPnj0b7vaYtNsXm/ne2NiYOXLkSLJYLLYrpY4rpVJhGAaO4ywHQfDA87yVq1evhtls1j7tvrEAODMzkyqVSseIqI+ZzzHzrwGUieiutfZTIrrjuu5GT09P8IsEODEx0QGgJ4qiM8z8VwCdAKoA7jLzNQDjxph7xpilp2UyFgz6vv8yEb0J4AyAtwEcBxAx8woRfc3M4wAE6NTTMhkLgIVC4ai19pRS6g8A/sjMXQBaAIjPlffCZCwATkxMPBcEwQtKqd8DuAwgDeAwgCSAcC9MxgIgM6tcLpfwPO+3xpjzzDxMRN0AjuyVyVgAlMgoIG/evPm81volx3HS1to/S1TdK5OxAbgFstlMxgrgs2AydgCbzWQsATaTydgCbBaTsQbYDCYFIGWzWbp48aIuFoucyWQiIuKdilpmpnw+b+S/a9euRT9W3YtcLpfTIpfJZKQa4Z9YU42OjtLly5cxOjqKkZGRTfkn999tniyXyyt05coV3draajo6OtwwDLlSqZR/rP/yfd8B4MnmrutWuru76zsdXNqf9vZ21xhD8/PzdalGdlKcHHxubs5ZX1/XjuNQqVSyDx8+DEZGRqLtCt5NngyC4J4wMmitdYlIkmzAzN8CWFpYWNi4cOFCTTYaGxtzU6nUQSJql+rCWivsPLLWLq2trS2eP3++1DAnMzc351UqlcNRFL0cRdFzjbZnWSn1oK+vb10Uks1m1aVLlwwzH6zVasdlb7EkIloHcD+VSi13dnaK8r7X//1cJoloWowsiqJZAfgegFZmPkpEa9KaWGtva62nBwYGluTgvu8LqLRSqr9RXSSY+WsiKgRBkDt9+vR/RG52dvZAuVwWYP3W2j8R0a8AbACYAPDxxsbGXWFyenraIaLWIAh6rbV/AfAqESlmvsfMn4RhOHHo0KG1rq6uTQVvN9f/V/EAWAYwB2CVfN8vyGYAXiSiR0IYgByA6wMDA/dl8Xw+30lEF5g5A+CUWCgzywIi92E6nZ4SOenroih6Xdoea630dSeI6DGAfzPze8Vi8WYmkwny+bwrJZjW+k1r7T8axbUweBvA+0R03XGc+Z6eHnn3Bw8z68nJSXGpAQB/AyBdiCjzQMOSqg2yasLgQwCJxp8C8AsiyjHzp4ODgwIChULhNQCXGgC7mVmq/HkAnxHRvwYHB/MiNz4+fkxrPaSUkr5OiubfAKgz8+cA3k0mk9dlxpJMJsWPjxljziil/m6tHSDaDOiTRPShrGuM+aq3t3e1GQCvM7P0Xm1KqRVmvk1E0mB+x6Dv+8LEOwCGAPxOGASwII2oMeajvr4+sXlMTU29EASBjB3eICIB+RIzB0opH8AHWmu/t7e3msvlki0tLS8mEolTRCSK6xb6AMwQ0Sda61ue5z3o6uoS896biRYKhX8y8wFmPqaUEpPIh2E4Y639ZmhoaHODycnJg2EYnmBmAdcLQKLpV0T0pdZ66uTJk4sid+PGjaQx5rAx5hVr7TAAGSKJX89GUfR5Op0Wk7eNFOJ6nndCa/2WdPBEpInogSi2ra1tdnV1tZxOpyUCf/fsKsj4vv+6Ukp88GhD2zOlUmmhXq9XttKFjPPET2u1mvhpVyOK3q/VagsAVoaHhytyiq3oGEVRR71ef03ekciotf7vTozcunXrkOM4rzDzYfErIlomopn+/v5H29PPrtOE7/ttURSZlpYWcVrrum5R/OTJvLV18MePH7uJRKJVKUXFYrGsta5uz1sie+7cuRal1OZ8k4jqnudVOzs7ZUr2vfmmKK5UKqW01glZ01obLC4uFrfS0xZ1P5e57aONzUS/kxPH6bfdMPfkcCrWAHfL3JPjxdgC3CtzW1YYS4DNYC62AJvFXCwBNpO52AFsNnOxAvgsmIsVwH0/ut/3ly/7/vps31+A7vsr7H3/EcJWSH8Wn5H8D2fpbyp9zLJtAAAAAElFTkSuQmCC") left center/.28rem .2rem no-repeat;
+    }
+
+    .process-section .list .item span {
+        display: inline-block;
+        box-sizing: border-box;
+        vertical-align: middle;
+        font-size: .26rem;
+        line-height: .37rem;
+        color: #282828;
+    }
+
+    .process-section .list .item span:first-child {
+        width: .28rem;
+        height: .28rem;
+        border: 1px solid #282828;
+        border-radius: 50%;
+        margin-right: .06rem;
+        font-size: .22rem;
+        line-height: .24rem;
+        text-align: center;
+        color: #282828;
+    }
+
+    .thematic-details .poster {
+        position: fixed;
+        top: 15%;
+        left: 15%;
+        width: 70%;
+        z-index: 60
+    }
+
+    .thematic-details .poster img {
+        width: 100%
+    }
+
+    .thematic-details .poster p {
+        color: #eee;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .certificate-image {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        z-index: 56;
+        width: 6rem;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+
+    .evaluate-section .head {
+        display: -webkit-box;
+        display: flex;
+        -webkit-box-pack: justify;
+        justify-content: space-between;
+        -webkit-box-align: center;
+        align-items: center;
+        padding: .33rem .3rem .13rem;
+    }
+
+    .evaluate-section .score {
+        display: -webkit-box;
+        display: flex;
+        -webkit-box-align: center;
+        align-items: center;
+    }
+
+    .evaluate-section .score div:first-child {
+        font-size: .28rem;
+        color: #ff6b00;
+    }
+
+    .evaluate-section .score span {
+        margin-right: .05rem;
+        font-weight: bold;
+        font-size: .44rem;
+    }
+
+    .evaluate-section .score div:last-child {
+        width: 1.7rem;
+        height: .42rem;
+        border-radius: .21rem;
+        margin-left: .15rem;
+        background-color: #f5f5f5;
+        font-size: .24rem;
+        line-height: .42rem;
+        text-align: center;
+        color: #999;
+    }
+
+    .evaluate-section .head button {
+        width: 1.6rem;
+        height: .56rem;
+        border-radius: .28rem;
+        background-image: linear-gradient(90deg, #409dff 0%, #1e85fb 100%);
+        font-size: .26rem;
+        color: #fff;
+    }
+
+    .dialog {
+        position: fixed;
+        top: 50%;
+        right: .85rem;
+        left: .85rem;
+        z-index: 56;
+        display: none;
+        max-height: 90%;
+        padding: .5rem 0;
+        border-radius: .12rem;
+        background-color: #FFFFFF;
+        transform: translateY(-50%);
+        text-align: center;
+        font-size: .3rem;
+        color: #333333;
+        opacity: 0;
+    }
+
+    .dialog.show {
+        display: block;
+        opacity: 1;
+    }
+
+    .dialog img {
+        width: 3.54rem;
+        height: 3.54rem;
+        margin-bottom: .2rem;
+        vertical-align: middle;
+        object-fit: contain;
+    }
+
+    a[href^="tel"] {
+        color: #2C8EFF;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="thematic-details">
+    {if !$subscribe && $is_official_account_switch}
+    <div class="follow acea-row row-between-wrapper" v-if="topFocus">
+        <div class="picTxt">点击“立即关注”即可关注公众号</div>
+        <div>
+            <div class="followBnt" @click="is_code=true">立即关注</div>
+            <span class="iconfont iconguanbi2" @click="topFocus = false"></span>
+        </div>
+    </div>
+    {/if}
+    <div class="swiper-details">
+        <div class="banner slider-banner">
+            <ul class="swiper-wrapper">
+                <li class="swiper-slide" v-for="swiper in swiperlist">
+                    <img :src="swiper" />
+                </li>
+            </ul>
+            <div class="swiper-pagination"></div>
+        </div>
+        <div class="successTip" v-if="barrageStatus">
+            <div class="picTxt acea-row row-middle" v-for="(item,index) in Barragelist" v-show="num==index">
+                <div class="pictrue"><img :src="item.avatar"></div>
+                <div class="acea-row row-middle" style="flex: 1;overflow: hidden;white-space: nowrap;">
+                    <div class="name line1">{{item.nickname}}</div>
+                    <div v-text="item.status_name" style="flex: 1;overflow: hidden;text-overflow: ellipsis;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="swiper">
+            <div v-if="special_validity == -1" class="validity">
+                <template v-if="special.validity">课程有效期为{{ special.validity }}天，过期后需重新购买哦！</template>
+                <template v-else>课程永久有效哦！</template>
+            </div>
+            <div v-else-if="special_validity == 0" class="validity">课程永久有效哦！</div>
+            <div v-else-if="special_validity > 0" class="validity">
+                课程有效期剩余{{ special_validity | validityFormat }}，过期后需重新购买哦！</div>
+            <div class="name" v-text="special.title"
+                 style="padding:0.25rem 0.3rem 0;font-size:0.32rem;line-height:0.5rem;color:#333333;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;">
+                加载中
+            </div>
+            <div class="swiper-int">
+                <div class="swiper-int-top">
+                    <div class="swiper-int-top-left">
+                        <div v-if="special.label.length" class="attr">
+                            <div v-for="item in special.label">{{item}}</div>
+                        </div>
+                    </div>
+                    <div class="acea-row row-middle" style="margin-top: .14rem;">
+                        <div class="pin-money" v-if="is_pay==false">
+                            <span class="price">￥<b>{{ special.is_pink ? special.pink_money : special.money }}</b></span>
+                            <span class="vip-price">￥{{ special.member_money }}</span>
+                            <img class="vip-price-icon" src="{__WAP_PATH}zsff/images/vip.png">
+                        </div>
+                        <div class="pin-money" v-else v-show="is_pay==false">拼课价<span class="money">￥{{special.pink_money}}</span></div>
+                    </div>
+                </div>
+                <div class="collect" @click="createPoster">
+                    <div class="iconfont iconfenxiang"></div>
+                    <div>分享</div>
+                </div>
+                <div class="collect" @click="collect">
+                    <div :class="['iconfont', special.collect ? 'iconshoucang2' : 'iconshoucang11']"></div>
+                    <div>{{special.collect ? '已收藏': '收藏'}}</div>
+                </div>
+            </div>
+        </div>
+        <template v-if="special.service_code">
+            <div class="pinTip2 acea-row row-between-wrapper" v-if="is_pay || isMember && special.member_pay_type==0">
+                <div class="reminder line1">和小伙伴一起学习，有老师答疑哦~</div>
+                <div class="chatBnt acea-row row-center-wrapper" @click=" open = false ">加入群聊</div>
+            </div>
+        </template>
+        <div class="teacher-section">
+            <div class="teacher-table">
+                <div class="item">
+                    <div class="num">{{ count }}</div>
+                    <div>现有节数</div>
+                </div>
+                <div class="item">
+                    <div>
+                        <template v-for="(item, index) in record.record">
+                            <img v-if="index < 5" :key="index" :src="item.avatar">
+                        </template>
+                    </div>
+                    <div class="learn"><span>已有</span><span>{{ record.recordCoujnt }}</span><span>人学习</span></div>
+                </div>
+            </div>
+            <div v-if="lecturer" class="teacher-detail-wrap">
+                <a :href="'{:url('merchant/teacher_detail')}' + '?id=' + special.lecturer_id">
+                    <div class="detail-hd">
+                        <div class="head">
+                            <img :src="lecturer.lecturer_head">
+                        </div>
+                        <div class="text">
+                            <div>{{ lecturer.lecturer_name }}</div>
+                            <div v-if="lecturer.label.length">
+                                <template v-for="(item, index) in lecturer.label">
+                                    <span v-if="index < 3" :key="index">{{ item }}</span>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="iconfont iconxiangyou"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <!-- 关联资料 -->
+        <div v-if="materialList.length" class="material">
+            <a v-for="item in materialList" :key="item.id" :href="'{:url('special/data_details')}?id=' + item.id">
+                <div>
+                    <img :src="item.image" alt="">
+                </div>
+                <div>
+                    <div>{{ item.title }}</div>
+                    <div v-if="item.pay_type" class="money">￥<span>{{ item.money }}</span></div>
+                    <div v-else>免费</div>
+                    <div>
+                        <div>{{ item.ficti + item.sales }}人已下载</div>
+                        <button type="button">去下载</button>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div v-if="pinkIngList.length && is_pay==false" class="scroll-section">
+            <div class="label">已拼{{ scrollData.length }}件</div>
+            <div id="scroll" class="swiper-container">
+                <div class="swiper-wrapper">
+                    <div v-for="(item, index) in scrollData" :key="index" class="swiper-slide">{{ item.nickname }}拼团成功
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="list" v-if="pinkIngList.length && is_pay==false">
+            <div class="item acea-row row-middle" v-for="item in pinkIngList">
+                <div class="pictrue"><img :src="item.avatar"></div>
+                <div class="name line1" v-html="item.nickname"></div>
+                <div class="left">
+                    <div>还差<span>{{item.num}}人</span>成团</div>
+                    <div class="time">剩余{{item.difftime.hour}}:{{item.difftime.minute}}:{{item.difftime.second}}</div>
+                </div>
+                <a class="acea-row row-center-wrapper link" href="javascript:" @click="goPink(item.id,item.uid)">
+                    去拼单
+                    <span class="iconfont iconxiangyou"></span>
+                </a>
+            </div>
+        </div>
+        <div v-if="special.is_pink" class="process-section">
+            <div class="title">拼团玩法</div>
+            <div class="list">
+                <div class="item">
+                    <span>1</span>
+                    <span>开团/参团</span>
+                </div>
+                <div class="item">
+                    <span>2</span>
+                    <span>邀请好友</span>
+                </div>
+                <div class="item">
+                    <span>3</span>
+                    <span>满员成团</span>
+                </div>
+            </div>
+        </div>
+        <!-- 导航栏 -->
+        <div ref="list" class="swiper-nav">
+            <div class="navCon acea-row row-middle">
+                <template v-if="special.type === 4">
+                    <div v-for="nav in liveNavlist" :key="nav.value" :class="{ on: active === nav.value }" class="item" @click="active = nav.value">
+                        {{ nav.title }}
+                    </div>
+                </template>
+                <template v-else-if="special.type === 5">
+                    <div v-for="nav in cloumnNavlist" :key="nav.value" :class="{ on: active === nav.value }" class="item" @click="active = nav.value">
+                        {{ nav.title }}<span v-if="nav.value === 5">({{ evaluateWhole }})</span></div>
+                </template>
+                <template v-else>
+                    <div v-for="nav in otherNavlist" :key="nav.value" :class="{ on: active === nav.value }" class="item" @click="active = nav.value">
+                        {{ nav.title }}<span v-if="nav.value === 5">({{ evaluateWhole }})</span></div>
+                </template>
+            </div>
+        </div>
+        <!-- 详情 -->
+        <div v-show="active === 2" class="swiper-conter" v-html="special.content"></div>
+        <template v-if="special.type === 4">
+            <!-- 回放目录 -->
+            <div v-show="active === 1" class="replay-directory">
+                <ul v-if="liveTaskList.length">
+                    <li v-for="(item, index) in liveTaskList" :key="index" :class="{ active: RecordId === item.RecordId }" class="item" @click="playBackRecord(item.RecordId)">
+                        <div class="label">回放</div>
+                        <div class="name">{{ index | serial }} |
+                            {{ item.playback_name || special.title }}
+                        </div>
+                        <div></div>
+                    </li>
+                </ul>
+                <div class="foot">
+                    <span v-show="liveLoading" class="fa fa-spinner loadingpic"></span>
+                </div>
+            </div>
+        </template>
+        <template v-else>
+            <div v-show="active === 1">
+                <div ref="list">
+                    <div v-if="special.sum && special.type != 5" class="special-tip">
+                        已更新{{ quantity }}节/共{{ special.sum }}节</div>
+                    <!-- 专栏目录 -->
+                    <ul v-if="special.type === 5" class="parent-catalogue">
+                        <template v-for="specialItem in otherTaskList">
+                            <li :key="specialItem.id" :class="{ active: specialItem.active }" @click="show(specialItem)">
+                                <div class="parent-title">
+                                    <div class="name">{{ specialItem.title }}</div>
+                                    <div :class="[specialItem.active ? 'iconxiangshang' : 'iconxiangxia', 'iconfont']">
+                                    </div>
+                                </div>
+                                <ul v-if="specialItem.special_task.length" class="catalogue">
+                                    <li v-for="(item, index) in specialItem.special_task" :key="item.id" @click.stop="play(item)">
+                                        <div>
+                                            <img v-if="item.type == 1 || item.light_type == 1" src="{__WAP_PATH}zsff/images/media1.png">
+                                            <img v-else-if="item.type == 2 || item.light_type == 2" src="{__WAP_PATH}zsff/images/media2.png">
+                                            <img v-else-if="item.type == 3 || item.light_type == 3" src="{__WAP_PATH}zsff/images/media3.png">
+                                        </div>
+                                        <div class="text">
+                                            <div class="title">{{ index >= 9 ? index + 1 : '0' + (index + 1) }} |
+                                                {{ item.title }}</div>
+                                            <div class="try-progress">
+                                                <div v-if="!is_pay && (special.member_pay_type || !isMember) && item.is_free && item.is_try" class="try">试看</div>
+                                                <template v-if="isLogin && (is_pay || (!special.member_pay_type && isMember))">
+                                                    <div v-if="item.watch && item.watch.percentage" class="progress">
+                                                        已学习{{ item.watch.percentage }}%</div>
+                                                    <div v-else class="progress no">未学习</div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                        <div class="status">
+                                            <i v-if="item.is_free" :class="[item.pay_status ? 'iconsuozi' : 'iconziyuan2', 'iconfont']"></i>
+                                            <span v-else class="free">免费</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </template>
+                    </ul>
+                    <!-- 专题目录 -->
+                    <ul v-else class="catalogue">
+                        <li v-for="(item, index) in otherTaskList" :key="item.id" @click="play(item)">
+                            <div>
+                                <img v-if="item.type == 1" src="{__WAP_PATH}zsff/images/media1.png">
+                                <img v-else-if="item.type == 2" src="{__WAP_PATH}zsff/images/media2.png">
+                                <img v-else-if="item.type == 3" src="{__WAP_PATH}zsff/images/media3.png">
+                            </div>
+                            <div class="text">
+                                <div class="title">{{ index >= 9 ? index + 1 : '0' + (index + 1) }} | {{ item.title }}
+                                </div>
+                                <div class="try-progress">
+                                    <div v-if="!is_pay && (special.member_pay_type || !isMember) && item.is_free && item.is_try" class="try">试看</div>
+                                    <template v-if="isLogin && (is_pay || (!special.member_pay_type && isMember))">
+                                        <div v-if="item.watch && item.watch.percentage" class="progress">
+                                            已学习{{ item.watch.percentage }}%</div>
+                                        <div v-else class="progress no">未学习</div>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="status">
+                                <i v-if="item.is_free" :class="[item.pay_status ? 'iconsuozi' : 'iconziyuan2', 'iconfont']"></i>
+                                <span v-else class="free">免费</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <p class="loading-line" style="background-color: #ffffff">
+                    <span v-show="otherLoading==true" class="fa fa-spinner loadingpic" style="font-size: 0.4rem"></span>
+                    <span v-text="otherLoadTitle">加载更多</span>
+                </p>
+            </div>
+        </template>
+        <!-- 专栏套餐 -->
+        <template v-if="special.type === 5">
+            <div v-show="active === 6" class="video-list" style="-webkit-overflow-scrolling: touch;">
+                <div v-if="columnTaskList.length" ref="list">
+                    <div class="video-listn" style="padding:0.3rem 0;">
+                        <div class="item acea-row row-between-wrapper" v-for="vo in columnTaskList" @click="setMeal(vo)">
+                            <div class="pictrue" @click="play(vo)" style="position: relative">
+                                <img :src="vo.image" alt="">
+                                <div class="label">{{specialType[vo.type]}}</div>
+                            </div>
+                            <div class="underline">
+                                <div class="text acea-row row-between row-column">
+                                    <div class="name line1" v-text="vo.title" @click="setMeal(vo)"></div>
+                                    <div v-if="vo.label.length" class="attr">
+                                        <div v-for="item in vo.label">{{item}}</div>
+                                    </div>
+                                    <template v-if="special.pay_type">
+                                        <template v-if="vo.pay_status">
+                                            <template v-if="isMember">
+                                                <div v-if="vo.member_pay_type" class="price">
+                                                    ￥{{vo.member_money === '0.00' ? vo.money : vo.member_money}}
+                                                </div>
+                                                <div v-else class="free">去学习</div>
+                                            </template>
+                                            <div v-else class="price">￥<span>{{vo.money}}</span></div>
+                                        </template>
+                                        <div v-else class="free">去学习</div>
+                                    </template>
+                                    <div v-else class="free">去学习</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="loading-line" style="background-color: #ffffff">
+                    <span v-show="columnLoading==true" class="fa fa-spinner loadingpic" style="font-size: 0.4rem"></span>
+                    <span v-text="columnLoadTitle">加载更多</span>
+                </p>
+            </div>
+        </template>
+        <template v-if="special.type !== 4">
+            <!-- 练习 -->
+            <div v-show="active === 3" class="problem-section">
+                <ul v-if="problemList.length">
+                    <li v-for="item in problemList" :key="item.id">
+                        <div :class="{ lock: !is_pay }" class="title">{{ item.title }}</div>
+                        <div class="group">
+                            <div class="progress">
+                                <div :style="{ width: item.rate + '%' }"></div>
+                            </div>
+                            <div class="people"><span>{{ item.rate + '%' }}</span>{{ item.answer }}人已答题</div>
+                            <a href="javascript:" @click="goQuestion(item)">
+                                <img src="{__WAP_PATH}zsff/images/question07.png">练习
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 考试 -->
+            <div v-show="active === 4" class="question-section">
+                <ul v-if="questionList.length">
+                    <li v-for="(item, index) in questionList" :key="item.id" @click="goQuestion(item)">
+                        <div>
+                            <img :src="item.image" alt="">
+                        </div>
+                        <div>
+                            <div>{{ item.title }}</div>
+                            <div>
+                                <div>共{{ item.item_number }}题</div>
+                                <div v-if="is_pay" class="btn">
+                                    <img src="{__WAP_PATH}zsff/images/question07.png" alt="">答题
+                                </div>
+                                <div v-else>
+                                    <img class="lock" src="{__WAP_PATH}zsff/images/question06.png" alt="">
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 评价 -->
+            <div v-show="active === 5" class="evaluate-section">
+                <div class="head">
+                    <div class="score">
+                        <div><span>{{ evaluateScore }}</span>分</div>
+                        <div>课程评分</div>
+                    </div>
+                    <button type="button" @click="userEvaluate">我要评价</button>
+                </div>
+                <evaluate-list :evaluate-list="evaluateList"></evaluate-list>
+                <div v-if="evaluateLoading" class="loading">
+                    <i class="fa fa-spinner fa-spin"></i>
+                </div>
+                <div v-if="evaluateFinished && evaluateList.length" class="finished">已全部加载完</div>
+                <div v-if="evaluateFinished && !evaluateList.length" class="empty">
+                    <img src="{__WAP_PATH}zsff/images/empty.png" alt="暂无评价">
+                    <div>暂无评价</div>
+                </div>
+            </div>
+        </template>
+    </div>
+    <footer class="acea-row row-middle" ref="storeMenu" v-if="is_pay==false && is_gift==false && isPink==false">
+        <a class="link" href="{:Url('wap/index/index')}">
+            <div class="cont">
+                <img src="{__WAP_PATH}zsff/images/special01.png">
+                <div>首页</div>
+            </div>
+        </a>
+        <a class="link" href="javascript:" @click="customerService">
+            <div class="cont">
+                <img src="{__WAP_PATH}zsff/images/special02.png">
+                <div>客服</div>
+            </div>
+        </a>
+        <a v-if="(special.pay_type == 1 && special.type == 4) || special.money > 0" class="link" href="javascript:" @click="OpenPay(1)">
+            <div class="cont">
+                <img src="{__WAP_PATH}zsff/images/special03.png">
+                <div>送朋友</div>
+            </div>
+        </a>
+        <div class="wrap">
+            <div class="video_footer_btn acea-row" :class="special.pay_type == 1 ? '': 'item2'">
+                <div class="video_footer_btn_left acea-row row-column row-center-wrapper" v-if="(special.is_pink && ((special.member_pay_type == 1 && isMember == 1) || isMember == 0))"
+                     @click="OpenPay(3)">
+                    <span class="video_footer_btn_left_pic">￥{{special.pink_money}}</span>
+                    <span class="video_footer_btn_left_num">{{special.pink_number}}人团</span>
+                </div>
+                <div class="video_footer_btn_right acea-row" :class="(special.is_pink == 0 || (special.is_pink && isMember == 1 && special.member_pay_type == 0)) ? 'on':''" v-if="special.type == 4">
+                    <span class="acea-row row-center-wrapper video_footer_btn_left_pic" style="flex: 1;" @click="OpenPay(6)"
+                          v-if="special.pay_type == 0 || (special.member_pay_type == 0 && isMember) || is_pay">进入直播间</span>
+                    <span class="acea-row row-center-wrapper video_footer_btn_left_pic" style="flex: 1;" @click="OpenPay(2)"
+                          v-if="isMember == 1 && special.member_pay_type == 1">￥{{special.member_money}}</span>
+                    <span class="acea-row row-center-wrapper video_footer_btn_left_pic" style="flex: 1;" @click="OpenPay(2)" v-if="isMember == 0 && special.pay_type == 1">￥{{special.money}}</span>
+                </div>
+                <div class="video_footer_btn_right acea-row" :class="(special.is_pink == 0 || (special.is_pink && isMember == 1 && special.member_pay_type == 0)) ? 'on':''" v-if="special.type != 4">
+                    <span v-if="special.pay_type == 0 || (special.member_pay_type == 0 && isMember) || is_pay" @click="OpenPay(5)" class="acea-row row-center-wrapper video_footer_btn_left_pic"
+                          style="flex: 1;">免费学习</span>
+                    <span v-if="isMember == 1 && special.member_pay_type == 1" @click="OpenPay(2)" class="acea-row row-center-wrapper video_footer_btn_left_pic"
+                          style="flex: 1;">￥{{special.member_money}}</span>
+                    <span v-if="isMember == 0 && special.pay_type == 1" @click="OpenPay(2)" class="acea-row row-center-wrapper video_footer_btn_left_pic" style="flex: 1;">￥{{special.money}}</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <footer class="acea-row row-wrap-all" ref="storeMenu" v-if="is_pay==true && is_gift==false && paid && isPink==false">
+        <a class="link" href="{:Url('wap/index/index')}">
+            <div class="cont">
+                <img src="{__WAP_PATH}zsff/images/special01.png">
+                <div>首页</div>
+            </div>
+        </a>
+        <a class="link" href="javascript:" @click="customerService">
+            <div class="cont">
+                <img src="{__WAP_PATH}zsff/images/special02.png">
+                <div>客服</div>
+            </div>
+        </a>
+        <a v-if="(special.pay_type == 1 && special.type == 4) || special.money > 0" class="link" href="javascript:" @click="OpenPay(1)">
+            <div class="cont">
+                <img src="{__WAP_PATH}zsff/images/special03.png">
+                <div>送朋友</div>
+            </div>
+        </a>
+        <div class="wrap">
+            <div class="video_footer_btn acea-row">
+                <div class="video_footer_btn_right acea-row row-column row-center-wrapper on" v-if="special.type != 4" @click="OpenPay(5)">
+                    <span class="video_footer_btn_left_pic">去学习</span>
+                </div>
+                <div class="video_footer_btn_right acea-row row-column row-center-wrapper on" v-if="special.type == 4" @click="OpenPay(6)">
+                    <span class="video_footer_btn_left_pic">进入直播间</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <footer class="acea-row row-wrap-all" v-if="isPink" ref="storeMenu">
+        <a class="link" href="{:Url('wap/index/index')}">
+            <div class="cont">
+                <img src="{__WAP_PATH}zsff/images/special01.png">
+                <div>首页</div>
+            </div>
+        </a>
+        <a class="link" href="javascript:" @click="customerService">
+            <div class="cont">
+                <img src="{__WAP_PATH}zsff/images/special02.png">
+                <div>客服</div>
+            </div>
+        </a>
+        <a class="link" href="javascript:" @click="OpenPay(1)">
+            <div class="cont">
+                <img src="{__WAP_PATH}zsff/images/special03.png">
+                <div>送朋友</div>
+            </div>
+        </a>
+        <div class="wrap">
+            <div class="video_footer_btn acea-row">
+                <a class="video_footer_btn_right acea-row row-column row-center-wrapper on" href="javascript:" @click="goPink(0,uid)">
+                    <span class="video_footer_btn_left_pic">查看拼课详情</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+    <footer class="acea-row row-middle" v-if="is_gift" ref="storeMenu">
+        <a class="link" href="{:Url('wap/index/index')}">
+            <div class="cont">
+                <img src="{__WAP_PATH}zsff/images/special01.png">
+                <div>首页</div>
+            </div>
+        </a>
+        <a class="link" href="javascript:" @click="customerService">
+            <div class="cont">
+                <img src="{__WAP_PATH}zsff/images/special02.png">
+                <div>客服</div>
+            </div>
+        </a>
+        <div class="wrap">
+            <div class="video_footer_btn acea-row">
+                <div class="video_footer_btn_right acea-row row-column row-center-wrapper on" @click="OpenPay(4)">
+                    <span class="video_footer_btn_left_pic">领取课程</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- 遮罩层 -->
+    <div :class="{ mask: dialogShow || password || is_poster || imgSrc || !open }" @touchmove.prevent @click="maskClick"></div>
+    <!-- 加入群聊弹窗 -->
+    <div :class="{ show: !open }" class="dialog">
+        <img :src="special.service_code">
+        <div>长按扫一扫</div>
+        <div>加客服好友进群哦</div>
+    </div>
+    <!-- 关注公众号弹窗 -->
+    <div class="mask" style="align-items:center;display: flex;" v-show="is_code" @click="is_code=false">
+        <img :src="wechat_qrcode" alt="" style="width: 5rem;height: 5rem;margin: 0 auto;">
+    </div>
+    <!-- 支付弹窗 -->
+    <pay-dialog :open.sync="payDialogOpen" :money="money" :now_money="now_money" :special_id="special.id" :link_pay_uid="link_pay_uid" :pay_type_num="pay_type_num" :pink-id="pinkId"
+                :is-wechat="isWechat" :is-alipay="is_alipay" :is-balance="is_yue" :template-id="templateId" :wxpay-h5="wxpayH5" :is-member="isMember" :member-money="special.member_money"
+                :member-link="memberLink" @change="changeVal">
+    </pay-dialog>
+    <!-- 登录弹窗 -->
+    <base-login :login-show="loginShow" :site-name="site_name" @login-close="loginClose"></base-login>
+    <!-- 直播间密码弹窗 -->
+    <div :class="{ on: password }" class="password">
+        <div class="title">请输入密码</div>
+        <input type="password" v-model="qr_password" autocomplete="off">
+        <input type="hidden" v-model="studio_pwd" autocomplete="off">
+        <div class="psdBnt" @click="goLive">确定</div>
+    </div>
+    <!-- 分享海报 -->
+    <div v-show="is_poster" class="poster">
+        <img :src="filename" />
+        <p v-show="filename">长按保存,分享朋友</p>
+    </div>
+    <!-- 完课证书 -->
+    <img v-if="imgSrc" :src="imgSrc" class="certificate-image">
+    <!-- 评价弹窗 -->
+    <evaluate-dialog :dialog-show="dialogShow" :rate-value="rateValue" :image-list="imageList" @rate-change="rateChange" @image-upload="imageUpload" @image-delete="imageDelete"
+                     @evaluate-submit="evaluateSubmit">
+    </evaluate-dialog>
+    <!-- 兑换码 -->
+    <exchange-guide v-if="isBatch && !is_pay" :href="'{:url('special/exchange')}?special_id=' + special.id">
+    </exchange-guide>
+    <!-- 分享返佣 -->
+    <rebate-guide v-if="rebateMoney && isShareDisplaySwitch" :rebate-money="rebateMoney" @rebate-action="rebateAction">
+    </rebate-guide>
+</div>
+{/block}
+{block name='foot'}
+<script type="text/javascript">
+    window.overallShare = false;
+    require([
+        'vue',
+        'helper',
+        'store',
+        'special-type',
+        'axios',
+        'components/pay-dialog/index',
+        'swiper',
+        'moment',
+        'components/evaluate-list/index',
+        'components/evaluate-dialog/index',
+        'components/exchange-guide/index',
+        'components/base-login/index',
+        'components/rebate-guide/index',
+        'reg-verify',
+        'quick',
+        'qrcode'
+    ], function (Vue, $h, app, specialType, axios, PayDialog, Swiper, moment, evaluateList, evaluateDialog, exchangeGuide, BaseLogin, RebateGuide) {
+        var swiperlist = {$swiperlist};
+        var special = {$special};
+        var pinkId = {$pinkId};
+        var site_url = "{$site_url}";
+        var orderId = '{$orderId ? $orderId : ""}';
+        var link_pay_uid = {$link_pay_uid};
+        var wechat_qrcode = '{$code_url}';
+        var is_yue = {$is_yue? 'true': 'false'};
+        var is_alipay = {$is_alipay? 'true': 'false'};
+        var isWechat = {$isWechat? 'true': 'false'};
+        var isPay = {$isPay? 'true': 'false'};
+        var gift = {$gift};
+        var now_money = {$now_money};
+        var link_pay = {$link_pay};
+        var isPink = {$isPink? 'true': 'false'};
+        var BarrageShowTime = {$BarrageShowTime? $BarrageShowTime: 5};
+        var barrage_index = {$barrage_index? $barrage_index: 0};
+        var uid = {$userInfo['uid']? $userInfo['uid'] : 0};
+        var liveInfo = {$liveInfo};
+        // 站点名称
+        var site_name = '{$Auth_site_name}';
+        // 是否是会员
+        var isMember = {$is_member};
+        // H5微信支付是否开启
+        var wxpayH5 = {$is_h5_wechat_payment_switch? 'true': 'false'};
+        // H5微信支付回调
+        var callback_url = '{$callback_url}';
+        // 是否兑换
+        var isBatch = {$isBatch? 'true': 'false'};
+        // cookie 前缀
+        var prefix = '{$prefix}';
+
+        var options = {
+            captionEl: false,
+            fullscreenEl: false,
+            zoomEl: false,
+            arrowEl: false
+        };
+        var comment_switch = {$comment_switch};
+        var memberLink = "{:url('special/member_recharge')}";
+        Vue.use(vuePhotoPreview, options);
+        new Vue({
+            el: '#app',
+            components: {
+                'pay-dialog': PayDialog,
+                'evaluate-list': evaluateList,
+                'evaluate-dialog': evaluateDialog,
+                'exchange-guide': exchangeGuide,
+                'base-login': BaseLogin,
+                'rebate-guide': RebateGuide
+            },
+            filters: {
+                serial: function (value) {
+                    return value < 9 ? '0' + (value + 1) : value + 1;
+                },
+                validityFormat: function (value) {
+                    var result = '';
+                    var days = Math.floor(value / 60 / 60 / 24);
+                    var hours = Math.floor(value / 60 / 60 % 24);
+                    var minutes = Math.floor(value / 60 % 60);
+                    if (days) {
+                        result += days + '天';
+                    }
+                    if (hours) {
+                        result += hours + '小时';
+                    }
+                    return result + minutes + '分钟';
+                }
+            },
+            data: {
+                parentActive: 0,
+                site_name: site_name,
+                RecordId: '',
+                count: 0,
+                quantity: special.quantity,
+                special: special,
+                swiperlist: swiperlist,
+                pinkIngList: [],
+                otherTaskList: [],
+                columnTaskList: [],
+                liveTaskList: [],
+                cloumnNavlist: [
+                    {
+                        title: '目录',
+                        value: 1
+                    },
+                    {
+                        title: '套餐',
+                        value: 6
+                    },
+                    {
+                        title: '详情',
+                        value: 2
+                    },
+                    {
+                        title: '评价',
+                        value: 5
+                    }
+                ],
+                otherNavlist: [
+                    {
+                        title: '目录',
+                        value: 1
+                    },
+                    {
+                        title: '详情',
+                        value: 2
+                    },
+                    {
+                        title: '评价',
+                        value: 5
+                    }
+                ],
+                liveNavlist: [
+                    {
+                        title: '回放目录',
+                        value: 1
+                    },
+                    {
+                        title: '直播介绍',
+                        value: 2
+                    }
+                ],
+                active: 1,
+                open: true,
+                payDialogOpen: false,  // 是否显示支付弹窗
+                loginShow: false,
+                is_pay: isPay,
+                isMember: isMember,
+                otherLoading: false,
+                columnLoading: false,
+                liveLoading: false,
+                otherLoadend: false,
+                columnLoadend: false,
+                liveLoadend: false,
+                otherLoaded: false,
+                columnLoaded: false,
+                liveLoaded: false,
+                pay_type_num: -1,
+                pinkId: pinkId || 0,
+                pinkInfo: {
+                    pinkT: {
+                        difftime: {hour: "00", minute: "00", second: "00"}
+                    }
+                },
+                Barragelist: [],
+                otherLoadTitle: '上拉加载更多',
+                columnLoadTitle: '上拉加载更多',
+                liveLoadTitle: '上拉加载更多',
+                money: special.money,
+                where: {
+                    page: 1,
+                    limit: 16,
+                    special_id: special.id || 0,
+                    source_id: 0,
+                },
+                where2: {
+                    page: 1,
+                    limit: 16,
+                    special_id: special.id || 0,
+                    source_id: 0,
+                },
+                orderId: null,
+                is_gift: false,
+                paid: isPay,
+                link_pay_uid: 0,
+                uid: uid,
+                wechat_qrcode: wechat_qrcode,
+                is_code: false,
+                isWechat: isWechat,
+                is_live: special.is_live,
+                url: isWechat ? $h.U({c: 'index', a: 'login'}) : $h.U({c: 'login', a: 'phone_check'}),
+                isPink: isPink,
+                barrageStatus: true,
+                num: barrage_index,
+                stream_name: liveInfo.stream_name || '',
+                password: false,
+                liveInfo: liveInfo,
+                qr_password: '',
+                studio_pwd: liveInfo.studio_pwd,
+                is_alipay: is_alipay, //支付宝是否开启
+                is_yue: is_yue, //余额是否开启
+                now_money: now_money, //余额
+                lecturer: null,
+                specialType: specialType,
+                topFocus: true,
+                record: {
+                    recordCoujnt: 0
+                },
+                scrollData: [],
+                templateId: '',
+                problemList: [],
+                questionList: [],
+                is_poster: false,
+                filename: '',
+                imgSrc: '',
+                wxpayH5: wxpayH5,
+                dialogShow: false,
+                rateValue: 5,  // 评价打分
+                imageList: [],  // 评价上传图片
+                evaluateList: [],
+                evaluateLoading: false,
+                evaluateFinished: false,
+                evaluatePage: 1,
+                evaluateLimit: 10,
+                evaluateWhole: 0,
+                evaluateScore: 0,
+                isBatch: isBatch,
+                materialList: [],
+                isLogin: false,
+                special_validity: -1, // -1 未购买显示课程有效期 0 已购买并永久 >0 已购买并有有效期
+                rebateMoney: 0,
+                isShareDisplaySwitch: {$is_share_display_switch},
+                memberLink: memberLink
+            },
+            watch: {
+                pay_type_num: function () {
+                    this.getSubscribeId();
+                }
+            },
+            created: function () {
+                this.userLogin();
+                this.getNumberCourses();
+                this.addLearningRecords();
+                this.getLecturer();
+                this.getPinkIngLists();
+                this.getProblem();
+                this.getSubscribeId();
+                this.specialMaterial();
+                this.rebateAmount();
+                if (this.special.type != 4) {
+                    if (comment_switch) {
+                        this.getEvaluateStatus();
+                        this.getEvaluateList();
+                    } else {
+                        if (this.special == 5) {
+                            for (let i = 0; i < this.cloumnNavlist.length; i++) {
+                                if (this.cloumnNavlist[i].value == 5) {
+                                    this.cloumnNavlist.splice(i, 1);
+                                    break;
+                                }
+                            }
+                        } else {
+                            for (let j = 0; j < this.otherNavlist.length; j++) {
+                                if (this.otherNavlist[j].value == 5) {
+                                    this.otherNavlist.splice(j, 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            mounted: function () {
+                var that = this;
+                this.$nextTick(function () {
+                    $h.EventUtil.listenTouchDirection(document, function () {
+                        if (this.active === 1) {
+                            if (this.special.type === 4) {
+                                this.getLiveTask();
+                            } else {
+                                this.getCourseList();
+                            }
+                        }
+                        if (this.active === 6) {
+                            this.getCloumnTask();
+                        }
+                        if (this.active === 5) {
+                            this.getEvaluateList();
+                        }
+                    }.bind(this));
+                    if (isWechat) {
+                      mapleWx($jssdk(), function () {
+                            this.onMenuShareAll({
+                                title: that.special.title,
+                                desc: that.special.abstract,
+                                imgUrl: that.special.image,
+                                link: customWXShare(uid)
+                            });
+                      });
+                    }
+                    setTimeout(function () {
+                        new Swiper('.banner', {
+                            pagination: {
+                                el: '.swiper-pagination'
+                            },
+                            autoplay: true,
+                            observer: true,
+                            observeParents: true
+                        });
+                    }, 500);
+                    switch (location.hash) {
+                        case '#tash':
+                            if (that.special.type != 4) that.active = 1;
+                            $('body,html').animate({scrollTop: $(that.$refs.list).offset().top}, 800);
+                            break;
+                        case '#act1':
+                            that.active = 0;
+                            $('body,html').animate({scrollTop: $(that.$refs.list).offset().top}, 800);
+                            break;
+                        case '#act2':
+                            if (that.special.type != 4) that.active = 1;
+                            $('body,html').animate({scrollTop: $(that.$refs.list).offset().top}, 800);
+                            break;
+                        case '#gift':
+                            that.is_gift = true;
+                            break;
+                        case '#link_pay':
+                            that.link_pay_uid = link_pay_uid;
+                            break;
+                    }
+                    if (gift) that.is_gift = true;
+                    if (link_pay) that.link_pay_uid = link_pay_uid;
+                    that.barrage();
+                });
+                switch (this.special.type) {
+                    case 5:
+                        this.getCourseList();
+                        this.getCloumnTask();
+                        break;
+                    case 4:
+                        this.getLiveTask();
+                        break;
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 6:
+                        this.getCourseList();
+                        break;
+                }
+                if (that.pinkId) {
+                    app.baseGet($h.U({c: 'special', a: 'get_pink_info', q: {pinkId: that.pinkId}}), function (res) {
+                        that.pinkInfo = res.data.data;
+                        that.CountDown({name: 'pinkInfo.pinkT', time_name: 'stop_time'});
+                    }, function (msg) {
+                        $h.showMsg(msg, function () {
+                            window.location.href = $h.U({c: 'special', a: 'details', q: {id: that.special.id}});
+                        });
+                    });
+                }
+                app.baseGet($h.U({c: 'special', a: 'groupLists', q: {special_id: special.id}}), function (res) {
+                    that.scrollData = res.data.data;
+                    that.$nextTick(function () {
+                        new Swiper('#scroll', {
+                            direction: "vertical",
+                            autoplay: true,
+                            loop: true,
+                            observer: true,
+                            observeParents: true
+                        });
+                    });
+                }, function (err) {
+                    console.error(err);
+                });
+                var width = $('.swiper-conter').width();
+                $('.video-ue').each(function (index) {
+                    var id = "video-ue-" + index, videoUrl = $(this).attr('src');
+                    $(this).attr('id', id);
+                    $(this).children('video').attr('src', videoUrl);
+                    $(this).append("<source src='" + videoUrl + "' type='video/mp4' />")
+                    $(this).addClass("video-js");
+                    videojs(id, {}, function () {
+                        this.width(width);
+                        this.src(videoUrl);
+                    });
+                });
+                if (this.special.type != 4) {
+                    this.getInspect();
+                }
+            },
+            updated: function () {
+                this.$nextTick(function () {
+                    this.$previewRefresh();
+                });
+            },
+            methods: {
+              wxShareLink: function (uid) {
+                var search = window.location.search.slice(1);
+                var searchArr = search.split('&');
+                var searchObj = {};
+                var query = [];
+                searchArr.forEach(function (item) {
+                  item = item.split('=');
+                  item[1] && (searchObj[item[0]] = item[1]);
+                });
+                searchObj['spread_uid'] = uid;
+                for (var key in searchObj) {
+                  query.push([key, searchObj[key]].join('='));
+                }
+                return window.location.origin + window.location.pathname + '?' + query.join('&');
+              },
+                // 获取登录状态
+                userLogin: function () {
+                    var vm = this;
+                    app.baseGet("{:url('index/login_user')}", function () {
+                        vm.isLogin = true;
+                    }, undefined, true);
+                    app.baseGet("{:url('special/special_validity')}?id=" + special.id, function (res) {
+                        vm.special_validity = res.data.data.validity;
+                    }, undefined, true);
+                },
+                // 点击我要评价
+                userEvaluate: function () {
+                    var vm = this;
+                    app.baseGet("{:url('index/login_user')}", function () {
+                        if (vm.is_pay || (!vm.special.member_pay_type && vm.isMember)) {
+                            vm.dialogShow = true;
+                        } else {
+                            layer.confirm('购买后可进行评价，是否购买？', {
+                                title: false,
+                                btn: ['购买', '取消'],
+                                closeBtn: false,
+                                scrollbar: false
+                            }, function (index) {
+                                vm.pay_type_num = 2;
+                                vm.payDialogOpen = true;
+                                layer.close(index);
+                            });
+                        }
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                // 获取评价状态
+                getEvaluateStatus: function () {
+                    app.baseGet("{:url('special/special_reply_data')}?special_id=" + this.special.id, function (res) {
+                        var resData = res.data;
+                        if (resData.code === 200) {
+                            var data = resData.data;
+                            this.evaluateWhole = data.whole;
+                            this.evaluateScore = data.score;
+                        } else {
+                            $h.pushMsg(resData.msg);
+                        }
+                    }.bind(this));
+                },
+                // 获取评价列表
+                getEvaluateList: function () {
+                    if (this.evaluateLoading || this.evaluateFinished) {
+                        return;
+                    }
+                    this.evaluateLoading = true;
+                    app.baseGet($h.U({
+                        c: 'special',
+                        a: 'special_reply_list',
+                        q: {
+                            special_id: this.special.id,
+                            page: this.evaluatePage++,
+                            limit: this.evaluateLimit
+                        }
+                    }), function (res) {
+                        var resData = res.data;
+                        this.evaluateLoading = false;
+                        if (resData.code === 200) {
+                            var data = resData.data;
+                            this.evaluateList = this.evaluateList.concat(data);
+                            this.evaluateFinished = this.evaluateLimit > data.length;
+                        } else {
+                            $h.pushMsg(resData.msg);
+                        }
+                    }.bind(this), function () {
+                        this.evaluateLoading = false;
+                    }.bind(this));
+                },
+                // 点击遮罩层
+                maskClick: function () {
+                    this.dialogShow = false;
+                    this.password = false;
+                    this.is_poster = false;
+                    this.open = true;
+                    this.imgSrc = '';
+                },
+                // 提交评价
+                evaluateSubmit: function (text) {
+                    var that = this;
+                    $h.loadFFF();
+                    app.basePost($h.U({
+                        c: 'special',
+                        a: 'user_comment_special',
+                        q: {
+                            special_id: this.special.id
+                        }
+                    }), {
+                        satisfied_score: this.rateValue,
+                        comment: text.trim(),
+                        pics: this.imageList
+                    }, function (res) {
+                        $h.loadClear();
+                        $h.pushMsg(res.data.msg, function () {
+                            that.dialogShow = false;
+                            that.getEvaluateStatus();
+                            that.evaluateFinished = false;
+                            that.evaluatePage = 1;
+                            that.evaluateList = [];
+                            that.getEvaluateList();
+                        });
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 删除图片
+                imageDelete: function (index) {
+                    this.imageList.splice(index, 1);
+                },
+                // 上传图片
+                imageUpload: function (file) {
+                    var formData = new FormData();
+                    formData.append('file', file);
+                    $h.loadFFF();
+                    axios.post("{:url('auth_api/upload')}", formData).then(function (res) {
+                        var resData = res.data;
+                        if (resData.code === 200) {
+                            $h.loadClear();
+                            this.imageList.push(resData.data.url);
+                        } else {
+                            $h.loadClear();
+                            layer.msg(resData.msg);
+                        }
+                    }.bind(this)).catch(function () {
+                        $h.loadClear();
+                    });
+                },
+                // 评分
+                rateChange: function (value) {
+                    this.rateValue = value;
+                },
+                // 生成分享海报
+                createPoster: function () {
+                  var vm = this;
+                  app.baseGet("{:url('index/login_user')}", function () {
+                    if (vm.filename) {
+                        vm.is_poster = true;
+                        return;
+                    }
+                    Promise.all([
+                        new Promise(function (resolve, reject) {
+                            var image = new Image();
+                            image.addEventListener('load', function () {
+                                resolve(image);
+                            });
+                            image.addEventListener('error', function () {
+                                reject('在' + special.poster_image + '加载图像时出错');
+                            });
+                            image.crossOrigin = 'anonymous';
+                            image.src = special.poster_image + '?t=' + new Date().getTime();
+                        }),
+                        new Promise(function (resolve, reject) {
+                            try {
+                                resolve(new QRCode(document.createElement('div'), site_url));
+                            } catch (error) {
+                                reject(error);
+                            }
+                        })
+                    ]).then(function (data) {
+                        var width = data[0].width;
+                        var height = data[0].height;
+                        var sWidth;
+                        var sHeight;
+                        if (600 / 740 <= width / height) {
+                            sWidth = 600;
+                            sHeight = 600 * (height / width);
+                        } else {
+                            sWidth = 740 * (width / height);
+                            sHeight = 740;
+                        }
+
+                        var canvas = document.createElement('canvas');
+                        var context = canvas.getContext('2d');
+                        canvas.width = 600;
+                        canvas.height = 960;
+                        context.fillStyle = '#FFFFFF';
+                        context.fillRect(0, 0, 600, 960);
+                        context.drawImage(data[0], (600 - sWidth) / 2, (740 - sHeight) / 2, sWidth, sHeight);
+                        context.drawImage(data[1]._el.firstChild, 118, 785, 130, 130);
+                        context.font = '22px sans-serif';
+                        context.fillStyle = '#999999';
+
+                        var text = '邀您加入' + site_name;
+                        var list = [];
+                        var start = 0;
+                        for (var i = 0; i < text.length; i++) {
+                            if (context.measureText(text.slice(start, i)).width > 198) {
+                                list.push(text.slice(start, i - 1));
+                                start = i - 1;
+                            }
+                        }
+                        if (start !== text.length) {
+                            list.push(text.slice(start));
+                        }
+                        if (list.length > 3) {
+                            list.length = 3;
+                            for (var j = 0; j < list[2].length; j++) {
+                                if (context.measureText(list[2].slice(0, j) + '……').width > 198) {
+                                    list[2] = list[2].slice(0, j - 1) + '……';
+                                    break;
+                                }
+                            }
+                        }
+                        list.push('长按识别或扫码进入');
+                        for (var k = 0; k < list.length; k++) {
+                            context.fillText(list[k], 284, 785 + (130 / (list.length + 1)) * (k + 1));
+                        }
+
+                        vm.filename = canvas.toDataURL('image/jpeg');
+                        vm.is_poster = true;
+                    }).catch(function (error) {
+
+                    });
+                  }, function () {
+                    if (isWechat) {
+                      window.localStorage.setItem('login_back_url', window.location.href);
+                      window.location.assign("{:url('login/index')}");
+                    } else {
+                      vm.loginShow = true;
+                    }
+                  });
+                },
+                // 是否可以发放证书
+                getInspect: function () {
+                    var that = this;
+                    $h.loadFFF();
+                    axios.get($h.U({
+                        c: 'special',
+                        a: 'inspect',
+                        q: {
+                            special_id: this.special.id
+                        }
+                    })).then(function (res) {
+                        $h.loadClear();
+                        if (200 == res.data.code) {
+                            layer.confirm('恭喜您已达到证书发放标准，是否领取?', {
+                                title: false,
+                                closeBtn: false,
+                                btn: ['领取', '取消']
+                            }, function (index) {
+                                that.getCertificate();
+                                layer.close(index);
+                            });
+                        }
+                    }).catch(function () {
+                        $h.loadClear();
+                    });
+                },
+                // 领取证书
+                getCertificate: function () {
+                    $h.loadFFF();
+                    app.baseGet($h.U({
+                        c: 'special',
+                        a: 'getTheCertificate',
+                        q: {
+                            special_id: this.special.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        layer.msg('领取成功<br>证书制作中…', function () {
+                            this.getCertificateInfo(res.data.msg);
+                        }.bind(this));
+                    }.bind(this), function () {
+                        $h.loadClear();
+                    });
+                },
+                // 获取证书信息
+                getCertificateInfo: function (id) {
+                    $h.loadFFF();
+                    app.baseGet($h.U({
+                        c: 'topic',
+                        a: 'viewCertificate',
+                        q: {
+                            id: id,
+                            obtain: 1
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        this.createCertificate(res.data.data);
+                    }.bind(this), function (err) {
+                        $h.loadClear();
+                        console.error(err);
+                    });
+                },
+                // 加载图片
+                loadImage: function (path) {
+                    return new Promise(function (resolve, reject) {
+                        var image = new Image();
+                        image.crossOrigin = 'anonymous';
+                        image.onload = function () {
+                            resolve(image);
+                        };
+                        image.onerror = function () {
+                            reject('error-image');
+                        };
+                        image.src = path + '?' + new Date().getTime();
+                    });
+                },
+                // 生成证书图片
+                createCertificate: function (certificate) {
+                    $h.loadFFF();
+                    Promise.all([
+                        this.loadImage(certificate.certificate.background),
+                        this.loadImage(certificate.certificate.qr_code)
+                    ]).then(function (images) {
+                        var canvas = document.createElement('canvas');
+                        var context = canvas.getContext('2d');
+
+                        canvas.width = images[0].width;
+                        canvas.height = images[0].height;
+
+                        context.drawImage(images[0], 0, 0);
+                        context.drawImage(images[1], 220, 557, 160, 160);
+
+                        context.fillStyle = 'rgba(255, 255, 255, 1)';
+                        context.fillRect(220, 724, 160, 36);
+
+                        context.font = '20px sans-serif';
+                        context.textAlign = 'center';
+                        context.fillStyle = '#666666';
+                        context.fillText('长按二维码查看', 300, 748);
+
+                        context.font = 'bold 34px sans-serif';
+                        context.fillStyle = '#29466D';
+                        context.fillText(certificate.nickname, 300, 296);
+
+                        context.font = '24px sans-serif';
+                        context.fillText('颁发时间：' + moment(certificate.add_time * 1000).format('YYYY.MM.DD'), 300, 481);
+
+                        context.font = '28px sans-serif';
+                        context.textAlign = 'start';
+                        context.fillStyle = '#333333';
+
+                        for (var i = Math.ceil(certificate.certificate.explain.length % 16); i--;) {
+                            context.fillText(certificate.certificate.explain.substr(i * 16, 16), 83, i * 40 + 370);
+                        }
+
+                        this.imgSrc = canvas.toDataURL('image/jpeg');
+                        canvas = null;
+                        $h.loadClear();
+                    }.bind(this)).catch(function (error) {
+                        $h.loadClear();
+                        console.error(error);
+                    });
+                },
+                // 去练习、答题
+                goQuestion: function (question) {
+                    var vm = this;
+                    app.baseGet("{:url('index/login_user')}", function () {
+                        if (question.is_pay || vm.is_pay) {
+                            if (question.type == 1) {
+                                window.location = "{:url('topic/problem_index')}?id=" + question.id;
+                            } else {
+                                window.location = "{:url('special/question_index')}?id=" + question.id;
+                            }
+                        } else {
+                            vm.payDialogOpen = true;
+                        }
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                // 获取练习
+                getProblem: function () {
+                    var that = this;
+                    $h.loadFFF();
+                    app.basePost($h.U({
+                        c: 'Topic',
+                        a: 'specialTestPaper'
+                    }), {
+                        special_id: this.special.id,
+                        type: 1
+                    }, function (res) {
+                        $h.loadClear();
+                        var questions = res.data.data;
+                        if (questions.length) {
+                            if (that.special.type === 5) {
+                                that.cloumnNavlist.splice(that.cloumnNavlist.length - 1, 0, {
+                                    title: '练习',
+                                    value: 3
+                                });
+                            } else {
+                                that.otherNavlist.splice(that.otherNavlist.length - 1, 0, {
+                                    title: '练习',
+                                    value: 3
+                                });
+                            }
+                            for (var i = questions.length; i--;) {
+                                questions[i].rate = Math.floor(questions[i].done / questions[i].item_number * 100);
+                            }
+                            that.problemList = questions;
+                        }
+                        that.getQuestion();
+                    }, function () {
+                        $h.loadClear();
+                        that.getQuestion();
+                    });
+                },
+                // 获取考试
+                getQuestion: function () {
+                    var that = this;
+                    $h.loadFFF();
+                    app.basePost($h.U({
+                        c: 'Topic',
+                        a: 'specialTestPaper'
+                    }), {
+                        special_id: this.special.id,
+                        type: 2
+                    }, function (res) {
+                        $h.loadClear();
+                        var questions = res.data.data;
+                        if (questions.length) {
+                            if (that.special.type === 5) {
+                                that.cloumnNavlist.splice(that.cloumnNavlist.length - 1, 0, {
+                                    title: '考试',
+                                    value: 4
+                                });
+                            } else {
+                                that.otherNavlist.splice(that.otherNavlist.length - 1, 0, {
+                                    title: '考试',
+                                    value: 4
+                                });
+                            }
+                        }
+                        that.questionList = questions;
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 获取订阅通知模板id
+                getSubscribeId: function () {
+                    if (!this.isWechat) {
+                        return;
+                    }
+                    $h.loadFFF();
+                    app.baseGet($h.U({
+                        c: 'special',
+                        a: 'getTemplateIds',
+                        q: {
+                            pay_type_num: this.pay_type_num,
+                            special_id: this.special.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        this.templateId = res.data.msg;
+                    }.bind(this), function () {
+                        $h.loadClear();
+                    });
+                },
+                show: function (special) {
+                    special.active = !special.active;
+                },
+                // 讲师详情
+                getLecturer: function () {
+                    $h.loadFFF();
+                    app.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'getLecturer',
+                        q: {
+                            mer_id: this.special.mer_id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        this.lecturer = res.data.data;
+                    }.bind(this), function () {
+                        $h.loadClear();
+                    });
+                },
+                // 获取浏览人数
+                getLearningRecords: function () {
+                    $h.loadFFF();
+                    app.baseGet($h.U({
+                        c: 'Special',
+                        a: 'learningRecords',
+                        q: {
+                            id: this.special.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        this.record = res.data.data;
+                    }.bind(this), function () {
+                        $h.loadClear();
+                    });
+                },
+                // 记录浏览人数
+                addLearningRecords: function () {
+                    $h.loadFFF();
+                    app.baseGet($h.U({
+                        c: 'Special',
+                        a: 'addLearningRecords',
+                        q: {
+                            id: this.special.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        this.getLearningRecords();
+                    }.bind(this), function () {
+                        $h.loadClear();
+                    });
+                },
+                //  拼团列表
+                getPinkIngLists: function () {
+                    if (!this.special.is_pink) return;
+                    $h.loadFFF();
+                    app.baseGet($h.U({
+                        c: 'Special',
+                        a: 'pinkIngLists',
+                        q: {
+                            id: this.special.id,
+                            pinkId: 0
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        this.pinkIngList = res.data.data;
+                        this.CountDown({name: 'pinkIngList', time_name: "stop_time"});
+                    }.bind(this), function () {
+                        $h.loadClear();
+                    });
+                },
+                //  专题下章节数量
+                getNumberCourses: function () {
+                    $h.loadFFF();
+                    app.baseGet($h.U({
+                        c: 'Special',
+                        a: 'numberCourses',
+                        q: {
+                            id: this.special.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        this.count = res.data.data;
+                        if(this.count != this.quantity) this.quantity = this.count;
+                    }.bind(this), function () {
+                        $h.loadClear();
+                    });
+                },
+                goLive: function () {
+                    if (!this.qr_password) return $h.showMsg('请输入密码');
+                    if (this.qr_password != this.studio_pwd) return $h.showMsg('密码不正确');
+                    document.cookie = prefix + this.stream_name + "studio_pwd" + "=" + this.studio_pwd + ";expires=7200" + ";path=/";
+                    window.location.href = $h.U({
+                        c: 'live',
+                        a: 'index',
+                        q: {stream_name: this.stream_name, record_id: this.RecordId}
+                    });
+                },
+                barrage: function () {
+                    var that = this;
+                    if (typeof BarrageShowTime == 'string') BarrageShowTime = parseInt(BarrageShowTime);
+                    BarrageShowTime = BarrageShowTime * 1000;
+                    app.baseGet($h.U({
+                        c: 'special',
+                        a: 'get_barrage_list',
+                        q: {special_id: special.id}
+                    }), function (res) {
+                        that.$set(that, 'Barragelist', res.data.data);
+                        that.Barragelist = that.Barragelist || [];
+                        var len = that.Barragelist.length;
+                        if (!len) return;
+                        setInterval(function () {
+                            that.num = that.num + 1;
+                            that.num = that.num >= len ? 0 : that.num;
+                            that.num = that.num < 0 ? 0 : that.num;
+                            that.barrageStatus = !that.barrageStatus;
+                            app.baseGet($h.U({c: 'special', a: 'set_barrage_index', q: {index: that.num}}));
+                        }, BarrageShowTime);
+                    });
+                },
+                goPink: function (pink_id, uid) {
+                    if (uid == this.uid && isPink) {
+                        window.location.href = $h.U({
+                            c: 'special',
+                            a: 'pink',
+                            q: {pink_id: pinkId, special_id: this.special.id, is_help: 0}
+                        });
+                    } else {
+                        window.location.href = $h.U({
+                            c: 'special',
+                            a: 'pink',
+                            q: {pink_id: pink_id > 0 ? pink_id : pinkId, special_id: this.special.id, is_help: 1}
+                        });
+                    }
+                },
+                follow: function () {
+                    return $h.openImage(wechat_qrcode);
+                },
+                getPartakePinkUrl: function () {
+                    return $h.U({c: 'special', a: 'details', q: {id: this.special.id}});
+                },
+                pay_order: function (data) {
+                    this.orderId = data.data.result.orderId || '';
+                    switch (data.data.status) {
+                        case "PAY_ERROR":
+                        case 'ORDER_EXIST':
+                        case 'ORDER_ERROR':
+                            this.extendOrder(data.msg);
+                            break;
+                        case 'WECHAT_PAY':
+                            this.wechatPay(data.data.result.jsConfig);
+                            break;
+                        case 'WECHAT_H5_PAY':
+                            this.payDialogOpen = false;
+                            var callbackUrl = callback_url + '?type=1&id=' + this.special.id;
+                            var mwebUrl = data.data.result.jsConfig.mweb_url + '&redirect_url=' + encodeURIComponent(callbackUrl);
+                            window.location.href = mwebUrl;
+                            break;
+                        case 'SUCCESS':
+                            this.successOrder(data.msg);
+                            break;
+                        case 'ZHIFUBAO_PAY':
+                            window.location.href = $h.U({
+                                m: 'wap',
+                                c: 'alipay',
+                                a: 'index',
+                                q: {info: data.data.result, params: 'special'}
+                            });
+                            break;
+                    }
+                },
+                wechatPay: function (config) {
+                    var that = this;
+                    mapleWx($jssdk(), function () {
+                        this.chooseWXPay(config, function () {
+                            that.successOrder();
+                        }, {
+                            fail: that.extendOrder,
+                            cancel: that.extendOrder
+                        });
+                    });
+                },
+                successOrder: function (msg) {
+                    var that = this;
+                    $h.showMsg({
+                        title: msg ? msg : '支付成功',
+                        icon: 'success',
+                        success: function () {
+                            switch (parseInt(that.pay_type_num)) {
+                                case 1:
+                                    window.location.assign($h.U({
+                                        c: 'special',
+                                        a: 'gift_special',
+                                        q: {
+                                            orderId: that.orderId
+                                        }
+                                    }));
+                                    break;
+                                case 2:
+                                    that.paid = true;
+                                    that.is_pay = true;
+                                    that.payDialogOpen = false;
+                                    that.updateMaterialStatus();
+                                    break;
+                                case 3:
+                                    window.location.href = $h.U({c: 'special', a: 'pink', q: {orderId: that.orderId}});
+                                    break;
+                            }
+                        }
+                    });
+                    app.baseGet($h.U({
+                        c: 'special',
+                        a: 'special_validity',
+                        q: {
+                            id: special.id
+                        }
+                    }), function (res) {
+                        that.special_validity = res.data.data.validity;
+                    }, function () {
+                    }, true);
+                },
+                updateMaterialStatus: function () {
+                    var that = this;
+                    that.otherLoading = false;
+                    that.otherLoaded = false;
+                    that.where.page = 1;
+                    that.$set(that, 'otherTaskList', []);
+                    that.getCourseList();
+                },
+                extendOrder: function (msg) {
+                    var that = this;
+                    if (typeof msg === 'object') {
+                        if (msg.errMsg === 'chooseWXPay:cancel') {
+                            msg = '微信支付取消';
+                        } else {
+                            msg = '支付失败';
+                        }
+                    } else {
+                        msg = msg || '支付失败';
+                    }
+                    $h.pushMsg(msg, function () {
+                        that.payDialogOpen = false;
+                        if (that.orderId) {
+                            app.baseGet($h.U({c: 'special', a: 'del_order', q: {orderId: that.orderId}}));
+                        }
+                    });
+                },
+                setMeal: function (item) {
+                    var that = this;
+                    if (that.special.type == 5) {
+                        location.href = (item.is_light ? "{:url('special/single_details')}" : "{:url('special/details')}") + '?id=' + item.id;
+                    }
+                },
+                // 点击专题目录
+                play: function (item) {
+                    var vm = this;
+                    if (vm.active == 6) {
+                        window.location.assign($h.U({
+                            c: 'special',
+                            a: 'details',
+                            q: {
+                                id: item.id
+                            }
+                        }));
+                    } else {
+                        app.baseGet("{:url('index/login_user')}", function () {
+                            if (!item.is_free || item.is_try || vm.is_pay || (!vm.special.member_pay_type && vm.isMember)) {
+                                vm.goPlayTsak(item);
+                            } else {
+                                layer.confirm('购买后可操作，是否购买？', {
+                                    title: false,
+                                    btn: ['购买', '取消'],
+                                    closeBtn: false,
+                                    shadeClose: true,
+                                    scrollbar: false
+                                }, function (index) {
+                                    vm.payDialogOpen = true;
+                                    vm.pay_type_num = 2;
+                                    layer.close(index);
+                                });
+                            }
+                        }, function () {
+                            if (isWechat) {
+                                window.localStorage.setItem('login_back_url', window.location.href);
+                                window.location.assign("{:url('login/index')}");
+                            } else {
+                                vm.loginShow = true;
+                            }
+                        }, true);
+                    }
+                },
+                // 专题列表
+                getCourseList: function () {
+                    var that = this;
+                    if (this.otherLoading) return;
+                    if (this.otherLoaded) return;
+                    this.otherLoadTitle = '';
+                    this.otherLoading = true;
+                    app.baseGet($h.U({c: 'special', a: 'get_course_list', q: this.where}), function (res) {
+                        var data = res.data.data,
+                            list = data.list || [],
+                            taskList = [];
+                        list.forEach(function (item) {
+                            item.active = false;
+                        });
+                        taskList = $h.SplitArray(list, that.otherTaskList);
+                        taskList.forEach(function (item, index) {
+                            item.active = !index;
+                        });
+                        that.where.page = data.page;
+                        that.otherLoaded = list.length < that.where.limit;
+                        that.otherLoadTitle = that.otherLoaded ? '我也是有底线的' : '上拉加载更多';
+                        that.otherLoading = false;
+                        that.$set(that, 'otherTaskList', taskList);
+                    }, function (res) {
+                        that.otherLoading = false;
+                        that.otherLoadTitle = '加载更多';
+                    });
+                },
+                // 套餐列表
+                getCloumnTask: function () {
+                    var that = this;
+                    if (this.columnLoading) return;
+                    if (this.columnLoaded) return;
+                    this.columnLoadTitle = '';
+                    this.columnLoading = true;
+                    app.baseGet($h.U({c: 'special', a: 'get_cloumn_task', q: this.where2}), function (res) {
+                        var data = res.data.data;
+                        var list = data.list || [];
+                        var taskList = $h.SplitArray(list, that.columnTaskList);
+                        that.where2.page = data.page;
+                        that.columnLoaded = list.length < that.where2.limit;
+                        that.columnLoadTitle = that.columnLoaded ? '我也是有底线的' : '上拉加载更多';
+                        that.columnLoading = false;
+                        that.$set(that, 'columnTaskList', taskList);
+                    }, function (res) {
+                        that.columnLoading = false;
+                        that.columnLoadTitle = '加载更多';
+                    });
+                },
+                // 直播回放列表
+                getLiveTask: function () {
+                    var that = this;
+                    if (this.liveLoading) return;
+                    if (this.liveLoaded) return;
+                    this.liveLoadTitle = '';
+                    this.liveLoading = true;
+                    app.baseGet($h.U({
+                        c: 'live',
+                        a: 'get_live_record_list',
+                        q: {special_id: that.special.id, page: that.where.page, limit: that.where.limit}
+                    }), function (res) {
+                        var data = res.data.data.data;
+                        var list = data || [];
+                        var taskList = $h.SplitArray(list, that.liveTaskList);
+                        that.where.page = that.where.page + 1;
+                        that.liveLoaded = list.length < that.where.limit;
+                        that.liveLoadTitle = that.liveLoaded ? '我也是有底线的' : '上拉加载更多';
+                        that.liveLoading = false;
+                        that.$set(that, 'liveTaskList', taskList);
+                    }, function (res) {
+                        that.liveLoading = false;
+                        that.liveLoadTitle = '加载更多';
+                    });
+                },
+                //播放素材
+                goPlayTsak: function (item) {
+                    var that = this;
+                    if (item.is_light) {
+                        window.location.assign("{:url('special/single_details')}?id=" + item.id);
+                        return;
+                    }
+                    app.baseGet($h.U({
+                        c: 'special',
+                        a: 'get_task_link',
+                        q: {
+                            task_id: item.id,
+                            special_id: item.special_id
+                        }
+                    }), function () {
+                        app.baseGet($h.U({
+                            c: 'special',
+                            a: 'play_num',
+                            q: {
+                                task_id: item.id,
+                                special_id: item.special_id
+                            }
+                        }), function () {
+                            window.location.assign($h.U({
+                                c: 'special',
+                                a: item.type == 1 ? 'task_text_info' : 'task_info',
+                                q: {
+                                    id: item.id,
+                                    specialId: item.special_id,
+                                    viewing_time: item.watch && item.watch.viewing_time || 0
+                                }
+                            }));
+                        });
+                    });
+                },
+                //滑动底部加载
+                bScrollInit: function () {
+                    var that = this;
+                    $h.EventUtil.listenTouchDirection(document, function () {
+                        if (that.special.type == 5) {
+                            that.columnLoading == false && that.getCloumnTask();
+                        } else {
+                            that.otherLoading == false && that.getCourseList();
+                        }
+                    }, false);
+                },
+                // 点击收藏
+                collect: function () {
+                    var vm = this;
+                    app.baseGet("{:url('index/login_user')}", function () {
+                        $h.loadFFF();
+                        app.baseGet("{:url('special/collect')}?id=" + vm.special.id, function (res) {
+                            $h.loadClear();
+                            vm.special.collect = !vm.special.collect;
+                            layer.msg(vm.special.collect ? '收藏成功' : '取消收藏成功');
+                        }, function () {
+                            $h.loadClear();
+                        });
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                // 点击客服
+                customerService: function () {
+                    var vm = this;
+                    app.baseGet("{:url('index/login_user')}", function () {
+                        app.baseGet("{:url('PublicApi/get_site_service_phone')}?mer_id=" + special.mer_id, function (res) {
+                            var data = res.data.data;
+                            if (Array.isArray(data)) {
+                                app.baseGet("{:url('PublicApi/public_data')}", function (res) {
+                                    data = res.data.data;
+                                    if (data.customer_service === '3') {
+                                        if (data.site_service_phone) {
+                                            layer.confirm('拨打<a href="tel:' + data.site_service_phone + '">' + data.site_service_phone + '</a>进行咨询？', {
+                                                title: false,
+                                                closeBtn: false,
+                                                btn: ['拨打', '取消']
+                                            }, function (index) {
+                                                window.location.assign('tel:' + data.site_service_phone);
+                                                layer.close(index);
+                                            });
+                                        } else {
+                                            layer.msg('抱歉，无法联系客服');
+                                        }
+                                    } else {
+                                        window.location.assign("{:url('service/service_list')}?mer_id=" + special.mer_id);
+                                    }
+                                });
+                            } else {
+                                layer.confirm('拨打<a href="tel:' + data.site_service_phone + '">' + data.site_service_phone + '</a>进行咨询？', {
+                                    title: false,
+                                    closeBtn: false,
+                                    btn: ['拨打', '取消']
+                                }, function (index) {
+                                    window.location.assign('tel:' + data.site_service_phone);
+                                    layer.close(index);
+                                });
+                            }
+                        });
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                //打开支付插件,并检测登录状态,没有登录,打开登录插件
+                OpenPay: function (is_pink) {
+                    var vm = this;
+                    this.pay_type_num = is_pink;
+                    app.baseGet("{:url('index/login_user')}", function () {
+                        if (isWechat) {
+                            app.baseGet("{:url('index/user_login')}", function () {
+                                switch (is_pink) {
+                                    case 1:
+                                        if (!this.special.pay_type) {
+                                            return $h.pushMsg('免费的不可以赠送哦');
+                                        }
+                                        if (this.isMember && !this.special.member_pay_type) {
+                                            return $h.pushMsg('会员价免费的不可以赠送哦');
+                                        }
+                                        this.money = this.special.money;
+                                        this.payDialogOpen = true;
+                                        break;
+                                    case 2:
+                                        if (this.isMember) {
+                                            this.money = this.special.member_pay_type ? this.special.member_money : 0;
+                                        } else {
+                                            this.money = this.special.money;
+                                        }
+                                        this.payDialogOpen = true;
+                                        break;
+                                    case 3:
+                                        this.money = this.special.pink_money;
+                                        this.payDialogOpen = true;
+                                        break;
+                                    case 4:
+                                        this.payDialogOpen = false;
+                                        app.baseGet($h.U({
+                                            c: 'special',
+                                            a: 'receive_gift',
+                                            q: {orderId: orderId}
+                                        }), function (res) {
+                                            $h.showMsg({
+                                                title: res.data.msg,
+                                                icon: 'success',
+                                                success: function () {
+                                                    window.location.assign("{:url('special/grade_special')}");
+                                                }
+                                            })
+                                        });
+                                        break;
+                                    case 5:
+                                        if (!this.otherTaskList.length) {
+                                            return $h.pushMsg('该专题暂无目录内容');
+                                        }
+                                        var opt = {
+                                            c: 'special',
+                                            a: 'single_details',
+                                            q: {
+                                                id: 0
+                                            }
+                                        };
+                                        var task = this.otherTaskList[0];
+                                        if (task.special_task) {
+                                            task = task.special_task[0];
+                                        }
+                                        if (task.is_light) {
+                                            if (task.light_type === 1) {
+                                                opt.a = 'single_text_detail';
+                                            }
+                                        } else {
+                                            opt.a = task.type === 1 ? 'task_text_info' : 'task_info';
+                                            opt.q.specialId = task.special_id;
+                                            opt.q.viewing_time = task.watch && task.watch.viewing_time || 0;
+                                        }
+                                        opt.q.id = task.id;
+                                        window.location.assign($h.U(opt));
+                                        break;
+                                    case 6:
+                                        if (this.liveInfo.studio_pwd && this.special.pay_type == 2) {
+                                            this.password = true;
+                                            return;
+                                        }
+                                        window.location.assign("{:url('live/index')}?stream_name=" + this.stream_name + '&record_id=' + this.RecordId);
+                                        break;
+                                }
+                            }.bind(this), function () {
+                                vm.loginShow = true;
+                            }, true);
+                        } else {
+                            switch (is_pink) {
+                                case 1:
+                                    if (!this.special.pay_type) {
+                                        return $h.pushMsg('免费的不可以赠送哦');
+                                    }
+                                    if (this.isMember && !this.special.member_pay_type) {
+                                        return $h.pushMsg('会员价免费的不可以赠送哦');
+                                    }
+                                    this.money = this.special.money;
+                                    this.payDialogOpen = true;
+                                    break;
+                                case 2:
+                                    if (this.isMember) {
+                                        this.money = this.special.member_pay_type ? this.special.member_money : 0;
+                                    } else {
+                                        this.money = this.special.money;
+                                    }
+                                    this.payDialogOpen = true;
+                                    break;
+                                case 3:
+                                    this.money = this.special.pink_money;
+                                    this.payDialogOpen = true;
+                                    break;
+                                case 4:
+                                    this.payDialogOpen = false;
+                                    app.baseGet($h.U({
+                                        c: 'special',
+                                        a: 'receive_gift',
+                                        q: {orderId: orderId}
+                                    }), function (res) {
+                                        $h.showMsg({
+                                            title: res.data.msg,
+                                            icon: 'success',
+                                            success: function () {
+                                                window.location.assign("{:url('special/grade_special')}");
+                                            }
+                                        })
+                                    });
+                                    break;
+                                case 5:
+                                    if (!this.otherTaskList.length) {
+                                        return $h.pushMsg('该专题暂无目录内容');
+                                    }
+                                    var opt = {
+                                        c: 'special',
+                                        a: 'single_details',
+                                        q: {
+                                            id: 0
+                                        }
+                                    };
+                                    var task = this.otherTaskList[0];
+                                    if (task.special_task) {
+                                        task = task.special_task[0];
+                                    }
+                                    if (task.is_light) {
+                                        if (task.light_type === 1) {
+                                            opt.a = 'single_text_detail';
+                                        }
+                                    } else {
+                                        opt.a = task.type === 1 ? 'task_text_info' : 'task_info';
+                                        opt.q.specialId = task.special_id;
+                                        opt.q.viewing_time = task.watch && task.watch.viewing_time || 0;
+                                    }
+                                    opt.q.id = task.id;
+                                    window.location.assign($h.U(opt));
+                                    break;
+                                case 6:
+                                    if (this.liveInfo.studio_pwd && this.special.pay_type == 2) {
+                                        this.password = true;
+                                        return;
+                                    }
+                                    window.location.assign("{:url('live/index')}?stream_name=" + this.stream_name + '&record_id=' + this.RecordId);
+                                    break;
+                            }
+                        }
+                    }.bind(this), function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                ReceiveGift: function () {
+                    var that = this;
+                    if (!orderId) return;
+                    app.baseGet($h.U({c: 'special', a: 'receive_gift', q: {orderId: orderId}}), function (res) {
+                        $h.showMsg({
+                            title: res.data.msg,
+                            icon: 'success',
+                            success: function () {
+                                window.location.href = $h.U({c: 'index', a: 'index'});
+                            }
+                        })
+                    });
+                },
+                //关闭登录
+                loginClose: function (val) {
+                    this.loginShow = false;
+                    val && this.logComplete();
+                },
+                //登录完成回调事件
+                logComplete: function () {
+                    var that = this;
+                    that.isLogin = true;
+                    that.otherLoaded = false;
+                    that.where.page = false;
+                    that.otherTaskList = [];
+                    that.getCourseList();
+                    app.baseGet($h.U({c: 'special', a: 'isMember'}), function (res) {
+                        var isMember = res.data.data.is_member;
+                        that.isMember = isMember;
+                        that.now_money = res.data.data.now_money;
+                        switch (that.pay_type_num) {
+                            case 1:
+                                that.money = (isMember && that.special.member_pay_type == 1) ? that.special.member_money : that.special.money;
+                                break;
+                            case 2:
+                                if (isMember) {
+                                    that.money = that.special.member_pay_type ? that.special.member_money : 0;
+                                } else {
+                                    that.money = that.special.money;
+                                }
+                                break;
+                            case 3:
+                                that.money = that.special.pink_money;
+                                break;
+                        }
+                    });
+                    app.baseGet($h.U({
+                        c: 'special',
+                        a: 'special_validity',
+                        q: {
+                            id: special.id
+                        }
+                    }), function (res) {
+                        that.special_validity = res.data.data.validity;
+                    }, function () {
+                    }, true);
+                },
+                //所有插件回调处理事件
+                changeVal: function (opt) {
+                    if (typeof opt != 'object') opt = {};
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                CountDown: function (opt, that) {
+                    if (typeof opt != 'object') opt = {};
+                    var name = opt.name || '', value = null, that = that ? that : this;
+                    if (name.indexOf('.') === -1)
+                        value = that[name];
+                    else {
+                        var nameArray = name.split('.');
+                        value = that[nameArray[0]][nameArray[1]];
+                    }
+                    var tiem = opt.time || 1000, timeName = opt.time_name || 'datatime',
+                        strName = {hour: "00", minute: "00", second: "00"},
+                        outputName = opt.output || 'difftime';
+                    if (!name) return false;
+                    if (value === undefined) return false;
+                    opt.nowTime = function () {
+                        if (Array.isArray(value)) {
+                            for (var i = 0; i < value.length; i++) {
+                                var intDiff = value[i][timeName] - Date.parse(new Date()) / 1000;//获取数据中的时间戳的时间差；
+                                var days = 0, hour = 0, minute = 0, second = 0;
+                                if (intDiff > 0) {
+                                    hour = Math.floor(intDiff / (60 * 60)) - (days * 24);
+                                    minute = Math.floor(intDiff / 60) - (hour * 60);
+                                    second = Math.floor(intDiff) - (hour * 60 * 60) - (minute * 60);
+                                    if (hour <= 9) hour = '0' + hour;
+                                    if (minute <= 9) minute = '0' + minute;
+                                    if (second <= 9) second = '0' + second;
+                                    strName = {
+                                        hour: hour,
+                                        minute: minute,
+                                        second: second
+                                    };
+                                } else {
+                                    strName = {
+                                        hour: "00",
+                                        minute: "00",
+                                        second: "00"
+                                    };
+                                }
+                                value[i][outputName] = strName;
+                            }
+                            that.$set(that, name, value);
+                        } else {
+                            var intDiff = value[timeName] - Date.parse(new Date()) / 1000;
+                            var days = 0, hour = 0, minute = 0, second = 0;
+                            if (intDiff > 0) {
+                                hour = Math.floor(intDiff / (60 * 60)) - (days * 24);
+                                minute = Math.floor(intDiff / 60) - (hour * 60);
+                                second = Math.floor(intDiff) - (hour * 60 * 60) - (minute * 60);
+                                if (hour <= 9) hour = '0' + hour;
+                                if (minute <= 9) minute = '0' + minute;
+                                if (second <= 9) second = '0' + second;
+                                strName = {
+                                    hour: hour,
+                                    minute: minute,
+                                    second: second
+                                };
+                            } else {
+                                strName = {
+                                    hour: "00",
+                                    minute: "00",
+                                    second: "00"
+                                };
+                            }
+                            if (name.indexOf('.') === -1)
+                                that.$set(that[name], outputName, strName);
+                            else {
+                                var nameArray = name.split('.');
+                                that.$set(that[nameArray[0]][nameArray[1]], outputName, strName);
+                            }
+                        }
+                    };
+                    opt.nowTime();
+                    setInterval(opt.nowTime, tiem);
+                },
+                //播放回放
+                playBackRecord: function (item) {
+                    this.RecordId = item;
+                    this.OpenPay(6);
+                },
+                // 关联资料
+                specialMaterial: function () {
+                    app.baseGet($h.U({
+                        c: 'special',
+                        a: 'SpecialDataDownload',
+                        q: {
+                            special_id: this.special.id
+                        }
+                    }), function (res) {
+                        this.materialList = res.data.data;
+                    }.bind(this));
+                },
+                // 获取返佣金额
+                rebateAmount: function () {
+                    var vm = this;
+                    app.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'rebateAmount',
+                        p: {
+                            id: this.special.id
+                        }
+                    }), function (res) {
+                        vm.rebateMoney = parseFloat(res.data.data.brokeragePrice);
+                    });
+                },
+                rebateAction: function (value) {
+                    switch (value) {
+                        case 'close':
+                            this.rebateMoney = 0;
+                            break;
+                        case 'share':
+                            this.createPoster();
+                            break;
+                    }
+                }
+            },
+        });
+    });
+</script>
+{/block}

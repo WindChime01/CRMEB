@@ -1,0 +1,713 @@
+{extend name="public/container"}
+{block name="title"}{$title}{/block}
+{block name="head_top"}
+<style>
+    body {
+        padding-bottom: 1.24rem;
+        padding-bottom: calc(1.24rem + constant(safe-area-inset-bottom));
+        padding-bottom: calc(1.24rem + env(safe-area-inset-bottom));
+        background-color: #f5f5f5;
+    }
+
+    .thematic-details,
+    .nav {
+        background-color: #fff;
+    }
+
+    .indexNew .learn {
+        font-size: 0;
+    }
+
+    .indexNew .learn span {
+        font-size: .22rem;
+        color: #999;
+    }
+
+    .indexNew .broadcast .learn span:first-child {
+        font-weight: bold;
+        font-size: .26rem;
+    }
+
+    .carousel {
+        padding-right: .3rem;
+        padding-left: .3rem;
+        background-color: #fff;
+    }
+
+    .carousel .swiper-container {
+        border-radius: .16rem;
+    }
+
+    .carousel img {
+        display: block;
+        width: 100%;
+        height: 3.24rem;
+        border-radius: .16rem;
+        object-fit: cover;
+    }
+
+    .carousel .swiper-pagination {
+        font-size: 0;
+    }
+
+    .carousel .swiper-container-horizontal>.swiper-pagination-bullets,
+    .carousel .swiper-pagination-custom,
+    .carousel .swiper-pagination-fraction {
+        bottom: .2rem;
+    }
+
+    .carousel .swiper-container-horizontal>.swiper-pagination-bullets .swiper-pagination-bullet {
+        margin: 0 .05rem;
+    }
+
+    .carousel .swiper-pagination-bullet {
+        width: .1rem;
+        height: .1rem;
+        border-radius: .05rem;
+        background: #B4B4B4;
+        opacity: .5;
+    }
+
+    .carousel .swiper-pagination-bullet-active {
+        width: .2rem;
+        background: #2c8eff;
+        opacity: 1;
+    }
+
+    .icp {
+        padding: .32rem;
+        word-break: break-all;
+        text-align: center;
+        font-size: .24rem;
+        line-height: 1.5;
+    }
+
+    .icp a {
+        color: #666666;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="indexNew">
+    <!--关注-->
+    {if !$subscribe && $is_official_account_switch}
+    <div class="thematic-details" v-if="topFocus">
+        <div class="follow acea-row row-between-wrapper">
+            <div>点击“立即关注”即可关注公众号</div>
+            <div>
+                <span class="followBnt" @click=" is_code = true">立即关注</span>
+                <span class="iconfont iconguanbi2" @click="topFocus = false"></span>
+            </div>
+        </div>
+    </div>
+    {/if}
+    <!--搜索-->
+    <div class="header">
+        <a class="search acea-row row-center-wrapper" href="{:Url('search')}">
+            <span class="iconfont iconsousuo"></span>输入你想要找的课程名称</a>
+    </div>
+    <!--幻灯片-->
+    <div v-if="bannerList.length" class="carousel">
+        <div id="swiper1" class="swiper-container">
+            <div class="swiper-wrapper">
+                <div v-for="item in bannerList" :key="item.id" class="swiper-slide">
+                    <a :href="item.url">
+                        <img :src="item.pic">
+                    </a>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+    <!--导航-->
+    <div v-if="navList.length" class="nav acea-row">
+        <a class="item" v-for="(item,index) in navList" :href="getNavHref(item,1)">
+            <div class="pictrue"><img :src="item.icon"></div>
+            <div class="text">{{item.title}}</div>
+        </a>
+    </div>
+    <!-- 新闻 -->
+    <div v-if="newsList.length" class="news">
+        <div class="pictrue"><img src="{__WAP_PATH}zsff/images/news.png" /></div>
+        <div id="swiper2" class="swiper-container">
+            <div class="swiper-wrapper">
+                <div v-for="(item, index) in newsList" :key="index" class="swiper-slide">
+                    <a :href="item.url">{{ item.title }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--活动区域-->
+    <div class="activity acea-row row-between" v-if="activity.length || activityOne.id">
+        <a class="left" :href="activityOne.wap_link">
+            <div class="title line1" v-text="activityOne.title"></div>
+            <div class="info line1" v-text="activityOne.info"></div>
+            <div class="pictrue"><img :src="activityOne.pic"></div>
+        </a>
+        <div class="right" v-if="activity.length">
+            <a class="item acea-row row-middle" v-for="item in activity" :href="item.wap_link">
+                <div class="text">
+                    <div class="title line1" v-text="item.title"></div>
+                    <div class="info line1" v-text="item.info">考研强助力</div>
+                </div>
+                <div class="pictrue"><img :src="item.pic"></div>
+            </a>
+        </div>
+    </div>
+    <!-- 自定义排版 -->
+    <template v-if="recommend.length">
+        <template v-for="(item, index) in recommend">
+            <!-- 资料 -->
+            <recommend-material v-if="item.type === 14" :key="item.id" :material-list="item.list" :type-setting="item.typesetting" all-link="{:url('material/material_list')}"
+                                cell-link="{:url('special/data_details')}" :material-title="item.title"></recommend-material>
+            <!-- 广告 -->
+            <recommend-poster v-else-if="item.type === 13" :key="item.id" :advert-list="item.list"></recommend-poster>
+            <!-- 练习模式 -->
+            <recommend-problem v-else-if="item.type === 11" :key="item.id" :obj="item"></recommend-problem>
+            <!-- 考试模式 -->
+            <recommend-question v-else-if="item.type === 12" :key="item.id" :obj="item"></recommend-question>
+            <!-- 拼团课程 -->
+            <div v-else-if="item.type === 8 && item.list.length" :key="item.id" class="group-section">
+                <div class="title">
+                    <div class="name">{{ item.title }}</div>
+                    <div class="wrap">
+                        <div class="img-wrap">
+                            <img class="img" v-for="itm in groupWork.avatar" :src="itm.avatar">
+                        </div>
+                        {{groupWork.count}}人拼团成功
+                    </div>
+                    <a class="link" href="{:url('special/group_list')}">
+                        查看更多<span class="iconfont iconxiangyou"></span>
+                    </a>
+                </div>
+                <div id="swiper3" class="swiper-container">
+                    <div class="swiper-wrapper">
+                        <div v-for="(itm, idx) in item.list" :key="itm.id" class="swiper-slide">
+                            <a class="link" :href="(itm.is_light ? '{:url('special/single_details')}' : '{:url('special/details')}') + '?id=' + itm.id">
+                                <img class="img" :src="itm.image">
+                                <div class="name">{{ itm.title }}</div>
+                                <div class="wrap">
+                                    <div class="pin">拼</div>
+                                    <div class="money">￥<span>{{ itm.pink_money }}</span></div>
+                                    <div class="button">去拼团</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 新闻资讯 -->
+            <div v-else-if="item.type === 1 && item.list.length" :key="item.id" class="news-section">
+                <div class="title">
+                    <div>{{ item.title }}</div>
+                    <a class="link" href="{:url('article/news_list')}">
+                        查看更多<span class="iconfont iconxiangyou"></span>
+                    </a>
+                </div>
+                <div class="list">
+                    <a v-for="(itm, idx) in item.list" :key="itm.link_id" :href="'{:url('article/news_detail')}?id=' + itm.link_id" class="link">
+                        <div class="text">
+                            <div class="name">{{ itm.title }}</div>
+                            <div class="wrap">
+                                <template v-for="(v, i) in itm.label">
+                                    <div v-if="!i" class="hot">{{ v }}</div>
+                                </template>
+                                <div class="browse">
+                                    <span class="iconfont iconliulanliang"></span>{{ itm.browse_count }}
+                                </div>
+                            </div>
+                        </div>
+                        <img class="img" :src="itm.image">
+                    </a>
+                </div>
+            </div>
+            <!--直播-->
+            <div v-else-if="item.type === 5 && item.list.length" :key="item.id" class="broadcast">
+                <div class="public_title acea-row row-between-wrapper">
+                    <div class="name">{{ item.title }}</div>
+                </div>
+                <div id="swiper4" class="swiper-container swiperScroll">
+                    <div class="swiper-wrapper">
+                        <a class="swiper-slide item" v-for="itm in item.list" :href="getDetails(2,itm.id)">
+                            <div class="pictrue">
+                                <img :src="itm.image">
+                                <div class="state acea-row row-center-wrapper" v-if="itm.status == 1">
+                                    <img src="/wap/first/zsff/images/live01.png">
+                                    <div class="stateTxt">直播中</div>
+                                </div>
+                                <div class="state return acea-row row-center-wrapper" v-else-if="itm.status == 2">
+                                    <img src="/wap/first/zsff/images/returnVisit.png">
+                                    <div class="stateTxt">回放</div>
+                                </div>
+                                <div class="state make acea-row row-center-wrapper" v-else-if="itm.status == 3">
+                                    <img src="/wap/first/zsff/images/live_time.png">
+                                    <div class="stateTxt">直播时间 {{itm.start_play_time}}</div>
+                                </div>
+                                <div class="state return acea-row row-center-wrapper" v-else-if="itm.status == 4">
+                                    <img src="/wap/first/zsff/images/returnVisit.png">
+                                    <div class="stateTxt">已结束</div>
+                                </div>
+                            </div>
+                            <div class="text">
+                                <div class="name line1" v-text="itm.title"></div>
+                                <div class="info learn"><span>{{itm.records}}</span><span>人已学</span></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- 讲师 -->
+            <div v-else-if="item.type === 6 && item.list.length" :key="item.id" class="teacher">
+                <div class="teacher-hd">
+                    <div class="name">{{ item.title }}</div>
+                    <a class="link" href="{:url('wap/merchant/teacher_list')}">查看更多<span class="iconfont iconxiangyou"></span></a>
+                </div>
+                <div class="swiper-container swiper5">
+                    <div class="swiper-wrapper">
+                        <div v-for="(itm, index) in item.list" :key="index" class="swiper-slide">
+                            <a :href="'{:url('merchant/teacher_detail')}?id=' + itm.id" class="link" style="display: block;">
+                                <img class="img" :src="itm.lecturer_head">
+                                <div class="name">{{itm.lecturer_name}}</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 线下活动 -->
+            <div v-else-if="item.type === 7 && item.list.length" :key="item.id" class="essential activity-offline">
+                <div class="public_title acea-row row-between-wrapper">
+                    <div class="name">{{ item.title }}</div>
+                    <a class="more acea-row row-middle" :href="getActivityHref()">查看更多<span class="iconfont iconxiangyou"></span></a>
+                </div>
+                <div class="list">
+                    <a class="item" v-for="itm in item.list" :href="activityDetails(itm.id)">
+                        <div class="pictrue">
+                            <img :src="itm.image">
+                        </div>
+                        <div class="text">
+                            <div class="title acea-row row-middle">
+                                <div class="name line1" v-text="itm.title"></div>
+                            </div>
+                            <div class="info">
+                                <div><span class="iconfont icondidian"></span>{{ itm.province }}{{ itm.city }}{{ itm.district }}{{ itm.detail }}</div>
+                                <div><span class="iconfont iconshijian2"></span>{{ itm.time }}</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <template v-else>
+                <!-- 左右切换 -->
+                <div v-if="item.typesetting == 4 && item.list.length" :key="item.id" class="curriculum">
+                    <div class="public_title acea-row row-between-wrapper">
+                        <div class="name" v-text="item.title"></div>
+                        <a class="more acea-row row-middle" v-if="item.type !== 10" :href="getNavHref(item)">查看更多<span class="iconfont iconxiangyou"></span></a>
+                    </div>
+                    <div class="swiper-container" :class="'swiper-course-'+index" :data-index="index">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide" v-for="(vv,inx) in item.data">
+                                <div class="public_list">
+                                    <a class="item acea-row" v-for="val in vv.value" :href="getDetails(item.type,val.link_id,val.is_light)">
+                                        <div class="pictrue">
+                                            <img :src="val.image">
+                                        </div>
+                                        <div class="text">
+                                            <div class="title acea-row row-middle">
+                                                <div class="name line1">{{val.title}}</div>
+                                            </div>
+                                            <div class="labelList">
+                                                <span class="labelItem" v-for="label in val.label">{{label}}</span>
+                                            </div>
+                                            <div class="acea-row row-between-wrapper">
+                                                <div>
+                                                    <div class="free" v-if="val.pay_type == 0 || val.pay_type == 2">免费</div>
+                                                    <div class="money" v-if="val.pay_type == 1 && val.is_pink == 0">￥<span>{{val.money}}</span></div>
+                                                    <div class="money" v-if="val.pay_type == 1 && val.is_pink > 0">￥<span>{{val.pink_money}}</span></div>
+                                                </div>
+                                                <div class="total" v-if="!val.is_light && val.special_type!=4 && item.type==0">共{{ val.count }}节</div>
+                                            </div>
+                                            <div v-if="item.type === 10" class="learn"><span>{{ val.browse_count }}</span><span>次学习</span></div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="item.data.length > 1" class="swiper-pagination"></div>
+                    </div>
+                </div>
+                <!-- 大图 -->
+                <div v-if="item.typesetting == 1 && item.list.length" :key="item.id" class="essential">
+                    <div class="public_title acea-row row-between-wrapper">
+                        <div class="name" v-text="item.title"></div>
+                        <a v-if="item.type !== 10" :href="getNavHref(item)" class="more acea-row row-middle">
+                            查看更多<span class="iconfont iconxiangyou"></span>
+                        </a>
+                    </div>
+                    <div class="list">
+                        <a v-for="val in item.list" :href="getDetails(item.type,val.link_id,val.is_light)" class="item">
+                            <div :class="{ 'goods-picture': item.type === 4 }" class="pictrue">
+                                <img :src="val.image">
+                                <div class="label">{{ val.special_type_name }}</div>
+                            </div>
+                            <div class="text">
+                                <div class="title acea-row row-middle">
+                                    <div class="name line1" v-text="val.title"></div>
+                                </div>
+                                <div v-if="item.type === 10" class="learn"><span>{{ val.browse_count }}</span><span>次学习</span></div>
+                                <div class="info acea-row row-between-wrapper">
+                                    <div class="labelList">
+                                        <span class="labelItem" v-for="label in val.label">{{ label }}</span>
+                                    </div>
+                                    <div>
+                                        <div class="free" v-if="val.pay_type == 0 || val.pay_type == 2">免费</div>
+                                        <div class="money" v-if="val.pay_type == 1 && val.is_pink == 0">￥<span>{{ val.money }}</span></div>
+                                        <div class="money" v-if="val.pay_type == 1 && val.is_pink > 0">￥<span>{{ val.pink_money }}</span></div>
+                                        <div class="total" v-if="val.special_type!=4 && item.type==0 && !val.is_light">共{{ val.count }}节</div>
+                                        <div class="total" v-else-if="item.type==4">已售{{ val.count }}件</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <!-- 小图 -->
+                <div v-if="item.typesetting == 3 && item.list.length" :key="item.id" class="interest">
+                    <div class="public_title acea-row row-between-wrapper">
+                        <div class="name" v-text="item.title"></div>
+                        <a v-if="item.type !== 10" :href="getNavHref(item)" class="more acea-row row-middle">
+                            查看更多<span class="iconfont iconxiangyou"></span>
+                        </a>
+                    </div>
+                    <div class="public_list">
+                        <a v-for="val in item.list" :href="getDetails(item.type,val.link_id,val.is_light)" class="item acea-row">
+                            <div class="pictrue" :class="{ 'goods-picture': item.type === 4 }">
+                                <img :src="val.image">
+                                <div class="label">{{val.special_type_name}}</div>
+                            </div>
+                            <div class="text">
+                                <div class="title acea-row row-middle">
+                                    <div class="name line1" v-text="val.title"></div>
+                                </div>
+                                <div class="labelList" style="height:.4rem;line-height:.4rem;">
+                                    <span v-for="label in val.label" class="labelItem">{{label}}</span>
+                                </div>
+                                <div class="acea-row row-middle row-between" style="height:.45rem;" v-if="item.type==0">
+                                    <div>
+                                        <div class="free" v-if="val.pay_type == 0 || val.pay_type == 2">免费</div>
+                                        <div class="money" v-if="val.pay_type == 1 && val.is_pink == 0">￥<span>{{val.money}}</span></div>
+                                        <div class="money" v-if="val.pay_type == 1 && val.is_pink > 0">￥<span>{{val.pink_money}}</span></div>
+                                    </div>
+                                    <div class="total" v-if="val.special_type!=4 && !val.is_light">共{{ val.count }}节</div>
+                                </div>
+                                <div v-if="item.type === 4" class="acea-row row-middle row-between" style="height:.45rem;">
+                                    <div>
+                                        <div class="money" v-if="val.money > 0">￥<span>{{val.money}}</span></div>
+                                        <div class="free" v-else>免费</div>
+                                    </div>
+                                </div>
+                                <div v-if="item.type === 10" class="learn"><span>{{ val.browse_count }}</span><span>次学习</span></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <!-- 宫图 -->
+                <div v-if="item.typesetting == 2 && item.list.length" :key="item.id" class="interest english">
+                    <div class="public_title acea-row row-between-wrapper">
+                        <div class="name" v-text="item.title"></div>
+                        <a v-if="item.type !== 10" :href="getNavHref(item)" class="more acea-row row-middle">
+                            查看更多<span class="iconfont iconxiangyou"></span>
+                        </a>
+                    </div>
+                    <div class="list acea-row row-between-wrapper">
+                        <a v-for="val in item.list" :href="getDetails(item.type,val.link_id,val.is_light)" class="item">
+                            <div class="pictrue" :class="{ 'goods-picture': item.type === 4 }"><img :src="val.image"></div>
+                            <div class="text">
+                                <div class="title acea-row row-middle">
+                                    <div class="name line1" v-text="val.title"></div>
+                                </div>
+                                <div class="label acea-row row-middle">
+                                    <span class="cell" v-for="label in val.label">{{label}}</span>
+                                </div>
+                                <div class="group acea-row row-middle" v-if="item.type==0">
+                                    <div class="free" v-if="val.pay_type == 0 || val.pay_type == 2">免费</div>
+                                    <div class="money" v-if="val.pay_type == 1 && val.is_pink == 0">
+                                        ￥<span class="num">{{val.money}}</span>
+                                    </div>
+                                    <div class="money" v-if="val.pay_type == 1 && val.is_pink > 0">
+                                        ￥<span class="num">{{val.pink_money}}</span>
+                                    </div>
+                                    <div class="total" v-if="val.special_type!=4 && !val.is_light">共{{ val.count }}节</div>
+                                </div>
+                                <div class="group acea-row row-middle" v-if="item.type==4">
+                                    <div class="free" v-if="val.money==0">免费</div>
+                                    <div class="money" v-if="val.money > 0">
+                                        ￥<span class="num">{{val.money}}</span>
+                                    </div>
+                                    <div class="total">已售{{ val.count }}件</div>
+                                </div>
+                                <div v-if="item.type === 10" class="learn"><span>{{ val.browse_count }}</span><span>次学习</span></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </template>
+        </template>
+    </template>
+    <div v-if="ICP" class="icp">
+        <a href="http://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">{{ ICP }}</a>
+    </div>
+    <p v-show="loading==true" class="loading-line">
+        <span v-show="loading==true" class="fa fa-spinner loadingpic" style="font-size: 0.4rem"></span>
+    </p>
+    <!--关注二维码-->
+    {if !$subscribe}
+    <div class="mask" style="align-items:center;display: flex;" v-show="is_code" @click="is_code=false">
+        <img src="{$code_url}" alt="" style="width: 5rem;height: 5rem;margin: 0 auto;">
+    </div>
+    {/if}
+    <div class="masks" style="align-items:center;display: flex;" v-show="is_live_one">
+        <div class="liveone">
+            <img src="{__WAP_PATH}zsff/images/close1.png" class="close" alt="" @click="clickLive(0,liveOne.id)">
+            <img :src="liveOne.image" alt="" style="width: 100%;margin: 0 auto;">
+            <div class="btn" @click="clickLive(1,liveOne.id)">看直播</div>
+        </div>
+    </div>
+    {include file="public/store_menu"}
+</div>
+{/block}
+{block name="foot"}
+<script>
+    var banner = {$banner}, activity = {$activity}, liveOne = {$liveOne};
+    var keepOnRecord = '{$keep_on_record}';
+    require([
+        'vue',
+        'helper',
+        'store',
+        'swiper',
+        'components/recommend/poster/index',
+        'components/recommend/problem/index',
+        'components/recommend/question/index',
+        'components/recommend/material/index',
+        'components/base-login/index',
+        'jquery-cookie'
+    ], function (Vue, $h, store, Swiper, recommendPoster, recommendProblem, recommendQuestion, RecommendMaterial, BaseLogin) {
+        new Vue({
+            el: '#app',
+            components: {
+                'recommend-poster': recommendPoster,
+                'recommend-problem': recommendProblem,
+                'recommend-question': recommendQuestion,
+                'recommend-material': RecommendMaterial,
+                'base-login': BaseLogin
+            },
+            data: {
+                liveOne: liveOne ? liveOne : {},
+                bannerList: banner,
+                recommend: [],
+                navList: [],
+                loading: false,
+                loadTitle: '',
+                loadend: false,
+                page: 1,
+                limit: 10,
+                is_code: false,
+                activity: activity,
+                activityOne: {},
+                is_live_one: false,
+                newsList: [],
+                topFocus: true,
+                groupWork: {},
+                ICP: keepOnRecord
+            },
+            created: function () {
+                this.getNewsList();
+            },
+            mounted: function () {
+                var that = this;
+                var live_one = $.cookie('live_one');
+                if (live_one != undefined && live_one != null) live_one = JSON.parse(live_one);
+                if ($.isEmptyObject(that.liveOne) == true) {
+                    $.cookie('live_one', null);
+                    that.is_live_one = false;
+                } else {
+                    if (live_one == undefined && live_one == null) {that.is_live_one = true;}
+                    else if (live_one.is_lives && live_one.id == that.liveOne.id) {that.is_live_one = false;}
+                    else if (live_one.id != that.liveOne.id) {that.is_live_one = true;}
+                    else {that.is_live_one = false;}
+                }
+                this.$nextTick(function () {
+                    // 轮播图
+                    new Swiper('#swiper1', {
+                        autoplay: true,
+                        loop: true,
+                        spaceBetween: 20,
+                        pagination: {
+                            el: '.swiper-pagination'
+                        }
+                    });
+                });
+                if (this.activity.length) {
+                    var activityOne = this.activity.shift();
+                    that.$set(that, "activityOne", activityOne);
+                }
+                this.get_content_recommend();
+                this.get_recommend();
+                this.getGroupWork();
+            },
+            methods: {
+                getGroupWork: function () {
+                    var that = this;
+                    store.baseGet($h.U({c: 'special', a: 'groupWork'}), function (res) {
+                        that.groupWork = res.data.data;
+                    }.bind(this))
+                },
+                // 获取新闻列表
+                getNewsList: function () {
+                    var that = this;
+                    store.baseGet($h.U({c: 'article', a: 'news_bulletin'}), function (res) {
+                        that.newsList = res.data.data;
+                        that.$nextTick(function () {
+                            new Swiper('#swiper2', {
+                                direction: "vertical",
+                                autoplay: true,
+                                loop: true
+                            });
+                        });
+                    }, function (err) {
+                        $h.pushMsgOnce('获取失败');
+                    });
+                },
+                clickLive: function (type, id) {
+                    this.is_live_one = false;
+                    var data = {};
+                    data.is_lives = 1;
+                    data.id = id;
+                    $.cookie('live_one', JSON.stringify(data), {expires: 1});
+                    if (type) {
+                        window.location.href = $h.U({c: 'special', a: 'details', q: {id: id}});
+                    }
+                },
+                activityDetails: function (id) {
+                    return $h.U({c: 'special', a: 'activity_details', q: {id: id}});
+                },
+                getDetails: function (type, id, is_light) {
+                    switch (type) {
+                        case 0:
+                        case 2:
+                        case 8:
+                            return is_light ? $h.U({c: 'special', a: 'single_details', q: {id: id}}) : $h.U({c: 'special', a: 'details', q: {id: id}});
+                            break;
+                        case 1:
+                            return $h.U({c: 'article', a: 'details', q: {id: id}});
+                            break;
+                        case 4:
+                            return $h.U({c: 'store', a: 'detail', q: {id: id}});
+                            break;
+                        case 10:
+                            return $h.U({c: 'special', a: 'source_detail', q: {id: id}});
+                            break;
+                    }
+                },
+                getNavHref: function (item, bo) {
+                    if (item.type == 3) {
+                        return item.link;
+                    } else if (item.type == 4) {
+                        return $h.U({c: 'store', a: 'index'});
+                    } else {
+                        if (bo) {
+                            return $h.U({c: 'special', a: 'special_cate', q: {cate_id: item.grade_id}});
+                        }
+                        return $h.U({
+                            c: 'index',
+                            a: 'unified_list',
+                            q: {type: item.type, title: item.title, recommend_id: item.id}
+                        });
+                    }
+                },
+                getActivityHref: function () {
+                    return $h.U({
+                        c: 'activity',
+                        a: 'index'
+                    });
+                },
+                get_recommend: function () {
+                    store.baseGet($h.U({c: 'index', a: 'get_recommend'}), function (res) {
+                        this.$set(this, 'navList', res.data.data);
+                    }.bind(this))
+                },
+                initSwiper: function () {
+                    var that = this;
+                    this.$nextTick(function () {
+                        var swiperScroll = new Swiper('#swiper4', {
+                            slidesPerView: 'auto',
+                            spaceBetween: 10,
+                            slidesOffsetBefore: 10,
+                            slidesOffsetAfter: 10
+                        });
+                        for (var index in that.recommend) {
+                            if (that.recommend[index].typesetting == 4 && that.recommend[index].list.length) {
+                                var className = '.swiper-course-' + index;
+                                new Swiper(className, {
+                                    pagination: '.swiper-pagination',
+                                    speed: 1000,
+                                    watchOverflow: true,
+                                    paginationClickable: false,
+                                    autoplayDisableOnInteraction: false,
+                                    onSlideChangeStart: function (swiper) {
+                                        var inx = $(className).data('index');
+                                        that.$set(that.recommend[inx], 'courseIndex', swiper.activeIndex + 1);
+                                    }
+                                });
+                            }
+                        }
+                    })
+                },
+                get_content_recommend: function () {
+                    if (this.loading) return;
+                    this.loading = true;
+                    store.baseGet($h.U({
+                        c: 'index',
+                        a: 'get_content_recommend'
+                    }), function (res) {
+                        var list = res.data.data.recommend;
+                        var recommend = $h.SplitArray(list, this.recommend);
+                        this.loading = false;
+
+                        for (var i = recommend.length; i--;) {
+                            if (recommend[i].type === 11) {
+                                recommend[i].url = "{:url('topic/problem_index')}";
+                                recommend[i].urlCategory = "{:url('topic/question_category')}";
+                                recommend[i].source_url = '{__WAP_PATH}';
+                            }
+                            if (recommend[i].type === 12) {
+                                recommend[i].url = "{:url('special/question_index')}";
+                                recommend[i].urlCategory = "{:url('topic/question_category')}";
+                                recommend[i].source_url = '{__WAP_PATH}';
+                            }
+                        }
+
+                        this.$set(this, 'recommend', recommend);
+                        this.initSwiper();
+                        this.$nextTick(function () {
+                            new Swiper('#swiper3', {
+                                slidesPerView: 'auto',
+                                spaceBetween: 10,
+                                slidesOffsetBefore: 10,
+                                slidesOffsetAfter: 10
+                            });
+                            new Swiper('.swiper5', {
+                                slidesPerView: 'auto',
+                                spaceBetween: 10,
+                                slidesOffsetBefore: 10,
+                                slidesOffsetAfter: 10
+                            });
+                        });
+                    }.bind(this), function (res) {
+                        this.loading = false;
+                    }.bind(this));
+                }
+            }
+        });
+    })
+</script>
+{/block}

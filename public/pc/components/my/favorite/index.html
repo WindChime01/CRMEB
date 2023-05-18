@@ -1,0 +1,63 @@
+<el-tabs v-if="activeName === 'favorite'" v-model="active" class="my-favor" @tab-click="tabClick">
+    <el-tab-pane label="收藏课程" name="0">
+        <template v-if="list1.length">
+            <el-row :gutter="20">
+                <el-col v-for="item in list1" :span="6">
+                    <a :href="(item.is_light ? $router.single_detail : $router.special_detail) + '?id=' + item.id">
+                        <div class="image-group">
+                            <el-image :src="item.image" fit="cover"></el-image>
+                            <el-image v-if="item.type === 1" src="/pc/images/course3.png" fit="cover"></el-image>
+                            <el-image v-else-if="item.type === 2" src="/pc/images/course2.png" fit="cover"></el-image>
+                            <el-image v-else-if="item.type === 3" src="/pc/images/course1.png" fit="cover"></el-image>
+                            <el-button icon="el-icon-close" @click.prevent="specialCollect(item.id)">移除</el-button>
+                        </div>
+                        <div>
+                            <div class="title">{{ item.title }}</div>
+                            <div class="label">
+                                <el-tag v-for="label in item.label">{{ label }}</el-tag>
+                            </div>
+                            <div class="money-count">
+                                <div class="money-vip">
+                                    <template v-if="item.pay_type">
+                                        <div class="money">￥<span>{{ item.money }}</span></div>
+                                        <div class="vip">￥{{ item.member_money }}</div>
+                                    </template>
+                                    <div v-else class="money free">免费</div>
+                                </div>
+                                <div v-if="item.type !== 4 && !item.is_light">共{{ item.count }}节</div>
+                            </div>
+                        </div>
+                    </a>
+                </el-col>
+            </el-row>
+            <el-pagination :page-size="limit" :total="count1" :current-page.sync="page1" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page @current-change="get_grade_list1"></el-pagination>
+        </template>
+        <div v-else class="empty"></div>
+    </el-tab-pane>
+    <el-tab-pane label="收藏资料" name="1">
+        <template v-if="list2.length">
+            <div class="material-list">
+                <a v-for="item in list2" :href="$router.material_detail + '?id=' + item.id">
+                    <div>
+                        <el-image :src="item.image" fit="cover"></el-image>
+                        <el-button icon="el-icon-close" @click.prevent="materialCollect(item.id)">移除</el-button>
+                    </div>
+                    <div>
+                        <div class="title">{{ item.title }}</div>
+                        <div class="people">{{ item.ficti + item.sales }}人已下载</div>
+                        <div class="money-vip">
+                            <template v-if="item.pay_type">
+                                <div class="money">￥<span>{{ item.money }}</span></div>
+                                <div class="vip">￥{{ item.member_money }}</div>
+                            </template>
+                            <div v-else class="money free">免费</div>
+                        </div>
+                    </div>
+                    <el-button icon="el-icon-download">去下载</el-button>
+                </a>
+            </div>
+            <el-pagination :page-size="limit" :total="count2" :current-page.sync="page2" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page @current-change="get_grade_list2"></el-pagination>
+        </template>
+        <div v-else class="empty"></div>
+    </el-tab-pane>
+</el-tabs>

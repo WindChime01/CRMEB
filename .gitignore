@@ -1,0 +1,15 @@
+# Windows thumbnail cache files
+/.idea
+/runtime
+/public/uploads
+/public/install/install.lock
+/extend/basic/AuthBasic.php
+/public/nginx.htaccess
+*.txt
+think
+.htaccess
+*.log:
+/application/database.php
+/vendor/workerman/workerman.log
+/public/aa.mp4
+/public/audio.mp3

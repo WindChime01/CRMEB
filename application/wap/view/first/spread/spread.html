@@ -1,0 +1,72 @@
+{extend name="public/container"}
+{block name="title"}推广中心{/block}
+{block name="head"}
+<style>
+    body {
+        background: #F5F5F5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div id="app" class="promotion">
+    <div class="first">
+        <div>可提现金额(元)</div>
+        <div>{$userInfo.brokerage_price}</div>
+        <div>
+            <div class="item">
+                <div>{$data.income}</div>
+                <div>今日收益</div>
+            </div>
+            <div class="item">
+                <div>{$data.order_count}</div>
+                <div>今日订单</div>
+            </div>
+            <div class="item">
+                <div>{$data.spread_count}</div>
+                <div>新增学员</div>
+            </div>
+        </div>
+    </div>
+    <div class="second">
+        <a href="javascript:" @click="withdraw">
+            <span>佣金提现</span>
+        </a>
+        <a href="{:url('spread_detail', ['type'=>2])}">
+            <span>提现记录</span>
+        </a>
+    </div>
+    <div class="third">
+        <a href="{:url('special')}">
+            <span>专题推广</span>
+            <i class="iconfont iconxiangyou"></i>
+        </a>
+        <a href="{:url('my_promoter')}">
+            <span>我的推广</span>
+            <i class="iconfont iconxiangyou"></i>
+        </a>
+        <a href="{:url('commission')}">
+            <span>佣金明细</span>
+            <i class="iconfont iconxiangyou"></i>
+        </a>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'quick'], function (Vue) {
+        new Vue({
+            el: '#app',
+            methods: {
+                withdraw: function () {
+                    if ({$userInfo.brokerage_price}) {
+                        window.location.assign("{:url('spread/withdraw')}");
+                    } else {
+                        layer.msg('可提现金额<br>' + {$userInfo.brokerage_price});
+                    }
+                }
+            }
+        });
+    });
+</script>
+{/block}

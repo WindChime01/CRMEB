@@ -1,0 +1,31 @@
+<div class="recommend recommend0">
+    <div class="head">
+        <div>{{ recommend.title }}<span>{{ recommend.explain }}</span></div>
+        <el-link :href="$router.more_list + '?type=' + recommend.type + '&recommend_id=' + recommend.id" :underline="false">更多<i class="el-icon-arrow-right el-icon--right"></i></el-link>
+    </div>
+    <el-row :gutter="20">
+        <el-col v-for="item in recommend.list" :key="item.id" :span="6">
+            <a :href="(item.is_light ? $router.single_detail : $router.special_detail) + '?id=' + item.id + '&from=more_list&type=' + recommend.type + '&recommend_id=' + recommend.id">
+                <el-image :src="item.image" fit="cover">
+                    <div slot="error" class="image-slot">
+                        <i class="el-icon-picture-outline"></i>
+                    </div>
+                </el-image>
+                <div>
+                    <div class="title">{{ item.title }}</div>
+                    <div class="label-count">
+                        <div>
+                            <el-tag v-for="label in item.label">{{ label }}</el-tag>
+                        </div>
+                        <div v-if="!item.is_light">共{{ item.count }}节</div>
+                    </div>
+                    <div class="browse-money">
+                        <div>{{ item.browse_count }}人已学</div>
+                        <div v-if="item.pay_type" class="money">￥<span>{{ item.money }}</span></div>
+                        <div v-else class="money free">免费</div>
+                    </div>
+                </div>
+            </a>
+        </el-col>
+    </el-row>
+</div>

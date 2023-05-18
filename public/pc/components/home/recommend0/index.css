@@ -1,0 +1,172 @@
+.recommend {
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.recommend .head {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+       -moz-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -webkit-box-align: end;
+    -webkit-align-items: flex-end;
+       -moz-box-align: end;
+        -ms-flex-align: end;
+            align-items: flex-end;
+    font-weight: bold;
+    font-size: 24px;
+    color: #333;
+}
+
+.recommend .head div span {
+    margin-left: 10px;
+    font-weight: normal;
+    font-size: 16px;
+    color: #999;
+}
+
+.recommend .head .el-link.el-link--default {
+    font-size: 14px;
+    color: #666;
+}
+
+.recommend .el-row {
+    margin-top: 30px;
+}
+
+.recommend0 .el-row {
+    margin-bottom: -20px;
+}
+
+.recommend0 .el-col {
+    margin-bottom: 14px;
+}
+
+.recommend0 .el-row a {
+    display: block;
+    border-radius: 8px;
+    background-color: #fff;
+    overflow: hidden;
+    -webkit-transition: 0.3s;
+    -o-transition: 0.3s;
+    -moz-transition: 0.3s;
+    transition: 0.3s;
+}
+
+.recommend0 .el-row a:hover {
+    -webkit-box-shadow: 0 2px 16px rgba(79, 109, 143, 0.12);
+            box-shadow: 0 2px 16px rgba(79, 109, 143, 0.12);
+    -webkit-transform: translateY(-6px);
+       -moz-transform: translateY(-6px);
+        -ms-transform: translateY(-6px);
+         -o-transform: translateY(-6px);
+            transform: translateY(-6px);
+}
+
+.recommend0 .el-image {
+    display: block;
+    width: 100%;
+    height: 160px;
+}
+
+.recommend0 .el-image + div {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.recommend0 .title {
+    padding-top: 15px;
+    overflow: hidden;
+    white-space: nowrap;
+    -o-text-overflow: ellipsis;
+       text-overflow: ellipsis;
+    font-size: 16px;
+    color: #333;
+}
+
+.recommend0 .label-count {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+       -moz-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+       -moz-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 14px;
+    color: #666;
+}
+
+.recommend0 .label-count > div:first-child {
+    font-size: 0;
+}
+
+.recommend0 .el-tag {
+    height: 22px;
+    padding-right: 9px;
+    padding-left: 9px;
+    border-color: rgba(44, 142, 255, 0.06);
+    border-radius: 2px;
+    background-color: rgba(44, 142, 255, 0.06);
+    line-height: 20px;
+    color: #2c8eff;
+}
+
+.recommend0 .el-tag ~ .el-tag {
+    margin-left: 6px;
+}
+
+.recommend0 .browse-money {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+       -moz-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+       -moz-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    height: 48px;
+    border-top: 1px dashed #eee;
+    font-size: 14px;
+    color: #999;
+}
+
+.recommend0 .money {
+    font-size: 14px;
+    color: #ff6b00;
+}
+
+.recommend0 .money.free {
+    font-size: 16px;
+}
+
+.recommend0 .money span {
+    font-size: 18px;
+}
+
+.recommend0 .el-col-6 {
+    padding-right: 7px !important;
+    padding-left: 7px !important;
+}

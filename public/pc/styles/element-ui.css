@@ -1,0 +1,128 @@
+/* element ui */
+.el-button {
+    font-weight: normal;
+}
+
+.el-button--primary {
+    border-color: #2c8eff;
+    background-color: #2c8eff;
+}
+
+.el-dialog {
+    border-radius: 8px;
+}
+
+.el-dialog__headerbtn {
+    font-size: 20px;
+}
+
+.el-dialog__headerbtn .el-dialog__close {
+    color: #8a8a8a;
+}
+
+.el-dialog__headerbtn:focus .el-dialog__close, .el-dialog__headerbtn:hover .el-dialog__close {
+    color: #2c8eff;
+}
+
+.el-loading-spinner .path {
+    stroke: #2c8eff;
+}
+
+.el-input__inner {
+    border-color: #dbdbdb;
+}
+
+.el-input.is-active .el-input__inner, .el-input__inner:focus {
+    border-color: #2c8eff;
+}
+
+.el-tabs__item:focus.is-active.is-focus:not(:active) {
+    -webkit-box-shadow: none;
+     box-shadow: none;
+}
+
+.el-breadcrumb__inner {
+    color: #282828;
+}
+
+.el-breadcrumb__item:last-child .el-breadcrumb__inner, .el-breadcrumb__item:last-child .el-breadcrumb__inner a, .el-breadcrumb__item:last-child .el-breadcrumb__inner a:hover, .el-breadcrumb__item:last-child .el-breadcrumb__inner:hover {
+    color: #282828;
+}
+
+.el-breadcrumb__separator {
+    color: #282828;
+}
+
+.el-breadcrumb__inner a:hover, .el-breadcrumb__inner.is-link:hover {
+    color: #2C8EFF;
+}
+
+.el-carousel__arrow {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+}
+
+.el-pagination {
+    font-weight: normal;
+    text-align: center;
+    color: #666666;
+}
+
+.el-pagination button {
+    padding: 0 18px;
+    border: 1px solid #E9E9E9;
+    border-radius: 2px;
+}
+
+.el-pagination button, .el-pagination span:not([class*=suffix]) {
+    height: 38px;
+    font-size: 14px;
+    line-height: 38px;
+}
+
+.el-pagination .btn-next, .el-pagination .btn-prev {
+    color: #707070;
+}
+
+.el-pagination button:disabled {
+    color: #CCCCCC;
+}
+
+.el-pager li {
+    min-width: 38px;
+    height: 38px;
+    border: 1px solid #E9E9E9;
+    border-radius: 2px;
+    margin-right: 5px;
+    font-size: 14px;
+    line-height: 38px;
+}
+
+.el-pager li:first-child {
+    margin-left: 5px;
+}
+
+.el-pager li.active {
+    border-color: #2C8EFF;
+    background-color: #2C8EFF;
+    color: #FFFFFF;
+}
+
+.el-pager li.active+li {
+    border-left: 1px solid #E9E9E9;
+}
+
+.el-pager li.btn-quicknext, .el-pager li.btn-quickprev {
+    border-color: transparent;
+    color: #999999;
+}
+
+.el-empty {
+    padding: 190px 0;
+    background: #FFFFFF;
+}
+
+.el-empty__image {
+    width: 274px;
+}

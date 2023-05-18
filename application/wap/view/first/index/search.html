@@ -1,0 +1,145 @@
+{extend name="public/container"}
+{block name="title"}搜索{/block}
+{block name="content"}
+<div v-cloak id="app" class="search-page">
+    <form @submit.prevent="onSearch(search)">
+        <label>
+            <i class="iconfont iconsousuo"></i>
+            <input v-model.trim="search" type="search" placeholder="输入搜索课程">
+            <i v-show="search" class="iconfont iconguanbi2" @click="search = ''"></i>
+        </label>
+        <input type="submit" value="搜索">
+    </form>
+    <div v-if="historyList.length" class="section">
+        <div class="title">
+            <div class="text">历史记录</div>
+            <i class="iconfont iconshanchu" @click="deleteHistory"></i>
+        </div>
+        <div class="content">
+            <span v-for="(item, index) in historyList" :key="index" @click="onSearch(item.search)">{{ item.search }}</span>
+        </div>
+    </div>
+    <div v-if="hotList.length" class="section">
+        <div class="title">
+            <div class="text">热门搜索</div>
+        </div>
+        <div class="content">
+            <span v-for="(item, index) in hotList" :key="index" @click="onSearch(item)">{{ item }}</span>
+        </div>
+    </div>
+    <div v-if="specialList.length" class="special-section">
+        <div class="title">专题</div>
+        <div>
+            <a v-for="item in specialList" :key="item.id" :href="(item.is_light ? singleDetailsURL : detailsURL) + '?id=' + item.id">
+                <div class="image">
+                    <img :src="item.image" :alt="item.title">
+                    <div v-if="item.type == 1" class="type">图文</div>
+                    <div v-else-if="item.type == 2" class="type">音频</div>
+                    <div v-else-if="item.type == 3" class="type">视频</div>
+                    <div v-else-if="item.type == 5" class="type">专栏</div>
+                </div>
+                <div class="text">
+                    <div class="special-title">{{ item.title }}</div>
+                    <div class="label">
+                        <span v-for="(label, index) in item.label" :key="index">{{ label }}</span>
+                    </div>
+                    <div class="money-total">
+                        <div class="money">￥<span>{{ item.money }}</span></div>
+                        <div v-if="!item.is_light" class="total">共{{ item.count }}节</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <img v-if="isEmpty" class="empty" src="{__WAP_PATH}zsff/images/no_search.png" alt="暂无搜索结果">
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'store'], function (Vue, store) {
+        new Vue({
+            el: '#app',
+            data: {
+                search: '',
+                historyList: [],
+                hotList: [],
+                specialList: [],
+                limit: 10,
+                singleDetailsURL: '',
+                detailsURL: '',
+                isEmpty: false
+            },
+            watch: {
+                specialList: function (val) {
+                    this.isEmpty = !val.length;
+                }
+            },
+            created: function () {
+                this.getSearchHistory();
+                this.getHotSearch();
+                this.singleDetailsURL = $h.U({
+                    c: 'special',
+                    a: 'single_details'
+                });
+                this.detailsURL = $h.U({
+                    c: 'special',
+                    a: 'details'
+                });
+            },
+            methods: {
+                // 获取搜索历史
+                getSearchHistory: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'index',
+                        a: 'get_search_history'
+                    }), function (res) {
+                        vm.historyList = res.data.data;
+                    });
+                },
+                // 获取热门搜索
+                getHotSearch: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'index',
+                        a: 'get_host_search'
+                    }), function (res) {
+                        vm.hotList = res.data.data;
+                    });
+                },
+                // 搜索内容
+                onSearch: function (search) {
+                    var vm = this;
+                    if (!search || this.loading) {
+                        return;
+                    }
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'index',
+                        a: 'go_search',
+                        q: {
+                            search: search,
+                            limit: this.limit
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.specialList = res.data.data.special;
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                // 删除搜索历史
+                deleteHistory: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'index',
+                        a: 'del_search_history'
+                    }), function () {
+                        vm.historyList = [];
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

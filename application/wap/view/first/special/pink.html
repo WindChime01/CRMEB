@@ -1,0 +1,450 @@
+{extend name="public/container"}
+{block name="title"}拼团详情{/block}
+{block name="head"}
+<style>
+    .detail-section {
+        padding-top: .36rem;
+        border-top: .2rem solid #F5F5F5;
+    }
+
+    .detail-section .count-wrap {
+        margin-bottom: .31rem;
+        font-size: 0;
+        text-align: center;
+    }
+
+    .detail-section .count-wrap .text-wrap {
+        position: relative;
+        display: inline-block;
+        padding-right: .5rem;
+        padding-left: .5rem;
+        font-size: .28rem;
+        line-height: .4rem;
+        color: #282828;
+    }
+
+    .detail-section .count-wrap .text-wrap::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: 100%;
+        width: 1.1rem;
+        height: 1px;
+        background-color: #DDDDDD;
+    }
+
+    .detail-section .count-wrap .text-wrap::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        width: 1.1rem;
+        height: 1px;
+        background-color: #DDDDDD;
+    }
+
+    .detail-section .count-wrap .time-wrap {
+        display: inline-block;
+        margin-right: .12rem;
+        margin-left: .12rem;
+        font-weight: bold;
+        line-height: .42rem;
+        color: #FF6B00;
+    }
+
+    .detail-section .count-wrap .number {
+        display: inline-block;
+        width: .42rem;
+        height: .42rem;
+        border-radius: .03rem;
+        margin-right: .06rem;
+        margin-left: .06rem;
+        background-color: #FFF5E1;
+    }
+
+    .detail-section .prompt {
+        font-weight: bold;
+        font-size: .3rem;
+        line-height: .42rem;
+        text-align: center;
+        color: #999999;
+    }
+
+    .detail-section .prompt.blue {
+        color: #2C8EFF;
+    }
+
+    .detail-section .group-wrap {
+        display: -webkit-box;
+        display: flex;
+        flex-wrap: wrap;
+        -webkit-box-pack: center;
+        justify-content: center;
+        padding: .49rem .64rem .24rem;
+        font-size: 0;
+    }
+
+    .detail-section .group-wrap .item {
+        flex-shrink: 0;
+        position: relative;
+        padding: .15rem;
+        border-radius: 50%;
+    }
+
+    .detail-section .group-wrap .img {
+        display: block;
+        width: .94rem;
+        height: .94rem;
+        border: .02rem solid #CCCCCC;
+        border-radius: 50%;
+        box-sizing: border-box;
+        object-fit: cover;
+        pointer-events: none;
+        -webkit-touch-callout: none;
+    }
+
+    .detail-section .group-wrap .king {
+        position: absolute;
+        top: 1px;
+        left: 1px;
+        z-index: -1;
+        width: .51rem;
+        height: .37rem;
+        -webkit-transform: rotate(-20deg);
+        transform: rotate(-20deg);
+    }
+
+    .detail-section .handle-section {
+        padding-right: .64rem;
+        padding-left: .64rem;
+        text-align: center;
+    }
+
+    .detail-section .handle-section .button {
+        display: block;
+        width: 100%;
+        height: .86rem;
+        border-radius: .43rem;
+        background-color: #2C8EFF;
+        font-size: .3rem;
+        color: #FFFFFF;
+    }
+
+    .detail-section .handle-section .link {
+        display: inline-block;
+        padding-left: .35rem;
+        margin-top: .25rem;
+        background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAA0CAYAAADFeBvrAAAIEElEQVRoQ91aXW9cVxVde987YzuxW8dp45I66cS4mfF48qG2hKSl4UMFKhUhIVVIBQQviJfwwI/gB/BA3uABBERClUAIJL4EJdAkTUNUx854Jh2caWJCnQ/biZ14PPfes9Ea3YkcMx6PA63QPU/W6Pqcvc7ae521z72C/254Q0ND6b6+vh0AnhaRYVXdDeAjZrZdRB4FsBVAOl6mDuCumd0WkVsA/uWcu2Jm0wDeXVxcvD4zM8NnoocNSzb5j3zeHxkZ6Umn0/1RFPWrar+IDIrIEIAdMYheM+sB0AUgJSIe1zEzBhoAWBGRZQBLBAfgupnNmNmsc27B87yFer2+UKlU+EzIf+00zs0CSg0PD2/p7u4eEpEDAPJm9rSqDgLYYmZORO4AuGNmS3HQAX9nQCKiBEiwItIL4BEzeyT+/Z5zblZE3gVQNLPxWq02Mz09fS/ehI4wdQQon8+nnXN9ZvaY53lk4qOqWjCzjIg8HgfJhecBvC8iN+O/l5xztXiXGZCvqt0ACGYb5wPwBP8WkS0M3MxuiEjVOTcJ4B9RFM1wPlVdLBaLTMe2oyNAuVxuu+/7WQAHzOywiDwV18UigMvOuaqqXjaz60wj59yymdVTqVQYBIFT1QZDzjlNpVIaBIEvImlVZVr2isgO59weVc0A2AOgD0DdzN4TkTMAxsMwLJdKJdbdwwPauXPnloGBge1kxDn3rIgUAIzEYN7nDprZhHOuLCKXWejFYpE53wDQwdB8Pu9TQMyMgLIiso/rxcyRkYqZTarq37ne3NzcrWvXrjEbWo52DEk+n9+lqkcAfMzMnhER7ihViQDeiaKIqTHPuqnVaner1SoD6BRMMyDNZDLp7u7urawnVd3meV7GzA6KCLNit5kti8h5AG87504Xi8Wr6wlFS0Bkpr+/n/VScM69xOKnesX5fdrMzodhOFEul8nSZgFsRJxms9knfN/fJyLPmNkR1mmshkVV/WMURZMLCws3WzHVElChUNgF4Hkz+ziAQ3EEZwG8IyJFAFeXlpZuV6tVFvz/fGQyme7e3l6eYbvMLA/g4Oo4ROQtAKcmJyfJ1APjAUBNNePuAPiCmbFmWLRVM/tNGIak/Vq5XKYYfOAjm81SHHb6vs90f4WqStERESrgr5kla9XvAUBNNXPOkeZXWDNmdpq5y5oJgmCmXC43D7sPHBBlPpvN9qRSqSHWFGtZRI6wprjBqnp6rfo1ATUcQDabHU6lUp8xs0MikmPNAHg9DENS/KExs3anVjHFEng1rqmSiJwNguBP5XKZ1qnhKJqAmg7gORH5OoBhEbnGmgHwhyAIyh8yM2sxNZmi6n2WNWVmOwFMm9mPa7XauaajaAAaGRl5JJ1OUwheUNWvxD7sdwDeZKpNTk7Otskv2hkO+q2OPVeLWm5u7rqqWSgUBuPUewHA52mtnHM/Y5z1ev1qpVK505gkn8/vFpFPiMhhAM/F8vyjIAjOrKyszLVRMx0ZGUmFYSjVapWm82FdspfJZFK+71ulUuE8LUFR/bq6ugZSqdRhM/tGbLvOmdkZM/tbsVi8QkBeNpsd833/ywD2i0iXmV10zv1kamqKKbfejunevXs5+XAURVtU9baZzc3Nzd2cnZ2924liDA4Obh0YGHhMRAacc496nncvCILpS5cuzbVbd3R09KCqfk1ExsxsBcCFMAx/Xi6XL8rQ0FBPX18f1eNY3MuMO+feiqLojXK5fHmdwBrMdHV10XG/Fp8XlPZxM/trqVR6r4P0k1wu95SIvEjnLiKUZJ4rJ1ZWVsbbMZXNZvd4nvcpVaVIHIh7quOLi4tvy+joKCc9pKrHeOY45153zp0E0M4MNu3KYc/zvg2A59UtM7sA4LfOufF0On3jwoULLZnav3//1nq9/riqckNeFpH9AOgZJ6Mo+n6tVjvTzkbxeAGQVdWjqvpqbIiPm9lZAnpJVWkzXjOzmogcj6Lo5PLy8nyb2mGq0lgykK/ybADAJu+2c+6sqp4Kw3A9phrM+L7/onPueVU9ZGZ0BbPxmffTYrHIjWGqtxQZ1lJPTw8931EzOyYi3WZ2wjk3QQP6LRGhZf80JwXwPTN7sxPXTHYBHBWRRmAA+jkHGWrF1FpmYobYHC5wI8zsFICTU1NTTNl2o+HSRYRq9x1uJoA/m9llKRQK3wUwQPXmDwB+cPHiRVr1DU0ni3rbtm33U2dtgKuYusLocrnc7tXMtNqA+fn5Gx2Kio6NjT0L4JsxIRUAcwT0Q3acbKFZN1EUnZiamqJX6nT8RwqtDZQ9TTwZe6mX2wDvREzuxzU6OlrwPI+ixAO30arL2NjYL+Oe/S5NXxiGvyqVSpc6RcPnNkolEfln4+Q1e7KT1Ox07Vwut9f3/S/GJpq3SykyxNxbjBcdF5HfT0xM0BttdqzLFK+u4sm46P2a2UA8Nlx/3759w2b2ufhq4EkR6SMgFuMt3rY45847594olUrVDWdr8UAbpgiEg8DWFY3NrpnL5TKqyvOIjSDvBbcTEN0A78V4dXSOKkMLsdnJVz1PBRoVkS+JyCcBsLciKxxU0Qkz+4uZ/aJYLE51Ij7rxULLFqssTTUbwR2JBJS4lEuWKCRRtpN1sCbO+iTOnCaufUhcg5e4FjxxlyT0SUm7xkreRSMbo/hlcDKugvmCOmmX9Y2WI0mvUxqAEvfCq9kZJuaVZBNQ4l4ax8CS81p/NVNJ+vDi/mVLYj6NaSJK3MdLq+7FkvF52SpAifsAcO0l5v/dJ5r/BuBljGU/KJ8PAAAAAElFTkSuQmCC") left center/.26rem .26rem no-repeat;
+        vertical-align: middle;
+        font-size: .24rem;
+        line-height: .33rem;
+        color: #282828;
+    }
+
+    .prompt-share {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 99;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .initiate-group .header .iconfont {
+        margin-left: .14rem;
+        font-size: 1.02rem;
+        line-height: normal;
+        color: #999999;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="initiate-group">
+        <div class="header acea-row row-middle">
+            <div class="pictrue">
+                <img :src="special.image">
+            </div>
+            <div class="text">
+                <div class="line1" v-text="special.title"></div>
+                <div style="margin-top: .13rem;font-size: 0;">
+                    <div class="money">¥<span>{{special.pink_money}}</span></div>
+                    <div class="mark">{{info.pinkT.people}}人拼</div>
+                </div>
+            </div>
+            <div v-if="uid==pinkT.uid && pinkBool==0" class="iconfont iconkaituanchenggong" style="color: #2C8EFF;"></div>
+            <div v-else-if="pinkBool==0" class="iconfont iconzhengzaipintuan"></div>
+            <div v-else-if="pinkBool==1" class="iconfont iconpintuanchenggong" style="color: #2C8EFF;"></div>
+            <div v-else class="iconfont iconpintuanshibai"></div>
+        </div>
+        <div class="detail-section">
+            <div class="count-wrap">
+                <div class="text-wrap">
+                    剩余
+                    <div class="time-wrap">
+                        <span class="number">{{ hour }}</span>:
+                        <span class="number">{{ minute }}</span>:
+                        <span class="number">{{ second }}</span>
+                    </div>
+                    结束
+                </div>
+            </div>
+            <div class="prompt blue" v-if="!pinkBool">拼团中，还差{{ info.count }}人拼团成功</div>
+            <div class="prompt blue" v-else-if="pinkBool==1">恭喜您拼团成功</div>
+            <div class="prompt" v-else-if="pinkBool > 1 && pinkBool < 4">还差{{ info.count }}人，拼团失败</div>
+            <div class="prompt" v-else-if="pinkBool==6">拼团人数已满</div>
+            <div class="group-wrap">
+                <div class="item">
+                    <img  class="king" src="{__WAP_PATH}zsff/images/king.png">
+                    <img class="img" :src="pinkT.avatar">
+                </div>
+                <div v-for="item in pinkAll" class="item">
+                    <img class="img" :src="item.avatar">
+                </div>
+                <div class="item" v-for="item in info.count">
+                    <img style="border: none;" class="img" src="{__WAP_PATH}zsff/images/symbol.png">
+                </div>
+            </div>
+            <div class="handle-section">
+                <button class="button" v-if="is_help==0 && !pinkBool" @click="getPinkUrl()">邀请好友参团</button>
+                <button class="button" v-if="is_help==1 && !pinkBool" @click="OpenPay(3,1)">我要参团</button>
+                <button class="button" v-else-if="is_help==0 && pinkBool==1" @click="OpenPay(5,0)">去学习</button>
+                <button class="button" v-else-if="is_help==0 && pinkBool > 1 && pinkBool < 4 && uid==pinkT.uid" @click="OpenPay(3,0)">重新开团</button>
+            </div>
+        </div>
+        {if !$subscribe && !empty($userInfo) && $is_official_account_switch}
+        <div class="publicFollow acea-row row-between-wrapper">
+            <div>关注公众号"{$Auth_site_name}"，看课更方便</div>
+            <div class="follow acea-row row-center-wrapper" @click=" is_code = true ">关注</div>
+        </div>
+        <div class="mask" style="align-items:center;display: flex;" v-show="is_code" @click="is_code=false">
+            <img :src="wechat_qrcode" alt="" style="width: 5rem;height: 5rem;margin: 0 auto;">
+        </div>
+        <div style="height: 1.0rem"></div>
+        {/if}
+        <!-- 支付弹窗 -->
+        <pay-dialog
+            :open.sync="payDialogOpen"
+            :money="money"
+            :special_id="special.id"
+            :now_money="now_money"
+            :link_pay_uid="link_pay_uid"
+            :pay_type_num="pay_type_num"
+            :pink-id="pink_id"
+            :is-wechat="isWechat"
+            :is-alipay="is_alipay"
+            :is-balance="is_yue"
+            :template-id="templateId"
+            :wxpay-h5="wxpayH5"
+            @change="changeVal"
+        ></pay-dialog>
+        <base-login :login-show="loginShow" :site-name="siteName" @login-close="loginClose"></base-login>
+        <quick-menu></quick-menu>
+    </div>
+</div>
+<script>
+    var info={$info},special_id={$special_id},uid={$userInfo.uid},site_url="{$site_url}",wechat_qrcode = '{$subscribeQrcode}';
+    var pink_id={$pink_id},is_help = {$is_help},is_light = {$is_light},isWechat={$isWechat ? 'true' : 'false'},now_money={$now_money},is_yue={$is_yue ? 'true' : 'false'},is_alipay={$is_alipay ? 'true' : 'false'};
+    window.overallShare=false;
+    require(['vue','helper','store', 'components/pay-dialog/index', 'components/base-login/index','quick'],function(Vue,$h,app, PayDialog, BaseLogin) {
+        var wxpayH5={$is_h5_wechat_payment_switch ? 'true' : 'false'};
+        var callback_url = '{$callback_url}';
+        var siteName = '{$Auth_site_name}';
+        new Vue({
+            el: '#app',
+            components: {
+                'pay-dialog': PayDialog,
+                'base-login': BaseLogin
+            },
+            data: {
+                uid:uid,
+                info:info,
+                is_help:is_help,
+                pink_id:pink_id,
+                special:info.special,
+                pinkT:info.pinkT,
+                pinkBool:info.pinkBool || 0,
+                pinkAll:info.pinkAll,
+                datatime:info.pinkT.stop_time,
+                hour:"00",
+                minute:"00",
+                second:"00",
+                shares:false,
+                wechat_qrcode:wechat_qrcode,
+                is_code: true,
+                payDialogOpen: false,  // 是否显示支付弹窗
+                money:0,
+                is_alipay: is_alipay, //支付宝是否开启
+                is_yue: is_yue, //余额是否开启
+                now_money: now_money, //余额
+                link_pay_uid: 0,
+                pay_type_num: 3,
+                templateId: '',
+                wxpayH5: wxpayH5,
+                loginShow: false,
+                siteName: siteName
+            },
+            created:function(){
+                this.show_time();
+                this.subscribeTemplate();
+            },
+            mounted:function(){
+                var that=this;
+                mapleWx($jssdk(), function () {
+                    this.onMenuShareAll({
+                        title:'仅差'+info.count+'人拼课成功! ['+that.special.title+']' ,
+                        desc: that.special.abstract,
+                        imgUrl: that.special.image,
+                        link: site_url
+                    });
+                });
+            },
+            methods:{
+                subscribeTemplate: function () {
+                    app.baseGet($h.U({
+                        c: 'special',
+                        a: 'getTemplateIds',
+                        q: {
+                            pay_type_num: this.pay_type_num,
+                            special_id: this.special.id
+                        }
+                    }), function (res) {
+                        this.templateId = res.data.msg;
+                    }.bind(this));
+                },
+                getTashUrl:function(id,isAtn){
+                    return $h.U({c:'special',a:'details',q:{id:id}})+(isAtn ? '#tash' : '');
+                },
+                getPinkUrl:function(){
+                    window.location.href=$h.U({c:'special',a:'poster_show',q:{special_id:special_id,pinkId:this.pinkT.id}});
+                },
+                show_time:function(){
+                    var that = this;
+                    function nowTime() {
+                        var intDiff = that.datatime - Date.parse(new Date()) / 1000;
+                        var days = 0, hour = 0, minute = 0, second = 0;
+                        if (intDiff > 0) {
+                            hour = Math.floor(intDiff / (60 * 60)) - (days * 24);
+                            minute = Math.floor(intDiff / 60) -  (hour * 60);
+                            second = Math.floor(intDiff) - (hour * 60 * 60) - (minute * 60);
+                            if (hour <= 9) hour = '0' + hour;
+                            if (minute <= 9) minute = '0' + minute;
+                            if (second <= 9) second = '0' + second;
+                            that.hour=hour;
+                            that.minute=minute;
+                            that.second=second;
+                        } else {
+                            that.hour="00";
+                            that.minute="00";
+                            that.second="00";
+                            clearInterval(timer);
+                        }
+                    }
+                    nowTime();
+                    var timer = setInterval(nowTime, 1000);
+                },
+                //所有插件回调处理事件
+                changeVal: function (opt) {
+                    if (typeof opt != 'object') opt = {};
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                //打开支付插件,并检测登录状态,没有登录,打开登录插件
+                OpenPay: function (is_pink,n) {
+                    this.pay_type_num = is_pink;
+                    app.baseGet("{:url('index/login_user')}", function () {
+                        switch (is_pink) {
+                            case 3:
+                                this.money = this.special.pink_money;
+                                this.payDialogOpen = true;
+                                if(!n){
+                                    this.pink_id=0;
+                                }
+                                break;
+                            case 5:
+                                if(is_light){
+                                    window.location.href=$h.U({c:'special',a:'single_details',q:{id:special_id}})+'#tash';
+                                }else{
+                                    window.location.href=$h.U({c:'special',a:'details',q:{id:special_id}})+'#tash';
+                                }
+                                break;
+                        }
+                    }.bind(this), function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            this.loginShow = true;
+                        }
+                    }.bind(this), true);
+                },
+                extendOrder: function (msg) {
+                    var that = this;
+                    if (typeof msg === 'object') {
+                        if (msg.errMsg === 'chooseWXPay:cancel') {
+                            msg = '微信支付取消';
+                        } else {
+                            msg = '支付失败';
+                        }
+                    } else {
+                        msg = msg || '支付失败';
+                    }
+                    $h.pushMsg(msg, function () {
+                        that.payDialogOpen = false;
+                        if (that.orderId) app.baseGet($h.U({ c: 'special', a: 'del_order', q: { orderId: that.orderId } }));
+                    });
+                },
+                successOrder: function (msg) {
+                    var that = this;
+                    $h.showMsg({
+                        title: msg ? msg : '支付成功',
+                        icon: 'success',
+                        success: function () {
+                            window.location.href = $h.U({ c: 'special', a: 'pink', q: { orderId: that.orderId } });
+                        }
+                    });
+                },
+                pay_order: function (data) {
+                    this.orderId = data.data.result.orderId || '';
+                    switch (data.data.status) {
+                        case "PAY_ERROR": case 'ORDER_EXIST': case 'ORDER_ERROR':
+                            this.extendOrder(data.msg);
+                            break;
+                        case 'WECHAT_PAY':
+                            this.wechatPay(data.data.result.jsConfig);
+                            break;
+                        case 'WECHAT_H5_PAY':
+                            this.payDialogOpen = false;
+                            var callbackUrl = callback_url + '?type=1&id=' + this.special.id;
+                            var mwebUrl = data.data.result.jsConfig.mweb_url + '&redirect_url=' + encodeURIComponent(callbackUrl);
+                            window.location.href = mwebUrl;
+                            break;
+                        case 'SUCCESS':
+                            this.successOrder(data.msg);
+                            break;
+                        case 'ZHIFUBAO_PAY':
+                            window.location.href = $h.U({m:'wap',c:'alipay', a: 'index', q: { info: data.data.result, params: 'special' } });
+                            break;
+                    }
+                },
+                wechatPay: function (config) {
+                    var that = this;
+                    mapleWx($jssdk(), function () {
+                        this.chooseWXPay(config, function () {
+                            that.successOrder();
+                        }, {
+                            fail: that.extendOrder,
+                            cancel: that.extendOrder
+                        });
+                    });
+                },
+                loginClose: function () {
+                    this.loginShow = false;
+                }
+            }
+        });
+    })
+</script>
+{/block}

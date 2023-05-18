@@ -1,0 +1,19 @@
+<div class="recommend recommend3">
+    <div class="head">
+        <div>{{ recommend.title }}<span>{{ recommend.explain }}</span></div>
+        <el-link :href="$router.material_list" :underline="false">更多<i class="el-icon-arrow-right el-icon--right"></i>
+        </el-link>
+    </div>
+    <el-row :gutter="20">
+        <el-col v-for="item in recommend.list" :key="item.id" :span="12">
+            <a :href="$router.material_detail + '?id=' + item.id">
+                <el-image :src="item.image" fit="cover"></el-image>
+                <div>
+                    <div>{{ item.title }}</div>
+                    <div>￥<span>{{ item.money }}</span></div>
+                    <div>{{ item.count }}人已下载</div>
+                </div>
+            </a>
+        </el-col>
+    </el-row>
+</div>

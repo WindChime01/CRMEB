@@ -1,0 +1,241 @@
+{extend name="public/container"}
+{block name="title"}{$type==1 ? '练习列表' : '考试列表'}{/block}
+{block name="head"}<style></style>{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="question-category-page">
+        <div class="header">
+            <div>
+                <div class="search">
+                    <div>
+                        {if $homeLogo}
+                        <img src="{$homeLogo}">
+                        {else}
+                        <img src="{__WAP_PATH}zsff/images/crmeb.png">
+                        {/if}
+                    </div>
+                    <input v-model="search" placeholder="输入试卷名称">
+                    <a href="javascript:" @click="onSearch">搜索</a>
+                </div>
+                <div id="sup" class="swiper-container" @click="onSup">
+                    <div class="swiper-wrapper">
+                        <div v-for="(item, index) in navSup" :key="item.id" :class="{ on: index === indexSup }" class="swiper-slide">{{ item.title }}</div>
+                    </div>
+                </div>
+            </div>
+            <div id="sub" class="swiper-container" @click="onSub">
+                <div class="swiper-wrapper">
+                    <div v-for="(item, index) in navSub" :key="item.id" :class="{ on: index === indexSub }" class="swiper-slide">{{ item.title }}</div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <ul v-if="type == 1" class="problem">
+                <li v-for="item in question" :key="item.id">
+                    <div>{{ item.title }}</div>
+                    <div>
+                        <div>共{{ item.item_number }}题</div>
+                        <div>{{ item.count }}人已答题</div>
+                        <a :href="'{:url('topic/problem_index')}?id=' + item.id">练习</a>
+                    </div>
+                </li>
+            </ul>
+            <ul v-else class="question">
+                <li v-for="item in question" :key="item.id">
+                    <div>
+                        <img :src="item.image">
+                    </div>
+                    <div>
+                        <div>{{ item.title }}</div>
+                        <div v-if="item.pay_type">￥<span>{{ item.money }}</span></div>
+                        <div v-else class="free">免费</div>
+                        <div>
+                            {{ item.count }}人已答题
+                            <a :href="'{:url('special/question_index')}?id=' + item.id">答题</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    require([
+        'vue',
+        'swiper',
+        'helper',
+        'store',
+        'quick'
+    ], function (Vue, Swiper, $h, $http) {
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                swiperOptions: {
+                    slidesPerView: 'auto',
+                    freeMode: true,
+                    observer: true
+                },
+                navSup: [],
+                navSub: [],
+                indexSup: 0,
+                indexSub: 0,
+                type: 1,
+                page: 1,
+                limit: 15,
+                loading: false,
+                finished: false,
+                question: [],
+                current: {},
+                search: ''
+            },
+            watch: {
+                loading: function (loading) {
+                    loading ? $h.loadFFF() : $h.loadClear();
+                }
+            },
+            created: function () {
+                this.type = $h.getParmas('type');
+                this.getCategory();
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    this.swiperSup = new Swiper('#sup', this.swiperOptions);
+                    this.swiperSub = new Swiper('#sub', this.swiperOptions);
+                    $h.EventUtil.listenTouchDirection(document, function () {
+                        vm.getQuestion();
+                    });
+                });
+            },
+            methods: {
+                onSup: function () {
+                    if (this.loading) {
+                        return;
+                    }
+                    var swiperWidth = this.swiperSup.width,
+                        swiperScrollWidth = this.swiperSup.$wrapperEl[0].scrollWidth,
+                        swiperSlideLeft = this.swiperSup.clickedSlide.offsetLeft,
+                        swiperSlideWidth = this.swiperSup.clickedSlide.offsetWidth;
+
+                    this.swiperSup.setTransition(300);
+
+                    if (swiperSlideLeft < (swiperWidth - parseInt(swiperSlideWidth)) / 2) {
+                        this.swiperSup.setTranslate(0);
+                    } else if (swiperSlideLeft > parseInt(swiperScrollWidth) - (swiperWidth + parseInt(swiperSlideWidth)) / 2) {
+                        this.swiperSup.setTranslate(swiperWidth - parseInt(swiperScrollWidth));
+                    } else {
+                        this.swiperSup.setTranslate((swiperWidth - parseInt(swiperSlideWidth)) / 2 - swiperSlideLeft);
+                    }
+
+                    this.indexSup = this.swiperSup.clickedIndex;
+                    this.navSub = this.navSup[this.indexSup].children;
+                    this.indexSub = 0;
+                    this.question = [];
+                    this.loading = false;
+                    this.finished = false;
+                    this.page = 1;
+                    this.search = '';
+                    this.current = this.navSub[0];
+                    this.getQuestion();
+                },
+                onSub: function () {
+                    if (this.loading) {
+                        return;
+                    }
+                    var swiperWidth = this.swiperSub.width,
+                        swiperScrollWidth = this.swiperSub.$wrapperEl[0].scrollWidth,
+                        swiperSlideLeft = this.swiperSub.clickedSlide.offsetLeft,
+                        swiperSlideWidth = this.swiperSub.clickedSlide.offsetWidth;
+
+                    this.swiperSub.setTransition(300);
+
+                    if (swiperSlideLeft < (swiperWidth - parseInt(swiperSlideWidth)) / 2) {
+                        this.swiperSub.setTranslate(0);
+                    } else if (swiperSlideLeft > parseInt(swiperScrollWidth) - (swiperWidth + parseInt(swiperSlideWidth)) / 2) {
+                        this.swiperSub.setTranslate(swiperWidth - parseInt(swiperScrollWidth));
+                    } else {
+                        this.swiperSub.setTranslate((swiperWidth - parseInt(swiperSlideWidth)) / 2 - swiperSlideLeft);
+                    }
+
+                    this.indexSub = this.swiperSub.clickedIndex;
+                    this.question = [];
+                    this.loading = false;
+                    this.finished = false;
+                    this.page = 1;
+                    this.search = '';
+                    this.current = this.navSub[this.indexSub];
+                    this.getQuestion();
+                },
+                getCategory: function () {
+                    this.loading = true;
+                    $http.baseGet("{:url('topic/testPaperCate')}?type=" + this.type, function (res) {
+                        $h.loadClear();
+                        var data = res.data.data;
+                        var children = [];
+                        data.forEach(function (item) {
+                            children = children.concat(item.children);
+                        });
+
+                        data.unshift({
+                            pid: 0,
+                            id: 0,
+                            title: '全部',
+                            children: children
+                        });
+
+                        data.forEach(function (item) {
+                            item.children.unshift({
+                                pid: item.id,
+                                id: 0,
+                                title: '全部'
+                            });
+                        });
+
+                        vm.navSup = data;
+                        vm.loading = false;
+
+                        if (vm.navSup.length) {
+                            vm.navSub = vm.navSup[0].children;
+                            vm.current = vm.navSub[0];
+                            vm.getQuestion();
+                        }
+                    });
+                },
+                getQuestion: function () {
+                    if (this.loading || this.finished) {
+                        return;
+                    }
+                    this.loading = true;
+                    $http.basePost($h.U({
+                        c: 'topic',
+                        a: 'practiceList?type=' + this.type,
+                    }), {
+                        page: this.page++,
+                        limit: this.limit,
+                        pid: this.current.pid,
+                        tid: this.current.id,
+                        search: this.search
+                    }, function (res) {
+                        vm.question = vm.question.concat(res.data.data);
+                        vm.loading = false;
+                        vm.finished = vm.limit > res.data.data.length;
+                    });
+                },
+                onSearch: function () {
+                    if (!this.search) {
+                        return $h.pushMsg('请输入搜索内容');
+                    }
+                    this.indexSup = 0;
+                    this.indexSub = 0;
+                    this.current = vm.navSub[0];
+                    this.question = [];
+                    this.loading = false;
+                    this.finished = false;
+                    this.page = 1;
+                    this.getQuestion();
+                }
+            }
+        });
+    });
+</script>
+{/block}

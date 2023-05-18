@@ -1,0 +1,22 @@
+<div class="recommend-problem">
+    <div>
+        {{ obj.title }}
+        <a :href="obj.urlCategory + '?type=1'">
+            查看更多<span class="iconfont iconxiangyou"></span>
+        </a>
+    </div>
+    <ul>
+        <li v-for="item in obj.list" :key="item.id">
+            <a :href="obj.url + '?id=' + item.id">
+                <div>{{ item.title }}</div>
+                <div>
+                    共{{ item.item_number }}题
+                    <div>{{ item.count }}人已答题</div>
+                    <div>
+                        <img :src="obj.source_url + 'zsff/images/question08.png'">练习
+                    </div>
+                </div>
+            </a>
+        </li>
+    </ul>
+</div>

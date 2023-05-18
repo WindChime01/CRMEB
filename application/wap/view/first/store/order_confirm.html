@@ -1,0 +1,371 @@
+{extend name="public/container" /}
+{block name="title"}提交订单{/block}
+{block name="head"}
+<style>
+    body {
+        padding-bottom: 1.12rem;
+        padding-bottom: calc(1.12rem + constant(safe-area-inset-bottom));
+        padding-bottom: calc(1.12rem + env(safe-area-inset-bottom));
+        background-color: #f5f5f5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="order-confirm">
+    <div class="contact" @click="addressCheck">
+        <div>
+            <template v-if="addressChecked">
+                <template v-for="item in address">
+                    <template v-if="item.id === addressChecked">
+                        <div :key="item.id">
+                            <span>{{ item.real_name }}</span>
+                            <span>{{ item.phone }}</span>
+                        </div>
+                        <div class="address">
+                            <span>[默认]</span>
+                            <span>{{ item.province }}{{ item.city }}{{ item.district }}{{ item.detail }}</span>
+                        </div>
+                    </template>
+                </template>
+            </template>
+            <template v-else>选择收货地址</template>
+        </div>
+        <div class="iconfont iconxiangyou"></div>
+    </div>
+    <div class="content">
+        <div class="goods">
+            <div v-for="item in cartInfo" :key="item.id" class="item">
+                <div><img :src="item.productInfo.image"></div>
+                <div class="item-bd">
+                    <div class="name">{{ item.productInfo.store_name }}</div>
+                    <div class="wrap">
+                        <div class="money">￥{{ level ? item.productInfo.vip_price : item.productInfo.price }}</div>
+                        <div class="count">
+                            <button type="button" :disabled="number === 1" @click="number--">-</button>
+                            <input v-model.number="number" type="number" readonly>
+                            <button type="button" :disabled="number === item.productInfo.stock" @click="number++">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="postage">
+            <div>邮费</div>
+            <div>{{ postage }}</div>
+        </div>
+        <div class="deduct">
+            <div>{$gold_name}抵扣</div>
+            <div>当前{$gold_name} <span>{$gold_num}</span></div>
+            <i v-if="goldNum" :class="[useGold ? 'iconxuanzhong1' : 'iconweixuanzhong', 'iconfont']" @click="useGold = !useGold"></i>
+        </div>
+    </div>
+    <div class="remark">
+        <div>备注信息</div>
+        <textarea v-model="signs.mark" placeholder="选填备注信息" rows="3"></textarea>
+    </div>
+    <div class="footer">
+        <div class="message">
+            <div class="message-bd">共{{ number }}件，合计：<div class="money"><span>￥</span>{{ total }}</div>
+            </div>
+            <div v-if="useGold" class="message-ft">抵扣减：￥{{ diko  }}</div>
+        </div>
+        <button type="button" @click="pay">立即结算</button>
+    </div>
+    <div :class="{ mask: popupShow }" @click="popupShow = false"></div>
+    <!-- 地址弹窗 -->
+    <div class="popup" :class="{ on: popupShow }">
+        <button type="button" @click="popupShow = false"></button>
+        <div class="head">选择地址</div>
+        <div class="cont">
+            <label v-for="item in address" :key="item.id">
+                <input v-model="addressChecked" :value="item.id" type="radio" name="address" hidden>
+                <div>
+                    <div>{{ item.real_name }} {{ item.phone }}</div>
+                    <div>{{ item.province }}{{ item.city }}{{ item.district }}{{ item.detail }}</div>
+                </div>
+            </label>
+        </div>
+        <div class="foot">
+            <a @click="go_address">选择其他地址</a>
+        </div>
+    </div>
+    <!-- 支付弹窗 -->
+    <pay-dialog :open.sync="payDialogOpen" :signs="signs" :money="totals" :now_money="now_money" :special_id="addressChecked" :pay_type_num="pay_type_num" :is-wechat="isWechat"
+                :is-alipay="is_alipay" :is-balance="isyue" :template-id="templateId" :wxpay-h5="wxpayH5" :use-gold="useGold" :is-member="level"
+                :member-money="cartInfo[0].productInfo.vip_price" :member-link="memberLink" @change="changeVal"></pay-dialog>
+    <base-login :login-show="loginShow" :site-name="site_name" @login-close="logComplete"></base-login>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'store', 'helper', 'components/pay-dialog/index', 'components/base-login/index', 'quick'], function (Vue, api, $h, PayDialog, BaseLogin) {
+        var cartInfo = {$cartInfo};
+        var cartId = {$cartId};
+        var priceGroup = {$priceGroup};
+        var orderKey = '{$orderKey}';
+        var ratio = {$ratio};
+        var now_money = {$now_money};
+        var is_yue = {$is_yue? 'true': 'false'};
+        var site_name = '{$Auth_site_name}';
+        var isWechat = {$isWechat? 'true': 'false'};
+        var is_alipay = {$is_alipay? 'true': 'false'};
+        var wxpayH5 = {$is_h5_wechat_payment_switch? 'true': 'false'};
+        var callback_url = '{$callback_url}';
+        var memberLink = "{:url('special/member_recharge')}";
+        new Vue({
+            el: '#app',
+            components: {
+                'pay-dialog': PayDialog,
+                'base-login': BaseLogin
+            },
+            data: {
+                isWechat: isWechat,
+                loginShow: false,
+                url: isWechat ? $h.U({c: 'index', a: 'login'}) : $h.U({c: 'login', a: 'phone_check'}),
+                site_name: site_name,
+                payDialogOpen: false,  // 是否显示支付弹窗
+                pay_type_num: 40,
+                pinkId: '',
+                link_pay_uid: '',
+                isyue: is_yue, //余额是否开启
+                is_alipay: is_alipay, //支付宝是否开启
+                now_money: now_money, //余额
+                cartId: cartId,
+                cartInfo: cartInfo,
+                priceGroup: priceGroup,
+                popupShow: false,
+                number: cartInfo ? cartInfo[0].cart_num : 1,
+                totalPrice: 0,
+                address: [],
+                addressChecked: 0,
+                totals: 0,
+                postages: 0,
+                signs: {
+                    key: orderKey,
+                    mark: ''
+                },
+                templateId: '',
+                wxpayH5: wxpayH5,
+                level: {$level},
+                useGold: false,
+                goldNum: {$gold_num},
+                ratio: {$ratio},
+                memberLink: memberLink
+            },
+            computed: {
+                total: function () {
+                    if (!this.cartInfo) {
+                        return;
+                    }
+                    this.totals = $h.Mul(this.cartInfo[0].productInfo[this.level ? 'vip_price' : 'price'], this.number);
+                    this.totals = $h.Add(this.totals, this.postages);
+                    this.totals = $h.Sub(this.totals, this.useGold ? $h.Mul(this.goldNum, this.ratio) : 0);
+                    if (this.totals < 0) {
+                        this.totals = 0;
+                    }
+                    return this.totals;
+                },
+                postage: function () {
+                    if (!this.cartInfo) {
+                        return;
+                    }
+                    if (this.cartInfo[0].productInfo.is_postage || this.cartInfo[0].productInfo.free_shipping > 0 && this.cartInfo[0].productInfo.free_shipping <= this.number) {
+                        this.postages = 0;
+                        return '包邮';
+                    }
+                    this.postages = this.cartInfo[0].productInfo.postage;
+                    return '￥' + this.postages;
+                },
+                diko: function () {
+                    if (!this.cartInfo) {
+                        return;
+                    }
+                    var totals = $h.Mul(this.cartInfo[0].productInfo[this.level ? 'vip_price' : 'price'], this.number);
+                    totals = $h.Add(totals, this.postages);
+                    var goldTotals = $h.Mul(this.goldNum, this.ratio);
+                    if (totals >= goldTotals) {
+                        return goldTotals;
+                    } else {
+                        return totals;
+                    }
+                }
+            },
+            watch: {
+                addressChecked: function () {
+                    this.popupShow = false;
+                    this.subscribeTemplate();
+                }
+            },
+            created: function () {
+                this.getAddress();
+            },
+            methods: {
+                subscribeTemplate: function () {
+                    api.baseGet($h.U({
+                        c: 'special',
+                        a: 'getTemplateIds',
+                        q: {
+                            pay_type_num: this.pay_type_num,
+                            special_id: this.addressChecked
+                        }
+                    }), function (res) {
+                        this.templateId = res.data.msg;
+                    }.bind(this));
+                },
+                getAddress: function () {
+                    $h.loadFFF();
+                    api.baseGet($h.U({c: 'auth_api', a: 'user_address_list'}), function (res) {
+                        $h.loadClear();
+                        var data = res.data.data;
+                        this.address = data;
+                        var result = data.find(function (value) {
+                            return value.is_default;
+                        }.bind(this));
+                        if (result) {
+                            this.addressChecked = result.id;
+                        }
+                    }.bind(this), function (err) {
+                        $h.loadClear();
+                        console.error(err.data.msg);
+                    }.bind(this));
+                },
+                addressCheck: function () {
+                    if (this.address.length) {
+                        this.popupShow = true;
+                    } else {
+                        this.go_address();
+                    }
+                },
+                go_address: function () {
+                    this.getOrderPrice(1);
+                },
+                getOrderPrice: function (n) {
+                    $h.loadFFF();
+                    api.baseGet($h.U({
+                        c: 'special',
+                        a: 'getOrderPrice',
+                        q: {
+                            cartId: this.cartId,
+                            cateNum: this.number
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        if (n) {
+                            window.location = $h.U({c: 'my', a: 'edit_address', p: {cartId: this.cartId}});
+                        } else {
+                            var data = res.data.data;
+                            this.signs.key = data.orderKey;
+                            this.priceGroup = data.priceGroup;
+                            this.payDialogOpen = true;
+                        }
+                    }.bind(this), function (err) {
+                        $h.loadClear();
+                    }.bind(this));
+                },
+                pay: function () {
+                    if (!this.addressChecked) {
+                        return $h.pushMsg('请选择收货地址');
+                    }
+                    $h.loadFFF();
+                    api.baseGet("{:url('index/login_user')}", function () {
+                        $h.loadClear();
+                        if (isWechat) {
+                            api.baseGet("{:url('index/user_login')}", function () {
+                                this.getOrderPrice(0);
+                            }.bind(this), function () {
+                                this.loginShow = true;
+                            }.bind(this), true);
+                        } else {
+                            this.getOrderPrice(0);
+                        }
+                    }.bind(this), function () {
+                        $h.loadClear();
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            this.loginShow = true;
+                        }
+                    }.bind(this), true);
+                },
+                pay_order: function (data) {
+                    this.orderId = data.data.result.orderId || '';
+                    switch (data.data.status) {
+                        case "PAY_ERROR": case 'ORDER_EXIST': case 'ORDER_ERROR':
+                            this.extendOrder(data.msg);
+                            break;
+                        case 'WECHAT_PAY':
+                            this.wechatPay(data.data.result.jsConfig);
+                            break;
+                        case 'WECHAT_H5_PAY':
+                            this.payDialogOpen = false;
+                            var callbackUrl = callback_url + '?type=2&id=0';
+                            var mwebUrl = data.data.result.jsConfig.mweb_url + '&redirect_url=' + encodeURIComponent(callbackUrl);
+                            window.location.href = mwebUrl;
+                            break;
+                        case 'SUCCESS':
+                            this.successOrder(data.msg);
+                            break;
+                        case 'ZHIFUBAO_PAY':
+                            window.location = $h.U({m: 'wap', c: 'alipay', a: 'index', q: {info: data.data.result, params: 'goods'}});
+                            break;
+                    }
+                },
+                wechatPay: function (config) {
+                    var that = this;
+                    mapleWx($jssdk(), function () {
+                        this.chooseWXPay(config, function () {
+                            that.successOrder();
+                        }, {
+                            fail: that.extendOrder,
+                            cancel: that.extendOrder
+                        });
+                    });
+                },
+                successOrder: function (msg) {
+                    $h.showMsg({
+                        title: msg ? msg : '支付成功',
+                        icon: 'success',
+                        success: function () {
+                            window.location = "{:url('wap/special/order_store_list')}?type=1";
+                        }
+                    });
+                },
+                extendOrder: function (msg) {
+                    if (typeof msg === 'object') {
+                        if (msg.errMsg === 'chooseWXPay:cancel') {
+                            msg = '微信支付取消';
+                        } else {
+                            msg = '支付失败';
+                        }
+                    } else {
+                        msg = msg || '支付失败';
+                    }
+                    $h.pushMsg(msg, function () {
+                        window.location = "{:url('wap/special/order_store_list')}?type=0";
+                    });
+                },
+                enter: function () {
+                    this.loginShow = true;
+                },
+                //关闭登录
+                loginClose: function (value) {
+                    this.loginShow = false;
+                    value && this.logComplete();
+                },
+                //登录完成回调事件
+                logComplete: function () {
+                    this.loginShow = false;
+                },
+                changeVal: function (opt) {
+                    if (typeof opt != 'object') opt = {};
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                }
+            }
+        });
+    });
+</script>
+{/block}

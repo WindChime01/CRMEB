@@ -1,0 +1,564 @@
+{extend name="public/container"}
+{block name="title"}素材详情{/block}
+{block name="head_top"}
+<style>
+    .prism-player .prism-info-display {
+        box-sizing: border-box;
+    }
+
+    .prism-player .prism-big-play-btn {
+        bottom: 50% !important;
+        left: 50% !important;
+        z-index: 54 !important;
+        transform: translate(-50%, 50%);
+    }
+
+    html,
+    body {
+        height: 100%;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="taskinfo">
+    <!-- 视频窗口 -->
+    <div :style="{ height: playerHeight + 'px' }" class="player">
+        <div :hidden="taskInfo.type == 2" id="J_prismPlayer"></div>
+        <img v-if="taskInfo.type == 2 || (!taskInfo.videoId && !taskInfo.link)" :src="taskInfo.image">
+    </div>
+    <div class="title">
+        <div>{{ taskInfo.title }}</div>
+        <div>已播放{{ taskInfo.play_count }}次</div>
+    </div>
+    <!-- 音频播放 -->
+    <div v-if="taskInfo.type == 2 && !(!taskInfo.videoId && !taskInfo.link)" class="audio">
+        <div class="progress">
+            <div class="time">{{ currentTime | format(duration) }}</div>
+            <div class="bar" @click="audioSeek">
+                <div :style="{ width: audioRange + '%' }" class="range">
+                    <div class="dot" @touchmove="audioMove" @touchend="audioMoveEnd"></div>
+                </div>
+            </div>
+            <div class="time">{{ duration | format }}</div>
+        </div>
+        <div class="control">
+            <button class="iconfont iconleft" type="button" @click="audioTab(0)"></button>
+            <button type="button" @click="audioPlay">
+                <svg class="icon" aria-hidden="true">
+                    <use :xlink:href="audioPaused ? '#iconbofang1' : '#iconzanting'"></use>
+                </svg>
+            </button>
+            <button class="iconfont iconright" type="button" @click="audioTab(1)"></button>
+        </div>
+    </div>
+    <!-- 目录、详情 -->
+    <div class="navbar">
+        <div :class="{ on: tabIndex == 0 }" class="navbar-item" @click="tabIndex = 0">目录</div>
+        <div :class="{ on: tabIndex == 1 }" class="navbar-item" @click="tabIndex = 1">详情</div>
+    </div>
+    <div class="navbar-content">
+        <div v-show="tabIndex == 0" class="navbar-content-item">
+            <ul class="catalog">
+                <li v-for="(item, index) in taskList" :key="item.id" :class="{ on: item.id == taskId }" class="catalog-item" @click="playTask(item)">
+                    <div>
+                        <img v-if="item.type == 1" class="catalog-item-image" src="{__WAP_PATH}zsff/images/media1.png">
+                        <img v-else-if="item.type == 2" class="catalog-item-image" src="{__WAP_PATH}zsff/images/media2.png">
+                        <img v-else-if="item.type == 3" class="catalog-item-image" src="{__WAP_PATH}zsff/images/media3.png">
+                    </div>
+                    <div class="catalog-item-text">
+                        <div class="catalog-item-title">{{ index >= 9 ? index + 1 : '0' + (index + 1) }} | {{ item.title }}</div>
+                        <div class="catalog-item-progress">
+                            <div v-if="item.watch && item.watch.percentage" class="progress-text">已学习{{ item.watch.percentage }}%</div>
+                            <div v-else class="progress-text no">未学习</div>
+                        </div>
+                    </div>
+                    <div class="catalog-item-status">
+                        <i v-if="item.is_free" :class="[item.pay_status ? 'iconsuozi' : 'iconziyuan2', 'iconfont']"></i>
+                        <span v-else class="free">免费</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div v-show="tabIndex == 1" class="navbar-content-item">
+            <div v-html="taskInfo.content" class="content"></div>
+        </div>
+    </div>
+    <pay-dialog :open.sync="payDialogOpen" :money="isMember ? specialInfo.member_money : specialInfo.money" :now_money="now_money" :special_id="specialId" :pay_type_num="2"
+                :is-wechat="isWechat" :is-alipay="is_alipay" :is-balance="is_yue" :template-id="templateIds" :wxpay-h5="wxpayH5" :is-member="isMember"
+                :member-money="specialInfo.member_money" :member-link="memberLink" @change="changeVal"></pay-dialog>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    window.overallShare = false;
+    require([
+        'vue',
+        'helper',
+        'store',
+        'moment',
+        'components/pay-dialog/index',
+        'aliplayer'
+    ], function (Vue, $h, store, moment, PayDialog) {
+        var specialId = {$specialId};
+        var taskId = {$task_id};
+        var now_money = {$now_money};
+        var isWechat = {$isWechat? 'true': 'false'};
+        var is_alipay = {$is_alipay? 'true': 'false'};
+        var is_yue = {$is_yue? 'true': 'false'};
+        var wxpayH5 = {$is_h5_wechat_payment_switch? 'true': 'false'};
+        var memberLink = "{:url('special/member_recharge')}";
+        new Vue({
+            el: '#app',
+            filters: {
+                format: function (time, sibling) {
+                    var duration = moment.duration(time * 1000);
+                    var hours = duration.hours();
+                    var siblingHours = sibling ? moment.duration(sibling * 1000).hours() : 0;
+                    return moment({
+                        h: hours,
+                        m: duration.minutes(),
+                        s: duration.seconds()
+                    }).format((hours || siblingHours ? 'HH:' : '') + 'mm:ss');
+                }
+            },
+            components: {
+                'pay-dialog': PayDialog
+            },
+            data: {
+                specialId: specialId,
+                taskId: taskId,
+                now_money: now_money,
+                isWechat: isWechat,
+                is_alipay: is_alipay,
+                is_yue: is_yue,
+                templateIds: '',
+                wxpayH5: wxpayH5,
+                memberLink: memberLink,
+                playerHeight: 0,
+                isPay: false,
+                isSourcePay: false,
+                isMember: 0,
+                linkUrl: '',
+                specialInfo: {},
+                taskInfo: {
+                    play_count: 0
+                },
+                taskList: [],
+                tabIndex: 0,
+                duration: 0,
+                currentTime: 0,
+                audioRange: 0,
+                audioPaused: true,
+                page: 1,
+                limit: 10,
+                loading: false,
+                finished: false,
+                player: null,
+                viewing_time: 0,
+                player: null,
+                payDialogOpen: false
+            },
+            created: function () {
+                this.viewing_time = $h.getParmas('viewing_time') / 1e3;
+                this.currentTime = Math.floor(this.viewing_time);
+                this.playerHeight = Math.floor(window.innerWidth * 9 / 16);
+                this.getTaskList();
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    var vm = this;
+                    this.getTaskInfo();
+                    $h.EventUtil.listenTouchDirection(document, function () {
+                        vm.getTaskList();
+                    });
+                });
+            },
+            methods: {
+                // 获取播放信息
+                getTaskInfo: function () {
+                    var vm = this;
+                    store.basePost($h.U({
+                        c: 'special',
+                        a: 'getTaskInfo'
+                    }), {
+                        special_id: specialId,
+                        task_id: this.taskId
+                    }, function (res) {
+                        var data = res.data.data;
+                        vm.isPay = data.isPay;
+                        vm.isSourcePay = data.isSourcePay;
+                        vm.isSourcePay = data.isSourcePay;
+                        vm.isMember = data.is_member;
+                        vm.linkUrl = data.link_url;
+                        vm.specialInfo = data.specialInfo;
+                        vm.taskInfo = data.taskInfo;
+                        if (vm.taskInfo.videoId) {
+                            vm.getPlayAuth();
+                        } else if (vm.taskInfo.link) {
+                            vm.createPlayer();
+                        }
+                        if (isWechat) {
+                            mapleWx($jssdk(), function () {
+                                this.onMenuShareAll({
+                                    title: vm.taskInfo.title,
+                                    desc: vm.taskInfo.title,
+                                    imgUrl: vm.taskInfo.image,
+                                    link: data.link_url
+                                });
+                            });
+                        }
+                    });
+                },
+                // 获取palyauth
+                getPlayAuth: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'get_video_playback_credentials',
+                        q: {
+                            videoId: vm.taskInfo.videoId,
+                            type: 2
+                        }
+                    }), function (res) {
+                        var request = new XMLHttpRequest();
+                        request.onreadystatechange = function () {
+                            if (request.readyState === 4) {
+                                try {
+                                    var data = JSON.parse(request.responseText);
+                                    if (request.status === 200) {
+                                        vm.duration = data.VideoMeta.Duration;
+                                        vm.createPlayer(data.PlayAuth);
+                                    } else {
+                                        layer.msg(data.Message);
+                                    }
+                                } catch (error) {
+                                    layer.msg(error);
+                                }
+                            }
+                        };
+                        request.open('GET', res.data.msg);
+                        request.send();
+                    }, undefined);
+                },
+                // 创建播放器
+                createPlayer: function (playauth) {
+                    var vm = this;
+                    if (this.player) {
+                        this.player.dispose();
+                        this.player = null;
+                        this.audioPaused = true;
+                    }
+                    this.player = new Aliplayer({
+                        id: 'J_prismPlayer',
+                        height: '100%',
+                        source: vm.taskInfo.link,
+                        vid: vm.taskInfo.videoId,
+                        playauth: playauth || '',
+                        cover: vm.taskInfo.type == 3 ? vm.taskInfo.image : '',
+                        autoplay: false,
+                        format: vm.taskInfo.type == 2 ? 'mp3' : '',
+                        controlBarVisibility: 'click',
+                        showBarTime: 3e3
+                    });
+                    vm.player.on('ready', vm.handleReady);
+                    vm.player.on('ready', vm.handleReady);
+                    vm.player.on('canplaythrough', vm.onPlayerCanplaythrough);
+                    vm.player.on('ended', vm.handleEnded);
+                    vm.player.on('timeupdate', vm.handleTimeupdate);
+                },
+                handleReady: function () {
+                    var vm = this;
+                    if (this.taskInfo.link) {
+                        this.duration = this.player.getDuration();
+                    }
+                    if (!this.isPay && !this.isSourcePay) {
+                        this.player.setPreviewTime(this.taskInfo.try_time * 60);
+                    }
+                },
+                // 初始播放位置
+                onPlayerCanplaythrough: function () {
+                    var vm = this;
+                    if (!this.isPay && !this.isSourcePay) {
+                        return;
+                    }
+                    if (!vm.seeked) {
+                        vm.seeked = true;
+                        vm.player.seek(vm.viewing_time);
+                    }
+                },
+                handleTimeupdate: function () {
+                    this.currentTime = this.player.getCurrentTime();
+                    if (this.taskInfo.type === 2) {
+                        this.setAudioRange();
+                    }
+                    if (!this.isPay && !this.isSourcePay) {
+                        return;
+                    }
+                    var floorTime = Math.floor(this.currentTime);
+                    if (floorTime && floorTime !== this.floorTime && !(floorTime % 10)) {
+                        this.floorTime = floorTime;
+                        this.setViewing();
+                    }
+                },
+                // 播放结束
+                handleEnded: function () {
+                    var vm = this;
+                    if (vm.taskInfo.type == 2) {
+                        vm.audioPaused = !vm.audioPaused;
+                    }
+                    if (!this.isPay && !this.isSourcePay) {
+                        layer.confirm('购买后可' + (this.taskInfo.type === 2 ? '听' : '看') + '全部内容，是否购买？', {
+                            title: false,
+                            closeBtn: false,
+                            btn: ['购买', '取消']
+                        }, function (index) {
+                            vm.payDialogOpen = true;
+                            layer.close(index);
+                        });
+                    }
+                    this.setViewing();
+                },
+                // 获取专栏列表
+                getTaskList: function () {
+                    var vm = this;
+                    if (vm.finished) {
+                        return;
+                    }
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'get_course_list',
+                        q: {
+                            special_id: specialId,
+                            page: vm.page,
+                            limit: vm.limit
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        var list = Array.isArray(data) ? [] : data.list;
+                        vm.taskList = vm.taskList.concat(list);
+                        vm.finished = vm.limit > list.length;
+                        if (!vm.finished) {
+                            vm.page++;
+                        }
+                    }, function () {
+                    });
+                },
+                // 点击目录
+                playTask: function (item) {
+                    var vm = this;
+                    if (item.id == vm.taskId) {
+                        return;
+                    }
+                    if (!this.isPay && item.pay_status && !item.is_try) {
+                        layer.confirm('购买后可' + (item.type === 2 ? '听' : '看') + '全部内容，是否购买？', {
+                            title: false,
+                            closeBtn: false,
+                            btn: ['购买', '取消']
+                        }, function (index) {
+                            vm.payDialogOpen = true;
+                            layer.close(index);
+                        });
+                        return;
+                    }
+                    vm.taskId = item.id;
+                    vm.viewing_time = item.watch && item.watch.viewing_time / 1e3 || 0;
+                    vm.currentTime = Math.floor(vm.viewing_time);
+                    vm.seeked = false;
+                    if (item.type == 1) {
+                      window.location.assign($h.U({
+                        c: 'special',
+                        a: 'task_text_info',
+                        q: {
+                          id: item.id,
+                          specialId: item.special_id,
+                          viewing_time: item.watch && item.watch.viewing_time || 0
+                        }
+                      }));
+                    } else {
+                      vm.getTaskInfo();
+                    }
+                },
+                // 更新播放进度
+                setViewing: function () {
+                    store.basePost($h.U({
+                        c: 'special',
+                        a: 'viewing'
+                    }), {
+                        special_id: specialId,
+                        task_id: this.taskId,
+                        total: this.duration * 1000,
+                        viewing_time: this.currentTime * 1000,
+                        percentage: Math.floor(this.currentTime / this.duration * 100)
+                    }, false, false, true);
+                },
+                // 播放/暂停音频
+                audioPlay: function () {
+                    this.audioPaused = !this.audioPaused;
+                    this.audioPaused ? this.player.pause() : this.player.play();
+                },
+                // 设置音频进度
+                setAudioRange: function () {
+                    this.audioRange = Math.floor(this.currentTime / this.duration * 100);
+                },
+                // 跳到音频的新位置
+                audioSeek: function (event) {
+                    var target = event.target;
+                    var classList = target.classList;
+                    var range;
+                    if (classList.contains('dot')) {
+                        return;
+                    } else if (classList.contains('range')) {
+                        range = event.offsetX / target.parentNode.clientWidth;
+                    } else {
+                        range = event.offsetX / target.clientWidth;
+                    }
+                    this.audioRange = range * 100;
+                    this.currentTime = this.duration * range;
+                    this.player.seek(this.currentTime);
+                },
+                // 上一个音频/下一个音频
+                audioTab: function (state) {
+                    if (this.player.getStatus() === 'playing') {
+                        this.audioPaused = true;
+                        this.player.pause();
+                    }
+                    var index = 0;
+                    for (var i = this.taskList.length; i--;) {
+                        if (this.taskList[i].id === this.taskId) {
+                            index = i;
+                            break;
+                        }
+                    }
+                    if (index === this.taskList.length - 1 && state) {
+                        return $h.pushMsg('已经是最后一个');
+                    }
+                    if (!index && !state) {
+                        return $h.pushMsg('已经是第一个');
+                    }
+                    var task = state ? this.taskList[index + 1] : this.taskList[index - 1];
+                    if (task.pay_status) {
+                        return $h.pushMsg('请先去购买');
+                    }
+                    this.playTask(task);
+                },
+                // 滑动音频
+                audioMove: function (event) {
+                    if (this.player.getStatus() === 'playing') {
+                        this.audioPaused = true;
+                        this.player.pause();
+                    }
+                    var parentNode = event.target.parentNode.parentNode;
+                    var range = Math.floor((event.touches[0].pageX - parentNode.offsetLeft) / parentNode.clientWidth * 100);
+                    if (range > 100) {
+                        range = 100;
+                    }
+                    this.audioRange = range;
+                },
+                // 滑动音频停止
+                audioMoveEnd: function () {
+                    this.player.seek(this.duration * this.audioRange / 100);
+                    if (this.player.getStatus() === 'pause') {
+                        this.audioPaused = false;
+                        this.player.play();
+                    }
+                },
+                changeVal: function (opt) {
+                    if (typeof opt !== 'object') {
+                        opt = {};
+                    }
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                // 支付方式回调
+                pay_order: function (data) {
+                    this.orderId = data.data.result.orderId || '';
+                    switch (data.data.status) {
+                        case "PAY_ERROR":
+                        case 'ORDER_EXIST':
+                        case 'ORDER_ERROR':
+                            this.extendOrder(data.msg);
+                            break;
+                        case 'WECHAT_PAY':
+                            this.wechatPay(data.data.result.jsConfig);
+                            break;
+                        case 'WECHAT_H5_PAY':
+                            this.payDialogOpen = false;
+                            var callbackUrl = callback_url + '?type=7&id=' + this.special.id;
+                            var mwebUrl = data.data.result.jsConfig.mweb_url + '&redirect_url=' + encodeURIComponent(callbackUrl);
+                            window.location.assign(mwebUrl);
+                            break;
+                        case 'SUCCESS':
+                            this.successOrder(data.msg);
+                            break;
+                        case 'ZHIFUBAO_PAY':
+                            window.location.assign($h.U({
+                                c: 'alipay',
+                                a: 'index',
+                                q: {
+                                    info: data.data.result,
+                                    params: 'special'
+                                }
+                            }));
+                            break;
+                    }
+                },
+                // 微信支付
+                wechatPay: function (config) {
+                    var vm = this;
+                    mapleWx($jssdk(), function () {
+                        this.chooseWXPay(config, function () {
+                            vm.successOrder();
+                        }, {
+                            fail: vm.extendOrder,
+                            cancel: vm.extendOrder
+                        });
+                    });
+                },
+                // 支付成功
+                successOrder: function (msg) {
+                    var that = this;
+                    $h.showMsg({
+                        title: msg || '支付成功',
+                        icon: 'success',
+                        success: function () {
+                            window.location.reload();
+                            that.payDialogOpen = false;
+                            that.getTaskInfo();
+                            that.finished = false;
+                            that.page = 1;
+                            that.taskList = [];
+                            that.getTaskList();
+                        }
+                    });
+                },
+                // 支付未完成
+                extendOrder: function (msg) {
+                    var that = this;
+                    if (typeof msg === 'object') {
+                        if (msg.errMsg === 'chooseWXPay:cancel') {
+                            msg = '微信支付取消';
+                        } else {
+                            msg = '支付失败';
+                        }
+                    } else {
+                        msg = msg || '支付失败';
+                    }
+                    $h.pushMsg(msg, function () {
+                        that.payDialogOpen = false;
+                        if (that.orderId) {
+                            store.baseGet($h.U({
+                                c: 'special',
+                                a: 'del_order',
+                                q: {
+                                    orderId: that.orderId
+                                }
+                            }));
+                        }
+                    });
+                },
+            }
+        });
+    });
+</script>
+{/block}

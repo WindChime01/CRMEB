@@ -1,0 +1,396 @@
+{extend name="public/container"}
+{block name="title"}{$titles}{/block}
+{block name="head_top"}
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="question-paper">
+    <div v-show="questions.length" class="header">
+        <div class="message">温馨提示：请点击“答题卡”前去提交考试哦！</div>
+        <div class="header-bd">
+            <a id="some-element"
+               :href="'{:url('topic/question_sheet')}?test_id=' + test_id + '&record_id=' + e_id + '&index=' + activeIndex + '&is_analysis=' + is_analysis + '&txamination_time=' + txamination_time + '&exam_time=' + duration">答题卡</a>
+            <div v-if="!is_analysis">{{ duration | formatTime }}</div>
+        </div>
+    </div>
+    <div class="swiper-container swiper-no-swiping">
+        <div class="swiper-wrapper">
+            <div v-for="(item, index) in virtualData.slides" :key="item.id" :style="{ left: virtualData.offset + 'px' }" class="swiper-slide">
+                <div class="type">{{ item.questionType }}</div>
+                <div class="question">
+                    <div>{{ item.stem }}</div>
+                    <img v-if="item.image" :src="item.image">
+                    <div :class="{ image: item.is_img }" class="label-group">
+                        <template v-for="option in item.options">
+                            <label v-if="option.value" :key="option.code">
+                                <input v-if="item.question_type === 2" v-model="item.user_answer" :value="option.code"
+                                       :disabled="!!is_analysis || !!questions[questionSwiper.activeIndex].is_correct" type="checkbox" hidden>
+                                <input v-else v-model="item.user_answer" :value="option.code" :disabled="!!is_analysis || !!questions[questionSwiper.activeIndex].is_correct"
+                                       type="radio" hidden>
+                                <div :class="{
+                                        ok: option.right && item.user_answer.includes(option.code) && is_analysis,
+                                        ok: !option.right && item.user_answer.includes(option.code) && is_analysis
+                                    }">
+                                    <img v-if="item.is_img" :src="option.value">
+                                    <template v-else>{{ option.value }}</template>
+                                </div>
+                            </label>
+                        </template>
+                    </div>
+                </div>
+                <div v-if="is_analysis" class="analysis">
+                    <div :class="{ no: item.is_correct !== 2 }">回答{{ item.is_correct === 2 ? '正确' : '错误' }}</div>
+                    <div>
+                        <div>正确答案：<div>{{ item.answer }}</div>
+                        </div>
+                        <div>您的答案：<div>{{ item.user_answer.toString() || '未答' }}</div>
+                        </div>
+                    </div>
+                    <div>试题难度：<span v-for="star in 5" :key="star" :class="{ on: item.difficulty >= star }" class="iconfont iconxing"></span></div>
+                    <div>答案解析：</div>
+                    <div v-html="item.analysis"></div>
+                    <div v-if="item.special.length">关联知识点：</div>
+                    <a v-for="special in item.special" :key="special.id"
+                       :href="(special.is_light ? '{:url('special/single_details')}' : '{:url('special/details')}') + '?id=' + special.id">{{ special.title }}</a>
+                </div>
+            </div>
+        </div>
+        <div class="swiper-pagination"></div>
+    </div>
+    <div v-if="questionSwiper" class="footer">
+        <button :disabled="!questionSwiper.activeIndex" @click="slidePrev">
+            <i class="iconfont iconshangyige"></i>
+            <div>上一题</div>
+        </button>
+        <button v-if="!is_analysis" :disabled="!!questions[questionSwiper.activeIndex].is_correct" class="submit" @click="submitQuestion">
+            <i class="iconfont icontijiao"></i>
+            <div>确认提交</div>
+        </button>
+        <button :disabled="questionSwiper.activeIndex === questionSwiper.virtual.slides.length - 1" @click="slideNext">
+            <i class="iconfont iconxiayige"></i>
+            <div>下一题</div>
+        </button>
+    </div>
+    <quick-menu v-if="is_analysis"></quick-menu>
+    <question-guide :visible.sync="guideVisible"></question-guide>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    var uid = '{$uid}';
+    var titles = '{$titles}';
+    var txamination_time = "{$txamination_time}";
+    var wechat_share =<?php echo isset($overallShareWechat) ? $overallShareWechat : '{}'; ?>;
+    window.overallShare = false;
+    require(['vue', 'helper', 'axios', 'swiper', 'components/question-guide/index', 'quick'], function (Vue, $h, axios, Swiper, questionGuide) {
+        var isWechat = '{$isWechat}';
+        var app = new Vue({
+            el: '#app',
+            components: {
+                'question-guide': questionGuide
+            },
+            filters: {
+                formatTime: function (time) {
+                    var hour = Math.floor(time / 3600000);
+                    var minute = Math.floor((time - hour * 3600000) / 60000);
+                    var second = Math.floor((time - hour * 3600000 - minute * 60000) / 1000);
+
+                    if (hour < 10) {
+                        hour = '0' + hour;
+                    }
+                    if (minute < 10) {
+                        minute = '0' + minute;
+                    }
+                    if (second < 10) {
+                        second = '0' + second;
+                    }
+
+                    return hour + ':' + minute + ':' + second;
+                }
+            },
+            data: {
+                questions: [],  // 考题列表
+                test_id: '',
+                e_id: '',
+                isWechat: isWechat,
+                is_analysis: 0,
+                activeIndex: 0,
+                virtualData: {
+                    slides: []
+                },
+                questionSwiper: null,
+                startTime: new Date(),
+                duration: 0,
+                txamination_time: 0,
+                guideVisible: false,
+                submitProblem: {}
+            },
+            watch: {
+                guideVisible: function (value) {
+                    if (!value) {
+                        localStorage.setItem('question-guide', new Date());
+                    }
+                }
+            },
+            created: function () {
+                var vm = this;
+                var search = window.location.search.slice(1);
+                var query = {};
+                search.split('&').forEach(function (item) {
+                    item = item.split('=');
+                    query[item[0]] = item[1];
+                });
+
+                this.test_id = query.test_id;
+                this.e_id = query.e_id;
+                this.is_analysis = query.is_analysis || 0;
+                this.is_analysis = Number(query.is_analysis) || 0;
+                this.activeIndex = Number(query.index) || 0;
+
+                this.getQuestions();
+
+                this.txamination_time = parseInt(txamination_time);
+
+                if ($h.getCookie('exam_time')) {
+                    if ($h.getCookie('exam_time') === 'NaN') {
+                        this.exam_time = 0;
+                    } else {
+                        this.exam_time = parseInt($h.getCookie('exam_time'));
+                    }
+                } else {
+                    this.exam_time = 0;
+                }
+
+                if (!this.is_analysis) {
+                    this.setTimer();
+                }
+
+                if (this.isWechat) {
+                    mapleWx($jssdk(), function () {
+                        this.onMenuShareAll({
+                            title: titles,
+                            desc: titles,
+                            imgUrl: wechat_share.wechat_share_img,
+                            link: window.location.origin + "{:url('special/question_index')}?spread_uid=" + uid + "&id=" + vm.test_id
+                        });
+                    });
+                }
+            },
+            methods: {
+                // 获取考试题
+                getQuestions: function () {
+                    var vm = this;
+                    var load = layer.load(1);
+                    axios.get('/wap/topic/testPaperQuestions', {
+                        params: {
+                            test_id: this.test_id,
+                            record_id: this.e_id,
+                            type: 2
+                        }
+                    }).then(function (res) {
+                        if (res.data.code === 200) {
+                            var questions = res.data.data;
+                            questions.forEach(function (question) {
+                                question.options = [];
+                                if (Array.isArray(question.option)) {
+                                    question.option.forEach(function (option, index) {
+                                        var code = String.fromCharCode(index + 65);
+                                        question.options.push({
+                                            code: code,
+                                            value: option,
+                                            right: question.answer.includes(code)
+                                        });
+                                    });
+                                } else {
+                                    for (var key in question.option) {
+                                        if (Object.hasOwnProperty.call(question.option, key)) {
+                                            question.options.push({
+                                                code: key,
+                                                value: question.option[key],
+                                                right: question.answer.includes(key)
+                                            });
+                                        }
+                                    }
+                                }
+                                if (!Array.isArray(question.userAnswer)) {
+                                    Object.assign(question, question.userAnswer);
+                                }
+                                if (!('is_correct' in question)) {
+                                    question.is_correct = 0;
+                                }
+                                if (!('user_answer' in question)) {
+                                    question.user_answer = '';
+                                }
+                                if (question.question_type === 2) {
+                                    question.user_answer = question.user_answer ? question.user_answer.split(',') : [];
+                                }
+                                switch (question.question_type) {
+                                    case 1:
+                                        question.questionType = '单选题';
+                                        break;
+                                    case 2:
+                                        question.questionType = '多选题';
+                                        break;
+                                    case 3:
+                                        question.questionType = '判断题';
+                                        break;
+                                }
+                            });
+                            vm.questions = questions;
+                            vm.questionSwiper = new Swiper('.swiper-container', {
+                                initialSlide: vm.activeIndex,
+                                pagination: {
+                                    el: '.swiper-pagination',
+                                    type: 'fraction'
+                                },
+                                virtual: {
+                                    slides: questions,
+                                    renderExternal: function (data) {
+                                        vm.virtualData = data;
+                                    }
+                                },
+                                on: {
+                                    init: function () {
+                                        vm.guideVisible = !localStorage.getItem('question-guide');
+                                    },
+                                    slideChange: function () {
+                                        if (!vm.is_analysis) {
+                                            vm.activeIndex = this.activeIndex;
+                                            if (vm.activeIndex === vm.questions.length - 1) {
+                                                layer.msg('答完全部考题后<br>点击左上角“答题卡”前去提交考试');
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        } else {
+                            layer.msg(res.data.msg, function () {
+                                window.location.replace($h.U({
+                                    c: 'topic',
+                                    a: 'question_user'
+                                }));
+                            });
+                        }
+                    }).catch(function () {
+
+                    }).then(function () {
+                        layer.close(load);
+                    });
+                },
+                // 计时器
+                setTimer: function () {
+                    var vm = this;
+                    window.addEventListener('pagehide', function () {
+                        $h.setCookie('exam_time', vm.duration);
+                    });
+                    var timer = setInterval(function () {
+                        vm.duration = new Date() - vm.startTime + vm.exam_time;
+                        if (vm.txamination_time * 60000 <= vm.duration) {
+                            clearInterval(timer);
+                            layer.msg('考试时间已到', function () {
+                                vm.submit();
+                            });
+                        }
+                    }, 1000);
+                },
+                // 提交考试
+                submit: function () {
+                    var vm = this;
+                    var submitProblem = this.questions[this.activeIndex];
+                    if (submitProblem.user_answer.length) {
+                        var question = submitProblem;
+                        var data = {
+                            e_id: this.e_id,
+                            questions_id: question.questions_id,
+                            answer: question.answer,
+                            score: question.score,
+                            type: 2
+                        };
+
+                        if (typeof question.user_answer === 'string') {
+                            data.user_answer = question.user_answer;
+                            data.is_correct = question.answer === question.user_answer ? 2 : 1;
+                        } else {
+                            var answer = question.answer.split(',');
+
+                            if (answer.length === question.user_answer.length) {
+                                if (answer.toString() === question.user_answer.toString()) {
+                                    data.is_correct = 2;
+                                } else {
+                                    data.is_correct = answer.sort().toString() === question.user_answer.sort().toString() ? 2 : 1;
+                                }
+                            } else {
+                                data.is_correct = 1;
+                            }
+
+                            data.user_answer = question.user_answer.sort().toString();
+                        }
+                        var index = layer.load(1);
+                        axios.post('/wap/topic/submitQuestions', data).then(function (res) {
+                            var resData = res.data;
+                            if (resData.code === 200) {
+                                question.is_correct = data.is_correct;
+                                window.location = "{:url('topic/question_sheet')}?test_id=" + vm.test_id + '&record_id=' + vm.e_id + '&index=' + vm.activeIndex + '&is_analysis=' + vm.is_analysis + '&txamination_time=' + vm.txamination_time;
+                            } else {
+                                layer.msg(resData.msg);
+                            }
+                        }).catch(function (err) {
+
+                        }).then(function () {
+                            layer.close(index);
+                        });
+                    } else {
+                        window.location = "{:url('topic/question_sheet')}?test_id=" + vm.test_id + '&record_id=' + vm.e_id + '&index=' + vm.activeIndex + '&is_analysis=' + vm.is_analysis + '&txamination_time=' + vm.txamination_time;
+                    }
+                },
+                // 提交本题
+                submitQuestion: function () {
+                    var vm = this;
+                    var question = this.questions[this.activeIndex];
+                    var data = {
+                        e_id: this.e_id,
+                        questions_id: question.questions_id,
+                        answer: question.answer,
+                        score: question.score,
+                        type: 2
+                    };
+                    if (!question.user_answer.length) {
+                        return layer.msg('请作答后提交本题');
+                    }
+                    if (question.question_type === 2) {
+                        question.user_answer.sort();
+                        data.user_answer = question.user_answer.toString();
+                    } else {
+                        data.user_answer = question.user_answer;
+                    }
+                    data.is_correct = data.user_answer === question.answer ? 2 : 1;
+                    var load = layer.load(1);
+                    axios.post('/wap/topic/submitQuestions', data).then(function (res) {
+                        if (res.data.code === 200) {
+                            question.is_correct = data.is_correct;
+                        } else {
+                            layer.msg(res.data.msg);
+                        }
+                    }).catch(function () {
+
+                    }).then(function () {
+                        layer.close(load);
+                    })
+                },
+                // 上一题
+                slidePrev: function () {
+                    this.questionSwiper.slidePrev();
+                },
+                // 下一题
+                slideNext: function () {
+                    this.questionSwiper.slideNext();
+                }
+            }
+        });
+    });
+</script>
+{/block}

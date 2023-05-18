@@ -1,0 +1,115 @@
+.recommend6 .recommend-head {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: end;
+    -webkit-align-items: flex-end;
+    -moz-box-align: end;
+    -ms-flex-align: end;
+    align-items: flex-end;
+    margin-top: 70px;
+}
+
+.recommend6 .recommend-head .title {
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 31px;
+    color: #282828;
+}
+
+.recommend6 .recommend-head .subtitle {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    margin-left: 10px;
+    font-size: 16px;
+    line-height: 21px;
+    color: #999999;
+}
+
+.recommend6 .recommend-body {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-align-content: flex-start;
+    -ms-flex-line-pack: start;
+    align-content: flex-start;
+    margin: 30px -24px -24px 0;
+}
+
+.recommend6 .recommend-body .item {
+    width: 384px;
+    padding: 20px 20px 17px;
+    border-radius: 8px;
+    margin: 0 24px 24px 0;
+    background-color: #FFFFFF;
+}
+
+.recommend6 .recommend-body .item:hover {
+    -webkit-box-shadow: 0 3px 20px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 3px 20px rgba(0, 0, 0, 0.07);
+}
+
+.recommend6 .recommend-body .title {
+    overflow: hidden;
+    white-space: nowrap;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    font-size: 18px;
+    line-height: 24px;
+    color: #282828;
+}
+
+.recommend6 .recommend-body .group {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    margin-top: 39px;
+}
+
+.recommend6 .recommend-body .total {
+    font-size: 16px;
+    color: #FF6B00;
+}
+
+.recommend6 .recommend-body .people {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    margin-left: 20px;
+    font-size: 14px;
+    color: #999999;
+}
+
+.recommend6 .recommend-body .button {
+    height: 30px;
+    padding: 0 17px;
+    border-radius: 15px;
+    background-color: #F2F8FF;
+    font-size: 14px;
+    line-height: 30px;
+    color: #2C8EFF;
+}
+
+.recommend6 .recommend-body .iconfont {
+    margin-right: 5px;
+    font-size: 14px;
+}

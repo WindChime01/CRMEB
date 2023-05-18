@@ -1,0 +1,29 @@
+<div class="my-course">
+    <template v-if="specialList.length">
+        <el-row :gutter="20">
+            <el-col v-for="item in specialList" :key="item.id" :span="6">
+                <a :href="(item.is_light ? $router.single_detail :  $router.special_detail) + '?id=' + item.id">
+                    <el-image :src="item.image" fit="cover"></el-image>
+                    <div>
+                        <div class="title">{{ item.title }}</div>
+                        <div class="label">
+                            <el-tag v-for="label in item.label">{{ label }}</el-tag>
+                        </div>
+                        <div class="money-count">
+                            <div class="money-vip">
+                                <template v-if="item.pay_type">
+                                    <div class="money">￥<span>{{ item.money }}</span></div>
+                                    <div class="vip">￥{{ item.member_money }}</div>
+                                </template>
+                                <div v-else class="money free">免费</div>
+                            </div>
+                            <div v-if="item.type !== 4 && !item.is_light">共{{ item.count }}节</div>
+                        </div>
+                    </div>
+                </a>
+            </el-col>
+        </el-row>
+        <el-pagination :page-size="limit" :total="count" :current-page.sync="page" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page @current-change="my_special_list"></el-pagination>
+    </template>
+    <el-empty v-else :image-size="200" description=" "></el-empty>
+</div>

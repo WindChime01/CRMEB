@@ -1,0 +1,161 @@
+.recommend {
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.recommend .head {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+       -moz-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -webkit-box-align: end;
+    -webkit-align-items: flex-end;
+       -moz-box-align: end;
+        -ms-flex-align: end;
+            align-items: flex-end;
+    font-weight: bold;
+    font-size: 24px;
+    color: #333;
+}
+
+.recommend .head div span {
+    margin-left: 10px;
+    font-weight: normal;
+    font-size: 16px;
+    color: #999;
+}
+
+.recommend .head .el-link.el-link--default {
+    font-size: 14px;
+    color: #666;
+}
+
+.recommend .el-row {
+    margin-top: 30px;
+}
+
+.recommend1 .el-row a {
+    display: block;
+    border-radius: 8px;
+    background-color: #fff;
+    overflow: hidden;
+}
+
+.recommend1 .el-row a > div:first-child {
+    position: relative;
+}
+
+.recommend1 .el-row a > div:first-child > div:first-child {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    padding-right: 16px;
+    padding-left: 41px;
+    border-bottom-right-radius: 8px;
+    background: rgba(0, 0, 0, 0.6) url("../../../images/live3.png") 15px center/16px 16px no-repeat;
+    font-size: 16px;
+    line-height: 34px;
+    color: #fff;
+}
+
+.recommend1 .el-row a > div:first-child > div.live1 {
+    background-image: url("../../../images/live1.png");
+}
+
+.recommend1 .el-row a > div:first-child > div.live2 {
+    background-image: url("../../../images/live2.png");
+}
+
+.recommend1 .el-image {
+    display: block;
+    width: 100%;
+    height: 216px;
+}
+
+.recommend1 .el-row a > div:last-child {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.recommend1 .title {
+    padding-top: 16px;
+    overflow: hidden;
+    white-space: nowrap;
+    -o-text-overflow: ellipsis;
+       text-overflow: ellipsis;
+    font-size: 18px;
+    color: #333;
+}
+
+.recommend1 .lecturer {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+       -moz-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 16px;
+    color: #2b2b2b;
+    height: 75px;
+}
+
+.recommend1 .el-avatar {
+    margin-right: 15px;
+}
+
+.recommend1 .browse-money {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+       -moz-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+       -moz-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    height: 46px;
+    border-top: 1px dashed #e9e9e9;
+    font-size: 14px;
+    color: #999;
+}
+
+.recommend1 .el-icon-view {
+    margin-right: 5px;
+}
+
+.recommend1 .money {
+    font-size: 16px;
+    color: #ff6b00;
+}
+
+.recommend1 .money.free {
+    font-size: 18px;
+}
+
+.recommend1 .money span {
+    font-size: 24px;
+}
+
+.recommend1 .el-col-8 {
+    padding-right: 7px !important;
+    padding-left: 7px !important;
+}

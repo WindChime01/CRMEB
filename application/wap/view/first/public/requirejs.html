@@ -1,0 +1,81 @@
+<script src="{__PLUG_PATH}requirejs/require.js"></script>
+<script>
+    var aliplayerVersion = '2.13.2';
+    requirejs.config({
+        urlArgs: 'bust=' + (new Date()).getTime(),
+        map: {
+            '*': {
+                'css': '{__PLUG_PATH}requirejs/css.min.js'
+            }
+        },
+        shim: {
+            'iview': {
+                deps: ['css!iviewcss']
+            },
+            'layer': {
+                deps: ['css!layercss']
+            },
+            'ydui': {
+                deps: ['css!yduicss']
+            },
+            'vant': {
+                deps: ['css!vantcss']
+            },
+            'cityselect': {
+                deps: ['css!yduicss']
+            },
+            'swiper': {
+                deps: ['css!swipercss']
+            },
+            'aliplayer': {
+                deps: [
+                    'css!//g.alicdn.com/de/prismplayer/' + aliplayerVersion + '/skins/default/aliplayer-min.css',
+                    'aliplayer-plugin'
+                ]
+            }
+        },
+        baseUrl: '//' + location.hostname + '{__PUBLIC_PATH}',
+        paths: {
+            'static': 'static',
+            'components': '{__WAP_PATH}zsff/components',
+            'images': '{__WAP_PATH}zsff/images',
+            'vue': 'static/plug/vue/dist/vue.min',
+            'axios': 'static/plug/axios.min',
+            'iview': 'static/plug/iview/dist/iview.min',
+            'iviewcss': 'static/plug/iview/dist/styles/iview',
+            'lodash': 'static/plug/lodash',
+            'layer': 'static/plug/layer/layer',
+            'layercss': 'static/plug/layer/theme/default/layer',
+            // 'jquery': 'static/plug/jquery-1.10.2.min',
+            'jquery': 'static/plug/captcha/js/jquery.min',
+            'moment': 'static/plug/moment',
+            'sweetalert': 'static/plug/sweetalert2/sweetalert2.all.min',
+            'helper': 'static/plug/helper',
+            'store': '{__WAP_PATH}crmeb/module/store',
+            'better-scroll': "static/plug/better-scroll",
+            'ydui': "static/plug/ydui/ydui",
+            'yduicss': "static/plug/ydui/ydui-px",
+            'vant': "static/plug/vant/vant.min",
+            'vantcss': "static/plug/vant/vant",
+            'cityselect': "static/plug/ydui/cityselect",
+            'reg-verify': "static/plug/reg-verify",
+            'special-type': '{__WAP_PATH}zsff/js/special-type',
+            'clipboard': '{__WAP_PATH}zsff/js/clipboard',
+            'quick': '{__WAP_PATH}zsff/js/quick',
+            'text': 'static/plug/requirejs/text',
+            'progress': '{__WAP_PATH}zsff/js/vue-circle-progress',
+            'swipercss': '{__PLUG_PATH}swiper5/css/swiper.min',
+            'swiper': '{__PLUG_PATH}swiper5/js/swiper',
+            'qrcode': '{__PUBLIC_PATH}system/js/qrcode.min',
+            'vue-circle-progress': '{__WAP_PATH}zsff/js/vue-circle-progress',
+            'picker': '{__PLUG_PATH}picker.min',
+            'shortcut': '{__WAP_PATH}zsff/components/shortcut/index',
+            'evaluate-list': '{__WAP_PATH}zsff/components/evaluate-list/index',
+            'aliplayer': '//g.alicdn.com/de/prismplayer/' + aliplayerVersion + '/aliplayer-min',
+            'aliplayer-hls': '//g.alicdn.com/de/prismplayer/' + aliplayerVersion + '/hls/aliplayer-hls-min',
+            'aliplayer-plugin': 'wap/first/zsff/js/aliplayer-plugin',
+            'jquery-cookie': '{__WAP_PATH}zsff/js/jquery.cookie',
+            'decimal': '{__PLUG_PATH}decimal',
+        }
+    });
+</script>

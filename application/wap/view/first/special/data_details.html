@@ -1,0 +1,541 @@
+{extend name="public/container"}
+{block name="title"}{$title}{/block}
+{block name="head_top"}
+<style>
+    body {
+        padding-bottom: 1rem;
+        padding-bottom: calc(1rem + constant(safe-area-inset-bottom));
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+
+    .layui-layer-imgsee {
+        display: none;
+    }
+
+    a[href^="tel"] {
+        color: #2C8EFF;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="material-detail">
+        <div class="header">
+            <img :src="material.image" alt="">
+            <div>
+                <div>{{ material.title }}</div>
+                <div>
+                    <div>
+                        <div>{{ material.ficti + material.sales }}人已下载</div>
+                        <div :class="{ money: material.pay_type }">
+                            <template v-if="material.pay_type">
+                                ￥<span>{{ material.money }}</span><span>￥{{ material.member_money }}</span>
+                            </template>
+                            <template v-else>
+                                免费
+                            </template>
+                        </div>
+                    </div>
+                    <button type="button" @click="createShare">
+                        <i class="iconfont iconfenxiang"></i>
+                        <div>分享</div>
+                    </button>
+                    <button type="button" @click="collect">
+                        <i :class="['iconfont', material.collect ? 'iconshoucang2' : 'iconshoucang11']"></i>
+                        <div>{{ material.collect ? '已收藏' : '收藏' }}</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- 相关讲师 -->
+        <related-lecturer v-if="lecturer" :lecturer="lecturer"></related-lecturer>
+        <div class="main">
+            <div>
+                <div>详情</div>
+            </div>
+            <div v-html="material.abstract"></div>
+        </div>
+        <div class="footer">
+            <button type="button" @click="goHome">
+                <img src="{__WAP_PATH}zsff/images/special01.png" alt="">
+                首页
+            </button>
+            <button type="button" @click="customerService">
+                <img src="{__WAP_PATH}zsff/images/special02.png" alt="">
+                客服
+            </button>
+            <button v-if="!material.pay_type || isPay || (!material.member_pay_type && is_member)" type="button" @click="download(1)">立即下载</button>
+            <button v-else type="button" @click="buy">立即购买</button>
+        </div>
+        <div :class="{ mask: hasDialog }" @touchmove.prevent @click="hasDialog = false, type = 0"></div>
+        <div v-if="(hasDialog && material.type == 1) || type == 1" class="android">
+            <img src="{__WAP_PATH}zsff/images/material1.png" alt="">
+            <div>{{ material.title }}</div>
+            <button type="button" @click="download(2)">立即下载</button>
+        </div>
+        <div v-if="(hasDialog && material.type == 2) || type == 2" class="ios">
+            <img src="{__WAP_PATH}zsff/images/material2.png" alt="">
+            <div>复制下方链接及提取码到网盘下载</div>
+            <div>
+                <div>
+                    <div>链接：</div>
+                    <div><a :href="material.network_disk_link">{{ material.network_disk_link }}</a></div>
+                </div>
+                <div>
+                    <div>提取码：</div>
+                    <div>{{ material.network_disk_pwd }}</div>
+                    <button class="btn" type="button" :data-clipboard-text="'链接：' + material.network_disk_link + '\n提取码：' + material.network_disk_pwd">一键复制</button>
+                </div>
+            </div>
+        </div>
+        <!-- 登录弹窗 -->
+        <base-login :login-show="loginShow" :site-name="site_name" @login-close="loginClose"></base-login>
+        <!-- 支付弹窗 -->
+        <pay-dialog :open.sync="payDialogOpen" :money="money" :now_money="now_money" :special_id="material.id" :pay_type_num="pay_type_num" :is-wechat="isWechat"
+                    :is-alipay="is_alipay" :is-balance="is_yue" :template-id="templateId" :wxpay-h5="wxpayH5" :is-member="is_member" :member-money="material.member_money"
+                    :member-link="memberLink" @change="changeVal">
+        </pay-dialog>
+    </div>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    window.overallShare = false;
+    require([
+        'vue',
+        'clipboard',
+        'helper',
+        'store',
+        'components/pay-dialog/index',
+        'components/base-login/index',
+        'components/related-lecturer/index',
+        'qrcode'
+    ], function (Vue, ClipboardJS, $h, $http, PayDialog, BaseLogin, RelatedLecturer) {
+        var material = {$data};
+        var is_member = {$is_member};
+        var isPay = {$isPay? 'true': 'false'};
+        var site_url = "{$site_url}";
+        var site_name = "{$Auth_site_name}";
+        var isWechat = {$isWechat? 'true': 'false'};
+        var now_money = {$now_money};
+        var wxpayH5 = {$is_h5_wechat_payment_switch? 'true': 'false'};
+        var is_alipay = {$is_alipay? 'true': 'false'};
+        var is_yue = {$is_yue? 'true': 'false'};
+        var callback_url = '{$callback_url}';
+        var uid = {$userInfo['uid']? $userInfo['uid']: 0};
+        var memberLink = "{:url('special/member_recharge')}";
+        var vm = new Vue({
+            el: '#app',
+            components: {
+                'pay-dialog': PayDialog,
+                'base-login': BaseLogin,
+                'related-lecturer': RelatedLecturer
+            },
+            data: {
+                material: material,
+                is_member: is_member,
+                isPay: isPay,
+                isWechat: isWechat,
+                isAndroid: window.navigator.userAgent.toLowerCase().indexOf('android') !== -1,
+                hasDialog: false,
+                isCollect: false,
+                payDialogOpen: false,  // 是否显示支付弹窗
+                money: 0,
+                now_money: now_money,
+                link_pay_uid: '',
+                pay_type_num: 70,
+                is_alipay: is_alipay,
+                is_yue: is_yue,
+                templateId: '',
+                wxpayH5: wxpayH5,
+                loginShow: false,
+                url: isWechat ? "{:url('index/login')}" : "{:url('login/phone_check')}",
+                site_name: site_name,
+                shareImage: '',
+                lecturer: null,
+                memberLink: memberLink,
+                type: 0
+            },
+            created: function () {
+                this.getLecturer();
+                if (this.isWechat) {
+                    mapleWx($jssdk(), function () {
+                        this.onMenuShareAll({
+                            title: vm.material.title,
+                            desc: vm.material.title,
+                            imgUrl: vm.material.image,
+                            link: customWXShare(uid)
+                        });
+                    });
+                }
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    (!this.isAndroid || this.material.type) && this.initialCopy();
+                });
+            },
+            methods: {
+                // 实例化clipboard
+                initialCopy: function () {
+                    this.clipboard = new ClipboardJS('.btn');
+                    this.clipboard.on('success', this.copySuccess);
+                    this.clipboard.on('error', this.copyError);
+                },
+                // 复制成功
+                copySuccess: function (e) {
+                    $h.pushMsg('复制成功', function () {
+                        vm.hasDialog = false;
+                        vm.recordDownload();
+                    });
+                    e.clearSelection();
+                },
+                // 复制失败
+                copyError: function () {
+                    $h.pushMsg('复制失败');
+                },
+                // 分享
+                createShare: function () {
+                  var vm = this;
+                  $http.baseGet("{:url('index/login_user')}", function () {
+                    if (vm.shareImage) {
+                        vm.layerPhoto();
+                    } else {
+                        $h.loadFFF();
+                        Promise.all([
+                            new Promise(function (resolve, reject) {
+                                var image = new Image();
+                                image.crossOrigin = 'anonymous';
+                                image.src = vm.material.poster_image + '?' + new Date().getTime();
+                                image.onload = function () {
+                                    resolve(image);
+                                };
+                                image.onerror = function () {
+                                    reject('error-image');
+                                };
+                            }),
+                            new Promise(function (resolve, reject) {
+                                resolve(new QRCode(document.createElement('canvas'), site_url));
+                            })
+                        ]).then(function (sources) {
+                            var canvas = document.createElement('canvas');
+                            var context = canvas.getContext('2d');
+                            canvas.width = 600;
+                            canvas.height = 960;
+
+                            context.fillStyle = '#FFFFFF';
+                            context.fillRect(0, 0, 600, 960);
+
+                            context.drawImage(sources[0], 0, 0, 600, 740);
+                            context.drawImage(sources[1]._el.firstElementChild, 108, 775, 150, 150);
+
+                            context.font = '22px sans-serif';
+                            context.fillStyle = '#999999';
+                            context.textBaseline = 'top';
+
+                            var text = '邀您加入' + site_name;
+                            var list = [];
+                            var start = 0;
+                            for (var i = 0; i <= text.length; i++) {
+                                if (context.measureText(text.slice(start, i)).width > 198) {
+                                    list.push(text.slice(start, i - 1));
+                                    start = i - 1;
+                                }
+                            }
+                            if (start !== text.length) {
+                                list.push(text.slice(start));
+                            }
+                            if (list.length > 3) {
+                                list.length = 3;
+                                for (var j = 0; j <= list[2].length; j++) {
+                                    if (context.measureText(list[2].slice(0, j) + '……').width > 198) {
+                                        list[2] = list[2].slice(0, j - 1) + '……';
+                                        break;
+                                    }
+                                }
+                            }
+                            list.push('长按识别或扫码进入');
+                            for (var k = 0; k < list.length; k++) {
+                                context.fillText(list[k], 294, 775 + (150 / list.length) * k);
+                            }
+
+                            $h.loadClear();
+                            vm.shareImage = canvas.toDataURL('image/jpeg');
+                            vm.layerPhoto();
+                            canvas = null;
+                        }).catch(function (err) {
+                            $h.loadClear();
+                            $h.pushMsg(err);
+                        });
+                    }
+                  }, function () {
+                    if (isWechat) {
+                        window.localStorage.setItem('login_back_url', window.location.href);
+                        window.location.assign("{:url('login/index')}");
+                    } else {
+                        vm.loginShow = true;
+                    }
+                  });
+                },
+                // 收藏
+                collect: function () {
+                  var vm = this;
+                  $http.baseGet("{:url('index/login_user')}", function () {
+                    $h.loadFFF();
+                    $http.baseGet($h.U({
+                        c: 'material',
+                        a: 'collect',
+                        q: {
+                            id: vm.material.id
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.material.collect = !vm.material.collect;
+                        $h.pushMsg(vm.material.collect ? '收藏成功' : '取消收藏成功');
+                    }, function () {
+                        $h.loadClear();
+                    });
+                  }, function () {
+                    if (isWechat) {
+                        window.localStorage.setItem('login_back_url', window.location.href);
+                        window.location.assign("{:url('login/index')}");
+                    } else {
+                        vm.loginShow = true;
+                    }
+                  });
+                },
+                // 购买
+                buy: function () {
+                    $http.baseGet("{:url('index/login_user')}", function () {
+                        if (isWechat) {
+                            $http.baseGet("{:url('index/user_login')}", function () {
+                                this.money = this.is_member ? this.material.member_money : this.material.money;
+                                this.payDialogOpen = true;
+                            }.bind(this), function () {
+                                this.loginShow = true;
+                            }.bind(this), true);
+                        } else {
+                            this.money = this.is_member ? this.material.member_money : this.material.money;
+                            this.payDialogOpen = true;
+                        }
+                    }.bind(this), function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            this.loginShow = true;
+                        }
+                    }.bind(this), true);
+                },
+                // 下载
+                download: function (type) {
+                    var vm = this;
+                    if (type === 1) {
+                        if (this.material.type) {
+                            this.hasDialog = true;
+                        } else {
+                            layer.open({
+                                title: false,
+                                closeBtn: false,
+                                content: '请选择下载方式',
+                                btn: ['本地下载', '网盘下载', '取消'],
+                                yes: function (index) {
+                                    vm.hasDialog = true;
+                                    vm.type = 1;
+                                    layer.close(index);
+                                },
+                                btn2: function () {
+                                    vm.hasDialog = true;
+                                    vm.type = 2;
+                                }
+                            });
+                        }
+                    } else {
+                        vm.recordDownload();
+                        window.open(this.material.link);
+                    }
+                },
+                changeVal: function (opt) {
+                    if (typeof opt !== 'object') {
+                        opt = {};
+                    }
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                //关闭登录
+                loginClose: function (value) {
+                    this.loginShow = false;
+                    value && this.logComplete();
+                },
+                // 登录完成回调事件
+                logComplete: function () {
+                    $h.loadFFF();
+                    $http.baseGet($h.U({
+                        c: 'special',
+                        a: 'isMember'
+                    }), function (res) {
+                        var data = res.data.data;
+                        vm.is_member = data.is_member;
+                        vm.now_money = data.now_money;
+                    });
+                },
+                // 支付完成后回调事件
+                pay_order: function (data) {
+                    this.orderId = data.data.result.orderId || '';
+                    switch (data.data.status) {
+                        case 'PAY_ERROR':
+                        case 'ORDER_EXIST':
+                        case 'ORDER_ERROR':
+                            this.extendOrder(data.msg);
+                            break;
+                        case 'WECHAT_PAY':
+                            this.wechatPay(data.data.result.jsConfig);
+                            break;
+                        case 'WECHAT_H5_PAY':
+                            this.payDialogOpen = false;
+                            window.location.assign(data.data.result.jsConfig.mweb_url + 'redirect_url=' + encodeURIComponent(callback_url + '?type=8&id=' + this.material.id));
+                            break;
+                        case 'SUCCESS':
+                            this.successOrder(data.msg);
+                            break;
+                        case 'ZHIFUBAO_PAY':
+                            window.location.assign($h.U({
+                                c: 'alipay',
+                                a: 'index',
+                                q: {
+                                    info: data.data.result,
+                                    params: 'datadownload'
+                                }
+                            }));
+                            break;
+                    }
+                },
+                extendOrder: function (msg) {
+                    if (typeof msg === 'object' && msg.errMsg === 'chooseWXPay:cancel') {
+                        msg = '微信支付取消';
+                    } else {
+                        msg = msg || '支付失败';
+                    }
+                    $h.pushMsg(msg, function () {
+                        vm.payDialogOpen = false;
+                        if (vm.orderId) {
+                            $http.baseGet($h.U({
+                                c: 'special',
+                                a: 'del_order',
+                                q: {
+                                    orderId: vm.orderId
+                                }
+                            }));
+                        }
+                    });
+                },
+                wechatPay: function (config) {
+                    mapleWx($jssdk(), function () {
+                        this.chooseWXPay(config, function () {
+                            vm.successOrder();
+                        }, {
+                            fail: vm.extendOrder,
+                            cancel: vm.extendOrder
+                        });
+                    });
+                },
+                successOrder: function (msg) {
+                    $h.showMsg({
+                        title: msg ? msg : '支付成功',
+                        icon: 'success',
+                        success: function () {
+                            vm.payDialogOpen = false;
+                            vm.isPay = true;
+                        }
+                    });
+                },
+                goHome: function () {
+                    window.location.href = "{:url('index/index')}";
+                },
+                // 联系客服
+                customerService: function () {
+                    var vm = this;
+                    $http.baseGet("{:url('index/login_user')}", function () {
+                        $http.baseGet("{:url('PublicApi/get_site_service_phone')}?mer_id=" + material.mer_id, function (res) {
+                            var data = res.data.data;
+                            if (Array.isArray(data)) {
+                                $http.baseGet("{:url('PublicApi/public_data')}", function (res) {
+                                    var data = res.data.data;
+                                    if (data.customer_service === '3') {
+                                        if (data.site_service_phone) {
+                                            layer.confirm('拨打<a href="tel:' + data.site_service_phone + '">' + data.site_service_phone + '</a>进行咨询？', {
+                                                title: false,
+                                                closeBtn: false,
+                                                btn: ['拨打', '取消']
+                                            }, function (index) {
+                                                window.location.assign('tel:' + data.site_service_phone);
+                                                layer.close(index);
+                                            });
+                                        } else {
+                                            layer.msg('抱歉，无法联系客服');
+                                        }
+                                    } else {
+                                        window.location.assign("{:url('service/service_list')}?mer_id=" + material.mer_id);
+                                    }
+                                });
+                            } else {
+                                layer.confirm('拨打<a href="tel:' + data.site_service_phone + '">' + data.site_service_phone + '</a>进行咨询？', {
+                                    title: false,
+                                    closeBtn: false,
+                                    btn: ['拨打', '取消']
+                                }, function (index) {
+                                    window.location.assign('tel:' + data.site_service_phone);
+                                    layer.close(index);
+                                });
+                            }
+                        });
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                recordDownload: function () {
+                    $http.baseGet($h.U({
+                        c: 'material',
+                        a: 'userDownload',
+                        q: {
+                            id: this.material.id
+                        }
+                    }), function () {
+                        vm.material.sales++;
+                    });
+                },
+                layerPhoto: function (src) {
+                    layer.photos({
+                        photos: {
+                            data: [
+                                {
+                                    src: this.shareImage
+                                }
+                            ]
+                        },
+                        anim: 5
+                    });
+                },
+                // 相关讲师
+                getLecturer: function () {
+                    var vm = this;
+                    $http.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'getLecturer',
+                        q: {
+                            mer_id: this.material.mer_id
+                        }
+                    }), function (res) {
+                        vm.lecturer = res.data.data;
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

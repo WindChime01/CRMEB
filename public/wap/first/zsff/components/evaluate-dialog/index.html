@@ -1,0 +1,25 @@
+<div :class="{ on: dialogShow }" class="evaluate-dialog" @touchmove.stop>
+    <div class="rate-section">
+        <div>满意度</div>
+        <div>
+            <span v-for="star in 5" :key="star" :class="{ on: star <= rateValue }" class="iconfont icondengji-shixin" @click="rateChange(star)"></span>
+        </div>
+        <div>{{ rateValue | rateCovert }}</div>
+    </div>
+    <div class="custom-section">
+        <textarea ref="textarea" v-model="textValue" :style="{ height: textHeight }" rows="2" maxlength="500" placeholder="课程满足你的期待么？说说你的想法，分享给想学习的他们吧~"></textarea>
+        <div>
+            <ul>
+                <li v-for="(item, index) in imageList" :key="item">
+                    <img :src="item" :alt="item">
+                    <a href="javascript:" @click="imageDelete(index)"></a>
+                </li>
+            </ul>
+            <label v-show="imageList.length < 6">
+                <input type="file" accept="image/*" hidden @change="imageUpload">
+                <span>上传图片</span>
+            </label>
+        </div>
+    </div>
+    <button type="button" @click="evaluateSubmit">立即评价</button>
+</div>

@@ -1,0 +1,117 @@
+{extend name="public/container"}
+{block name="title"}专题兑换{/block}
+{block name="head_top"}
+<style>
+    html, body {
+        height: 100%;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        background: url("{__WAP_PATH}zsff/images/exchange1.png") center/cover no-repeat;
+        overflow: hidden;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="exchange-code">
+        <form class="exchange-code-form" @submit.prevent="exchange">
+            <input v-model.trim="code" type="text" maxlength="6" placeholder="请输入兑换码">
+            <div><span>温馨提示：</span>每个兑换码只能兑换一次哦~</div>
+            <input :disabled="!code" type="submit" value="立即兑换">
+        </form>
+        <div :class="{ mask: isSuccess }"></div>
+        <div v-show="isSuccess" class="dialog">
+            <img src="{__WAP_PATH}zsff/images/exchange3.png" alt="">
+            <div>兑换成功</div>
+            <div>您的课程已兑换成功，快去学习吧！</div>
+            <a :href="(is_light ? '{:url('special/single_details')}' : '{:url('special/details')}') + '?id=' + special_id">立即查看</a>
+        </div>
+        <base-login :login-show="loginShow" :site-name="site_name" @login-close="loginClose"></base-login>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'components/base-login/index', 'quick'], function (Vue, $h, $http, BaseLogin) {
+        var isWechat = {$isWechat ? 'true' : 'false'};
+        var site_name = '{$Auth_site_name}';
+        var special_id='{$special_id}';
+        var vm = new Vue({
+            el: '#app',
+            components: {
+                'base-login': BaseLogin
+            },
+            data: {
+                code: '',
+                isSuccess: false,
+                loginShow: false,
+                isWechat: isWechat,
+                site_name: site_name,
+                special_id: special_id,
+                is_light: 0
+            },
+            methods: {
+              exchangeSubmit: function () {
+                var vm = this;
+                $h.loadFFF();
+                $http.basePost("{:url('special/exchangeSubmit')}", {
+                  special_id: vm.special_id,
+                  code: vm.code
+                }, function (res) {
+                  $h.loadClear();
+                  vm.is_light = res.data.data.is_light;
+                  vm.isSuccess = true;
+                }, function () {
+                  $h.loadClear();
+                });
+              },
+              // 立即兑换
+                exchange: function () {
+                  var vm = this;
+                    if (!/^\d{6}$/.test(this.code)) {
+                        return $h.pushMsg('请输入正确的兑换码');
+                    }
+                    $http.baseGet("{:url('index/login_user')}", function () {
+                      if (isWechat) {
+                        $http.baseGet("{:url('index/user_login')}", function () {
+                          vm.exchangeSubmit();
+                        }, function () {
+                          vm.loginShow = true;
+                        });
+                      } else {
+                        vm.exchangeSubmit();
+                      }
+                    }, function () {
+                      if (isWechat) {
+                        window.localStorage.setItem('login_back_url', window.location.href);
+                        window.location.assign("{:url('login/index')}");
+                      } else {
+                        vm.loginShow = true;
+                      }
+                    });
+                },
+                changeVal: function (opt) {
+                    if (typeof opt !== 'object') {
+                        opt = {};
+                    }
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                //关闭登录
+                loginClose: function (value) {
+                    this.loginShow = false;
+                    value && this.logComplete();
+                },
+                //登录完成回调事件
+                logComplete: function () {
+                    this.exchange();
+                }
+            }
+        });
+    });
+</script>
+{/block}

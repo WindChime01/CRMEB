@@ -1,0 +1,155 @@
+.evaluate-list {
+    background-color: #fff;
+}
+
+.evaluate-list li {
+    position: relative;
+    padding: .3rem;
+    font-size: .28rem;
+    color: #282828;
+}
+
+.evaluate-list li ~ li::before {
+    content: " ";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 1.06rem;
+    z-index: 2;
+    height: 1px;
+    border-top: 1px solid #f1f1f1;
+    color: #f1f1f1;
+    -webkit-transform-origin: left top;
+    -moz-transform-origin: left top;
+     -ms-transform-origin: left top;
+      -o-transform-origin: left top;
+         transform-origin: left top;
+    -webkit-transform: scaleY(0.5);
+    -moz-transform: scaleY(0.5);
+     -ms-transform: scaleY(0.5);
+      -o-transform: scaleY(0.5);
+         transform: scaleY(0.5);
+}
+
+.evaluate-list li > div:first-child {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: -moz-box;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            -moz-box-align: center;
+         align-items: center;
+}
+
+.evaluate-list li > div:first-child img {
+    display: block;
+    width: .56rem;
+    height: .56rem;
+    border-radius: 50%;
+    background-color: #82848f;
+    -o-object-fit: cover;
+       object-fit: cover;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.evaluate-list li > div:first-child div ~ div {
+    margin-left: .2rem;
+}
+
+.evaluate-list li > div:first-child div:nth-child(2) span {
+    display: inline-block;
+    width: .52rem;
+    height: .26rem;
+    border: 1px solid #2c8eff;
+    border-radius: .04rem;
+    margin-left: .1rem;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+         box-sizing: border-box;
+    font-size: .18rem;
+    line-height: .26rem;
+    text-align: center;
+    color: #2c8eff;
+}
+
+.evaluate-list li > div:first-child div:nth-child(3) {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+        -ms-flex: 1;
+            -moz-box-flex: 1;
+         flex: 1;
+}
+
+.evaluate-list .iconfont {
+    font-size: .24rem;
+    color: #ccc;
+}
+
+.evaluate-list .iconfont ~ .iconfont {
+    margin-left: .07rem;
+}
+
+.evaluate-list .iconfont.on {
+    color: #ff6b00;
+}
+
+.evaluate-list li > div:first-child div:last-child {
+    font-size: .22rem;
+    color: #999;
+}
+
+.evaluate-list li > div ~ div {
+    margin-top: .2rem;
+    margin-left: .76rem;
+}
+
+.evaluate-list .img-group {
+    margin-bottom: -0.22rem;
+    font-size: 0;
+}
+
+.evaluate-list .img-group img {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: .06rem;
+    margin-right: .22rem;
+    margin-bottom: .22rem;
+    -o-object-fit: cover;
+       object-fit: cover;
+}
+
+.evaluate-list .img-group img:nth-child(3n+3) {
+    margin-right: 0;
+}
+
+.evaluate-list .reply {
+    overflow: hidden;
+}
+
+.evaluate-list .reply div {
+    position: relative;
+    padding: .2rem .34rem;
+    border-radius: .06rem;
+    margin-top: .15rem;
+    background-color: #f7f7f7;
+    font-size: .26rem;
+    color: #454545;
+}
+
+.evaluate-list .reply div::before {
+    content: " ";
+    position: absolute;
+    bottom: 100%;
+    left: .6rem;
+    border-width: .15rem;
+    border-style: solid;
+    border-color: transparent transparent #f7f7f7;
+}
+
+.evaluate-list .reply span {
+    color: #333999;
+}

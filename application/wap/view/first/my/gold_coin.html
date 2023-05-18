@@ -1,0 +1,282 @@
+{extend name="public/container"}
+{block name="title"}{$gold_name}充值{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="gold-coin">
+        <div class="header">
+            <div class="cont">
+                <div class="text">
+                    我的{{ gold_name }}
+                    <div class="num">{{ amount }}</div>
+                </div>
+                <a class="link" href="{:Url('my/gold_coin')}">明细</a>
+            </div>
+        </div>
+        <div class="main">
+            <!-- 数量选择 -->
+            <div class="wrap select">
+                <div class="head">数量选择</div>
+                <div class="cont">
+                    <div class="list">
+                        <label v-for="(item, index) in updateOptions" :key="index" class="item">
+                            <input v-model="checkedCoin" :value="index" type="radio" name="num">
+                            <div class="item-cont">
+                                <div class="text">
+                                    <div :style="{ backgroundImage: 'url(' + gold_image + ')' }" class="num">{{ item.coin }}</div>
+                                    {{ item.money }}元
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    <label :class="{ checked: checkedCoin === options.length }" class="input">
+                        <div class="cell">
+                            <input v-model.number="inputMoney" :class="{ on: !inputMoney }" type="number" @focus="handleFocus" @blur="handleBlur">
+                            元
+                        </div>
+                        <div :style="{ backgroundImage: 'url(' + gold_image + ')' }" class="cell">{{ toCoin }}</div>
+                    </label>
+                </div>
+            </div>
+            <div class="handle">
+                <button class="btn" type="button" @click="callPay">立即充值</button>
+            </div>
+            <!-- 支付弹窗 -->
+            <pay-dialog :open.sync="payDialogOpen" :money="payMoney" :now_money="now_money" :special_id="payMoney" :pay_type_num="payTypeNum" :is-Wechat="isWechat" :is-alipay="is_alipay"
+                        :is-balance="is_yue" :wxpay-h5="wxpayH5" @change="changeVal"></pay-dialog>
+            <base-login :login-show="loginShow" :site-name="site_name" @login-close="logComplete"></base-login>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    require(['vue', 'store', 'components/pay-dialog/index', 'components/base-login/index', 'decimal', 'quick'], function (Vue, store, PayDialog, BaseLogin, Decimal) {
+        var from = '{$from}';
+        var stream_name = '{$stream_name}';
+        var recharge_price_list = {$recharge_price_list};
+        var gold_info = {$gold_info};
+        var is_yue = {$is_yue? 'true': 'false'};
+        var now_money = {$now_money};
+        var is_alipay = {$is_alipay? 'true': 'false'};
+        var wxpayH5 = {$is_h5_wechat_payment_switch? 'true': 'false'};
+        var callback_url = '{$callback_url}';
+        var site_name = '{$Auth_site_name}';
+        new Vue({
+            el: '#app',
+            components: {
+                'pay-dialog': PayDialog,
+                'base-login': BaseLogin
+            },
+            data: {
+                // 我的金币
+                gold_name: gold_info.gold_name ? gold_info.gold_name : "金币",
+                gold_image: gold_info.gold_image,
+                amount: 0,
+                // 换算率
+                rate: gold_info.gold_rate ? gold_info.gold_rate : 10,
+                // 金币选项
+                options: recharge_price_list,
+                // 选中金额
+                checkedCoin: 0,
+                // 输入金额
+                inputMoney: 1,
+                // 支付方式选中项
+                payChecked: 0,
+                // 是否显示支付弹窗
+                payDialogOpen: false,
+                // 登录弹窗隐藏
+                loginShow: false,
+                loginUrl: '',
+                siteName: '',
+                payTypeNum: 30,//金币充值
+                is_alipay: is_alipay, //支付宝是否开启
+                is_yue: is_yue, //余额是否开启
+                now_money: now_money, //余额
+                urlStr: '',
+                from: from,
+                streamName: stream_name,
+                wxpayH5: wxpayH5,
+                site_name: site_name,
+                isWechat: isWechat
+            },
+            computed: {
+                updateOptions: function () {
+                    var that = this,
+                        Obj = {},
+                        Arr = [];
+                    that.options.map(function (value) {
+                        Obj.coin = value;
+                        Obj.money = (value / that.rate).toFixed(2);
+                        Arr.push(Obj);
+                        Obj = {};
+                    });
+                    return Arr;
+                },
+                // 金额换算金币
+                toCoin: function () {
+                    return Decimal.mul(Number(this.inputMoney), this.rate);
+                },
+                // 支付金额
+                payMoney: function () {
+                    return this.checkedCoin === -1 ? Number(this.inputMoney) : Decimal.div(this.options[this.checkedCoin], this.rate).toNumber();
+                }
+            },
+            watch: {
+                checkedCoin: function (value) {
+                    this.inputMoney = value === -1 ? this.inputMoney : 0;
+                }
+            },
+            created: function () {
+                this.my_user_gold_num();
+            },
+            methods: {
+                // 获取我的金币总数
+                my_user_gold_num: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'my_user_gold_num'
+                    }), function (res) {
+                        vm.amount = res.data.data.user_gold_num;
+                    });
+                },
+                handleFocus: function () {
+                    this.checkedCoin = -1;
+                },
+                handleBlur: function () {
+                    this.inputMoney = Number(this.inputMoney);
+                },
+                // 支付弹窗调起
+                callPay: function () {
+                    var vm = this;
+                    if (this.checkedCoin == -1) {
+                        if (this.inputMoney <= 0) {
+                            $h.pushMsg('请输入正确值');
+                            return;
+                        }
+                    }
+                    store.baseGet("{:url('index/login_user')}", function () {
+                        if (isWechat) {
+                            store.baseGet("{:url('index/user_login')}", function () {
+                                vm.payDialogOpen = true;
+                            }, function () {
+                                vm.loginShow = true;
+                            }, true);
+                        } else {
+                            vm.payDialogOpen = true;
+                        }
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                closeLogin: function (params) {
+                    if (typeof params !== 'object') {
+                        return;
+                    }
+                    switch (params.action) {
+                        case 'loginClose':
+                            this.loginShow = false;
+                            break;
+                        case 'logComplete':
+                            this.loginShow = false;
+                            this.payDialogOpen = true;
+                            break;
+                    }
+                },
+                logComplete: function (data) {
+                    var that = this;
+                    that.loginShow = false;
+                    if (!data) {
+                        return;
+                    }
+                    if (!data.isfollow && is_official_account_switch) {
+                        that.codeUrl = data.url;
+                        that.isfollow = true;
+                    } else {
+                        window.location.reload();
+                    }
+                },
+                //所有插件回调处理事件
+                changeVal: function (opt) {
+                    if (typeof opt != 'object') opt = {};
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                pay_order: function (data) {
+                    this.orderId = data.data.result.orderId || '';
+                    switch (data.data.status) {
+                        case "PAY_ERROR": case 'ORDER_EXIST': case 'ORDER_ERROR':
+                            this.extendOrder(data.msg);
+                            break;
+                        case 'WECHAT_PAY':
+                            this.wechatPay(data.data.result.jsConfig);
+                            break;
+                        case 'WECHAT_H5_PAY':
+                            this.payDialogOpen = false;
+                            var mwebUrl = data.data.result.jsConfig.mweb_url + '&redirect_url=' + encodeURIComponent(callback_url + '?type=4&id=0');
+                            window.location.assign(mwebUrl);
+                            break;
+                        case 'SUCCESS':
+                            this.successOrder(data.data);
+                            break;
+                        case 'ZHIFUBAO_PAY':
+                            window.location.assign($h.U({m: 'wap', c: 'alipay', a: 'index', q: {info: data.data.result, params: 'recharge'}}));
+                            break;
+                    }
+                },
+                wechatPay: function (config) {
+                    var that = this;
+                    mapleWx($jssdk(), function () {
+                        this.chooseWXPay(config, function () {
+                            that.successOrder();
+                        }, {
+                            fail: that.extendOrder,
+                            cancel: that.extendOrder
+                        });
+                    });
+                },
+                successOrder: function (data) {
+                    var that = this, msg, result;
+                    if (data) {
+                        msg = data.msg;
+                        result = data.result;
+                        that.payDialogOpen = false;
+                        $h.showMsg({
+                            title: msg ? msg : '支付成功',
+                            icon: 'success',
+                            success: function () {
+                                if (that.from == 'live') {
+                                    window.location.assign($h.U({c: 'live', a: 'index', q: {stream_name: that.streamName, record_id: that.RecordId}}));
+                                } else {
+                                    that.my_user_gold_num();
+                                }
+                            }
+                        });
+                    } else {
+                        window.location.reload();
+                    }
+                },
+                extendOrder: function (msg) {
+                    if (typeof msg === 'object') {
+                        if (msg.errMsg === 'chooseWXPay:cancel') {
+                            msg = '微信支付取消';
+                        } else {
+                            msg = '支付失败';
+                        }
+                    } else {
+                        msg = msg || '支付失败';
+                    }
+                    $h.pushMsg(msg, function () {
+                        window.location.assign($h.U({c: 'special', a: 'recharge_index'}));
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

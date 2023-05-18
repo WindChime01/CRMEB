@@ -1,0 +1,119 @@
+{extend name="public/container" /}
+{block name="title"}收益明细{/block}
+{block name="head"}
+<style>
+    body {background-color: #F5F5F5;}
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="lecturer-income">
+    <div class="header">
+        <div v-for="item in tabs" :key="item.value" :class="{ on: active === item.value }" class="item" @click="active = item.value">{{ item.name }}</div>
+    </div>
+    <div class="main">
+        <dl v-if="list.length">
+            <template v-for="item in list">
+                <dt :key="item.time">{{ item.time }}</dt>
+                <dd :key="item.time">
+                    <ul>
+                        <li v-for="cell in item.list">
+                            <div class="lt">
+                                <div>{{ cell.title }}</div>
+                                <div class="time">{{ cell.add_time }}</div>
+                            </div>
+                            <div :class="{ add: cell.pm }" class="rt">{{ (cell.pm ? '+' : '-') + cell.number }}</div>
+                        </li>
+                    </ul>
+                </dd>
+            </template>
+        </dl>
+        <img v-else-if="finished" src="{__WAP_PATH}zsff/images/empty.png" class="empty">
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'quick'], function (Vue, $h, store) {
+        var active = 1;
+        var search = window.location.search.slice(1);
+        var query = {};
+        search.split('&').forEach(function (item) {
+            item = item.split('=');
+            query[item[0]] = item[1];
+        });
+        if (query.active) {
+            active = Number(query.active);
+        }
+        new Vue({
+            el: '#app',
+            data: {
+                tabs: [
+                    {
+                        name: '余额',
+                        value: 1
+                    },
+                    {
+                        name: '提现',
+                        value: 2
+                    },
+                    {
+                        name: '金币',
+                        value: 3
+                    }
+                ],
+                active: active,
+                page: 1,
+                limit: 10,
+                finished: false,
+                list: []
+            },
+            watch: {
+                active: function () {
+                    this.page = 1;
+                    this.finished = false;
+                    this.list = [];
+                    this.get_flowing_water_list();
+                }
+            },
+            created: function () {
+                this.get_flowing_water_list();
+                $h.EventUtil.listenTouchDirection(document, this.get_flowing_water_list);
+            },
+            methods: {
+                get_flowing_water_list: function () {
+                    var vm = this;
+                    var is_extract = 0;
+                    var category = 'now_money';
+                    if (this.finished) {
+                        return;
+                    }
+                    if (this.active === 3) {
+                        category = 'gold_num';
+                    } else {
+                        if (this.active === 2) {
+                            is_extract = 1;
+                        }
+                    }
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'get_flowing_water_list',
+                        q: {
+                            category: category,
+                            page: this.page++,
+                            limit: this.limit,
+                            is_extract: is_extract
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        var data = res.data.data.data;
+                        vm.list = vm.list.concat(data);
+                        vm.finished = vm.limit > data.length;
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

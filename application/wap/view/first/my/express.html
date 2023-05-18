@@ -1,0 +1,84 @@
+{extend name="public/container" /}
+{block name="title"}物流信息{/block}
+{block name="head"}
+<style>
+    body {
+        background-color: #F5F5F5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="logistics">
+    <a v-for="item in order.cartInfo" :key="item.id" href="javascript:" class="goods">
+        <div><img :src="item.productInfo.image"></div>
+        <div class="name">{{ item.productInfo.store_name }}</div>
+        <div class="wrap">
+            <div>￥{{ item.productInfo.price }}</div>
+            <div>×{{ item.cart_num }}</div>
+        </div>
+    </a>
+    <div class="detail">
+        <div class="header">
+            <div class="icon"></div>
+            <div class="wrap">
+                <div><span>物流公司：</span>{{ order.delivery_name }}</div>
+                <div><span>快递单号：</span>{{ order.delivery_id }}</div>
+            </div>
+            <button :data-clipboard-text="order.delivery_id" class="btn">复制单号</button>
+        </div>
+        <ol>
+            <li v-for="item in list" :key="item.time">
+                <div>{{ item.status }}</div>
+                <div class="time">{{ item.time }}</div>
+                <div class="circle"></div>
+                <div class="line"></div>
+            </li>
+        </ol>
+    </div>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'clipboard'], function (Vue, $h, store, ClipboardJS) {
+        new Vue({
+            el: '#app',
+            data: {
+                order: {$order},
+                list: []
+            },
+            created: function () {
+                this.express();
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    var clipboard = new ClipboardJS('.btn');
+                    clipboard.on('success', function (event) {
+                        $h.pushMsg('复制成功');
+                        event.clearSelection();
+                    });
+                    clipboard.on('error', function () {
+                        $h.pushMsg('复制失败');
+                    });
+                });
+            },
+            methods: {
+                express: function () {
+                    var vm = this;
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'query',
+                        q: {
+                            delivery_id: this.order.delivery_id,
+                            phone: this.order.user_phone
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        vm.list = res.data.data.content;
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

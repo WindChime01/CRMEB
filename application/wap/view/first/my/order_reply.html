@@ -1,0 +1,348 @@
+{extend name="public/container"}
+{block name="title"}商品评价{/block}
+{block name="head_top"}
+<link rel="stylesheet" href="{__PLUG_PATH}/PhotoSwipe/photoswipe.css">
+<link rel="stylesheet" href="{__PLUG_PATH}/PhotoSwipe/default-skin/default-skin.css">
+<script src="{__PLUG_PATH}/PhotoSwipe/photoswipe.min.js"></script>
+<script src="{__PLUG_PATH}/PhotoSwipe/photoswipe-ui-default.min.js"></script>
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+
+    .goods-evaluate .goods-section {
+        display: -webkit-box;
+        display: flex;
+        padding: .2rem .3rem;
+        background-color: #fff;
+        font-size: .28rem;
+        color: #282828;
+    }
+
+    .goods-evaluate .goods-section img {
+        display: block;
+        width: 1.2rem;
+        height: 1.2rem;
+        border-radius: .06rem;
+        background-color: #868686;
+        object-fit: cover;
+        pointer-events: none;
+    }
+
+    .goods-evaluate .goods-section>div:nth-child(2) {
+        -webkit-box-flex: 1;
+        flex: 1;
+        margin-right: .25rem;
+        margin-left: .25rem;
+    }
+
+    .goods-evaluate .goods-section>div:last-child {
+        text-align: right;
+        color: #999;
+    }
+
+    .goods-evaluate .evaluate-section {
+        padding: .35rem .3rem .8rem;
+        margin-top: .12rem;
+        background-color: #fff;
+    }
+
+    .goods-evaluate .evaluate-section>ul li {
+        display: -webkit-box;
+        display: flex;
+        -webkit-box-align: center;
+        align-items: center;
+        font-size: .28rem;
+        color: #282828;
+    }
+
+    .goods-evaluate .evaluate-section>ul li~li {
+        margin-top: .35rem;
+    }
+
+    .goods-evaluate .evaluate-section>ul div:nth-child(2) {
+        margin-right: .3rem;
+        margin-left: .4rem;
+        font-size: 0;
+    }
+
+    .goods-evaluate .evaluate-section>ul div:last-child {
+        font-size: .24rem;
+        color: #aaa;
+    }
+
+    .goods-evaluate li .iconfont {
+        font-size: .36rem;
+        color: #ccc;
+        cursor: pointer;
+    }
+
+    .goods-evaluate li .iconfont~.iconfont {
+        margin-left: .16rem;
+    }
+
+    .goods-evaluate li .icondengji-shixin {
+        color: #ff6b00;
+    }
+
+    .goods-evaluate .evaluate-section>div {
+        padding: .3rem;
+        border-radius: .1rem;
+        margin-top: .55rem;
+        background-color: #fafafa;
+    }
+
+    .goods-evaluate textarea {
+        width: 100%;
+        resize: none;
+        font-size: .28rem;
+    }
+
+    .goods-evaluate textarea::-webkit-input-placeholder,
+    .goods-evaluate textarea::placeholder {
+        color: #bbb;
+    }
+
+    .goods-evaluate .evaluate-section>div>div {
+        margin-top: .6rem;
+        margin-right: -0.32rem;
+        margin-bottom: -0.32rem;
+    }
+
+    .goods-evaluate .evaluate-section>div>div::after {
+        content: " ";
+        display: block;
+        height: 0;
+        clear: both;
+        visibility: hidden;
+    }
+
+    .goods-evaluate .evaluate-section>div li {
+        position: relative;
+        float: left;
+        width: 1.4rem;
+        height: 1.4rem;
+        margin-right: .32rem;
+        margin-bottom: .32rem;
+    }
+
+    .goods-evaluate .evaluate-section li img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: .03rem;
+        background-color: #e93323;
+        object-fit: cover;
+        pointer-events: none;
+    }
+
+    .goods-evaluate .evaluate-section li a {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: .36rem;
+        height: .36rem;
+        border-radius: 50%;
+        margin-top: -0.12rem;
+        margin-right: -0.12rem;
+        background: #2c8eff url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA1klEQVQ4T63TLVJDUQyG4edUlBkQrQYcawGDKCuAVbCE7gBThwAUi4BKNCyBH4nChknnlCnl3jt0bmPPyZvkS74SETs4wjs+SymhIyKiYBf7eCsRcYApnnGXoDZITR7hBBNcJSBpp7jAHDdNkLXkczzgOgHZ0pKaD38gnX9y3K4PVY7WAll9ES2QW3zhGI3d/QBaIE91OylYoz6/ACuQcVX5EgPcY4bX9Q1tF9Cgw/9H6CVirzX2PqQep/y4POV0VZrpZUMzneVq0wvDauePDey8h8O08zdMV6S1c4zvwQAAAABJRU5ErkJggg==") center/.16rem no-repeat;
+    }
+
+    .goods-evaluate .evaluate-section label {
+        float: left;
+        width: 1.4rem;
+        height: 1.4rem;
+        border: 1px solid #ddd;
+        border-radius: .03rem;
+        margin-right: .32rem;
+        margin-bottom: .32rem;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        font-size: 0;
+        line-height: 1.4rem;
+        text-align: center;
+    }
+
+    .goods-evaluate .evaluate-section label span {
+        display: inline-block;
+        padding-top: .5rem;
+        background: url("data:image/png;base64,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") center top/.46rem no-repeat;
+        vertical-align: middle;
+        font-size: .22rem;
+        line-height: 1.5;
+        color: #bbb;
+    }
+
+    .goods-evaluate button {
+        display: block;
+        width: 100%;
+        height: .86rem;
+        border-radius: .43rem;
+        margin-top: .55rem;
+        background: linear-gradient(90deg, #409dff 0%, #1e85fb 100%);
+        font-family: inherit;
+        font-weight: normal;
+        font-size: .3rem;
+        color: #fff;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="goods-evaluate">
+        <!-- 商品 -->
+        <div class="goods-section">
+            <div>
+                <img :src="cart_info.productInfo.image" alt="">
+            </div>
+            <div>{{ cart_info.productInfo.store_name }}</div>
+            <div>
+                <div>￥{{ cart_info.truePrice }}</div>
+                <div>x{{ cart_info.cart_num }}</div>
+            </div>
+        </div>
+        <!-- 评价 -->
+        <div class="evaluate-section">
+            <ul v-if="rateList.length">
+                <li v-for="(item, index) in rateList" :key="index">
+                    <div>{{ item.name }}</div>
+                    <div>
+                        <i v-for="star in 5" :key="star" :class="[item.value >= star ? 'icondengji-shixin' : 'icondengji-kongxin']" class="iconfont" @click="rateChange(star, index)"></i>
+                    </div>
+                    <div>{{ item.value | toDesc }}</div>
+                </li>
+            </ul>
+            <div>
+                <textarea v-model="textValue" ref="textarea" :style="{ height: textHeight }" maxlength="500" placeholder="商品满足你的期待么？说说你的想法，分享给想买的他们吧~"></textarea>
+                <div>
+                    <ul v-if="imageList.length">
+                        <li v-for="(item, index) in imageList" :key="item">
+                            <img :src="item" :alt="item">
+                            <a href="javascript:" @click="imageDelete(index)"></a>
+                        </li>
+                    </ul>
+                    <label v-show="imageList.length < 6">
+                        <input type="file" name="" accept="image/*" hidden @change="imageUpload">
+                        <span>上传图片</span>
+                    </label>
+                </div>
+            </div>
+            <button type="button" @click="evaluateSubmit">立即评价</button>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require([
+        'vue',
+        'axios',
+        'quick'
+    ], function (Vue, axios) {
+        var cartInfo = {$cartInfo};
+        var vm = new Vue({
+            el: '#app',
+            filters: {
+                // 转换评分
+                toDesc: function (value) {
+                    return ['非常差', '差', '一般', '好', '非常好'][value - 1];
+                }
+            },
+            data: {
+                cart_info: cartInfo.cart_info,
+                textValue: '',
+                textHeight: '',
+                imageList: [],
+                rateList: [
+                    {
+                        name: '商品质量',
+                        value: 5
+                    },
+                    {
+                        name: '服务态度',
+                        value: 5
+                    },
+                    {
+                        name: '物流服务',
+                        value: 5
+                    }
+                ]
+            },
+            watch: {
+                textValue: {
+                    handler: function () {
+                        this.$nextTick(this.textResize);
+                    },
+                    immediate: true
+                }
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+
+                });
+            },
+            methods: {
+                // 调整输入框高度
+                textResize: function () {
+                    this.textHeight = 'auto';
+                    this.$nextTick(function () {
+                        this.textHeight = this.$refs.textarea.scrollHeight + 'px';
+                    });
+                },
+                // 上传图片
+                imageUpload: function (event) {
+                    var files = event.target.files;
+                    if (!files.length) {
+                        return;
+                    }
+                    var formData = new FormData();
+                    formData.append('file', files[0]);
+                    axios.post("{:url('auth_api/upload')}", formData).then(function (res) {
+                        var resData = res.data;
+                        if (resData.code === 200) {
+                            vm.imageList.push(resData.data.url);
+                            event.target.value = '';
+                        } else {
+                            layer.msg(resData.msg);
+                        }
+                    }).catch(function (err) {
+                        layer.msg(err);
+                    });
+                },
+                // 删除图片
+                imageDelete: function (index) {
+                    this.imageList.splice(index, 1);
+                },
+                // 评分
+                rateChange: function (value, index) {
+                    this.rateList[index].value = value;
+                },
+                // 提交评价
+                evaluateSubmit: function () {
+                    axios.post("{:url('auth_api/user_comment_product')}?unique=" + cartInfo.unique, {
+                        product_score: this.rateList[0].value,
+                        service_score: this.rateList[1].value,
+                        delivery_score: this.rateList[2].value,
+                        comment: this.textValue.trim(),
+                        pics: this.imageList
+                    }).then(function (res) {
+                        var resData = res.data;
+                        if (resData.code === 200) {
+                            layer.msg(resData.msg, {
+                                anim: 0
+                            }, function () {
+                                window.location = "{:url('special/order_store_list')}";
+                            });
+                        } else {
+                            layer.msg(resData.msg);
+                        }
+                    }).catch(function (err) {
+                        layer.msg(err);
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

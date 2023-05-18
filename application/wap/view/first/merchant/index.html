@@ -1,0 +1,367 @@
+{extend name="public/container" /}
+{block name="title"}讲师申请{/block}
+{block name="head"}
+<style>
+    .tip {
+        padding-left: .22rem;
+        font-size: .2rem;
+        color: #E93323;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="apply-lecturer">
+    <form class="form">
+        <label class="item">
+            <div class="item-hd"><span>*</span>姓名</div>
+            <input v-model.trim="formData.merchant_name" :disabled="applyStatus === 1" type="text" placeholder="请输入姓名" class="item-bd">
+        </label>
+        <label class="item">
+            <div class="item-hd"><span>*</span>手机</div>
+            <input v-model="formData.link_tel" :disabled="applyStatus === 1" type="tel" placeholder="请输入手机号" class="item-bd">
+        </label>
+        <div class="tip">注：成为讲师后可使用该手机号用短信登录讲师后台</div>
+        <label v-if="applyStatus !== 1" class="item">
+            <div class="item-hd"><span>*</span>验证码</div>
+            <input v-model="formData.code" type="number" placeholder="请输入验证码" class="item-bd">
+            <button :disabled="!!count" class="code-btn" type="button" id="getCode">{{ count ? '重新获取(' + count + 's)' : '获取验证码' }}</button>
+        </label>
+        <div class="item">
+            <div class="item-hd"><span>*</span>头像</div>
+            <div class="item-bd">
+                <div v-if="formData.merchant_head" class="img-wrap">
+                    <i v-if="formData.merchant_head && applyStatus !== 1" class="iconfont iconcha3" @click="deleteImage('merchant_head')"></i>
+                    <img v-if="formData.merchant_head" :src="formData.merchant_head">
+                </div>
+                <label v-else class="upload">
+                    <input type="file" accept="image/jpg,image/jpeg,image/png" hidden @change="upload('merchant_head', $event)">
+                </label>
+            </div>
+        </div>
+        <label class="item">
+            <div class="item-hd"><span>*</span>领域<i class="iconfont iconzhuyi-copy" @click.prevent="labelAlert"></i></div>
+            <input v-model.trim="label" :disabled="applyStatus === 1" type="text" placeholder="请填写" class="item-bd">
+        </label>
+        <label class="item">
+            <div class="item-hd"><span>*</span>地区</div>
+            <input :disabled="applyStatus === 1" :value="formData.province + formData.city + formData.district" type="text" placeholder="请选择" class="item-bd" readonly @focus="show = true">
+            <i class="iconfont icondidian"></i>
+        </label>
+        <label class="item">
+            <div class="item-hd"><span>*</span>地址</div>
+            <input v-model.trim="formData.address" :disabled="applyStatus === 1" type="text" placeholder="请输入详细地址" class="item-bd">
+        </label>
+        <label class="item">
+            <div class="item-hd"><span>*</span>简介</div>
+            <input v-model.trim="formData.explain" :disabled="applyStatus === 1" type="text" placeholder="最多20个字" maxlength="20" class="item-bd">
+        </label>
+        <div class="intro-item">
+            <div class="item-hd">
+                <div class="item-hd-lt"><span>*</span>介绍</div>
+                <div class="item-hd-rt">{{ formData.introduction.length }}/2000</div>
+            </div>
+            <textarea v-model.trim="formData.introduction" :disabled="applyStatus === 1" placeholder="请填写讲师介绍" class="item-bd" rows="3"></textarea>
+        </div>
+        <div v-if="!(applyStatus === 1 && !formData.charter.length)" class="honor-item">
+            <div class="item-hd">
+                <div>请上传所获得的荣誉证书及相关资质证书</div>
+                <div class="tip">(图片格式支持JPG、PNG、JPEG，最多上传4张)</div>
+            </div>
+            <div class="item-bd">
+                <div v-for="item in formData.charter" :key="item" class="img-wrap">
+                    <i v-if="applyStatus !== 1" class="iconfont iconcha3" @click="deleteImage('charter', item)"></i>
+                    <img :src="item">
+                </div>
+                <label v-if="formData.charter.length < 4 && applyStatus !== 1" class="upload">
+                    <input type="file" accept="image/jpg,image/jpeg,image/png" hidden @change="upload('charter', $event)">
+                </label>
+            </div>
+        </div>
+        <div v-if="applyStatus !== 1" class="agree-item"><i :class="[agree ? 'iconxuanzhong1' : 'iconweixuanzhong', 'iconfont']" @click="agree = !agree"></i>已阅读并同意<button class="agree-btn"
+                    type="button" @click="agreeVisible = true">《{$title}》</button></div>
+        <button v-if="applyStatus !== 1" class="btn" type="button" @click="submitApply">提交申请</button>
+    </form>
+    <div :class="{ mask: agreeVisible }"></div>
+    <!-- 协议弹窗 -->
+    <div :class="{ show: agreeVisible }" class="agree-dialog">
+        <div class="title">{$title}</div>
+        <div class="content">{$content}</div>
+        <button class="ok" type="button" @click="agreeVisible = false,agree = true">我同意</button>
+        <button class="no" type="button" @click="agreeVisible = false,agree = false">不同意</button>
+        <i class="iconfont iconcha3" @click="agreeVisible = false"></i>
+    </div>
+    <div id="captcha"></div>
+    <!-- 申请讲师状态 -->
+    <apply-dialog :show.sync="applyVisible" :status="applyStatus"></apply-dialog>
+    <quick-menu></quick-menu>
+    <yd-cityselect v-model="show" :ready="ready" :provance="formData.province" :city="formData.city" :area="formData.district" :callback="citySelectCallback" :items="district" />
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'ydui', 'static/plug/ydui/province_city_area', 'components/apply-dialog/index', 'quick'], function (Vue, $h, store, ydui, district, ApplyDialog) {
+        Vue.use(ydui.default);
+        var COUNT = 60;
+        new Vue({
+            el: '#app',
+            components: {
+                'apply-dialog': ApplyDialog
+            },
+            data: {
+                formData: {
+                    merchant_name: '',
+                    link_tel: '',
+                    code: '',
+                    merchant_head: '',
+                    province: '',
+                    city: '',
+                    district: '',
+                    address: '',
+                    explain: '',
+                    introduction: '',
+                    charter: []
+                },
+                district: district,
+                label: '',
+                show: false,
+                ready: false,
+                count: 0,
+                agree: false,
+                agreeVisible: false,
+                applyStatus: null,
+                applyVisible: false
+            },
+            watch: {
+                'formData.introduction': function (value) {
+                    if (value.length > 2000) {
+                        this.formData.introduction = value.slice(0, 2000);
+                    }
+                }
+            },
+            created: function () {
+                this.is_apply();
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    var vm = this;
+                    $('#captcha').slideVerify({
+                        baseUrl: '/wap/auth_api',
+                        mode: 'pop',
+                        containerId: 'getCode',
+                        beforeCheck: function () {
+                            var flag = true;
+                            return flag
+                        },
+                        ready: function () { },
+                        success: function (params) {
+                            vm.getCode(params.captchaVerification);
+                        },
+                        error: function () {
+                            console.error('slideVerify');
+                        },
+                        beforeShow: function () {
+                            var flag = true;
+                            if (!vm.formData.link_tel) {
+                                flag = false;
+                                $h.pushMsg('请输入手机号');
+                            } else if (!/^1[3456789]\d{9}$/.test(vm.formData.link_tel)) {
+                                flag = false;
+                                $h.pushMsg('请输入正确的手机号');
+                            }
+                            return flag;
+                        }
+                    });
+                });
+            },
+            methods: {
+                // 上传图片
+                upload: function (name, event) {
+                    var vm = this;
+                    var files = event.target.files;
+                    if (!files.length) {
+                        return false;
+                    }
+                    if (['image/jpg', 'image/jpeg', 'image/png'].indexOf(files[0].type) === -1) {
+                        return layer.msg('请上传JPG、PNG、JPEG格式的图片');
+                    }
+                    var formData = new FormData();
+                    formData.append('file', files[0]);
+                    var index = layer.load(1);
+                    store.basePost($h.U({
+                        c: 'auth_api',
+                        a: 'upload'
+                    }), formData, function (res) {
+                        layer.close(index);
+                        event.target.value = '';
+                        if (typeof vm.formData[name] === 'string') {
+                            vm.formData[name] = res.data.data.url;
+                        } else {
+                            vm.formData[name].push(res.data.data.url);
+                        }
+                    }, function (err) {
+                        layer.close(index);
+                        layer.msg(err, function () {
+                            event.target.value = '';
+                        });
+                    }, true);
+                },
+                // 删除图片
+                deleteImage: function (name, url) {
+                    if (typeof this.formData[name] === 'string') {
+                        this.formData[name] = '';
+                    } else if (Array.isArray(this.formData[name])) {
+                        this.formData[name].splice(this.formData[name].indexOf(url), 1);
+                    }
+                },
+                // 选择地区
+                citySelectCallback: function (data) {
+                    this.formData.province = data.itemName1;
+                    this.formData.city = data.itemName2;
+                    this.formData.district = data.itemName3;
+                },
+                // 提交申请
+                submitApply: function () {
+                    var vm = this;
+                    if (!this.formData.merchant_name) {
+                        return $h.pushMsg('请输入姓名');
+                    }
+                    if (!this.formData.link_tel) {
+                        return $h.pushMsg('请输入手机号');
+                    }
+                    if (!/^1[3456789]\d{9}$/.test(this.formData.link_tel)) {
+                        return $h.pushMsg('请输入正确的手机号');
+                    }
+                    if (!this.formData.code) {
+                        return $h.pushMsg('请输入验证码');
+                    }
+                    if (!this.formData.merchant_head) {
+                        return $h.pushMsg('请上传头像');
+                    }
+                    if (!this.label) {
+                        return $h.pushMsg('请填写标签');
+                    }
+                    var label = this.label.split(this.label.indexOf('，') === -1 ? ',' : '，');
+                    var labelLen = label.length;
+                    if (labelLen > 3) {
+                        return $h.pushMsg('可添加1-3个领域');
+                    }
+                    for (var i = 0; i < labelLen; i++) {
+                        if (!label[i].length || label[i].length > 6) {
+                            return $h.pushMsg('每个标签1-6个字');
+                        }
+                    }
+                    if (!this.formData.province) {
+                        return $h.pushMsg('请选择地址');
+                    }
+                    if (!this.formData.explain) {
+                        return $h.pushMsg('请输入讲师说明');
+                    }
+                    if (!this.formData.introduction) {
+                        return $h.pushMsg('请填写讲师介绍');
+                    }
+                    if (!this.agree) {
+                        return $h.pushMsg('请勾选讲师入驻协议');
+                    }
+                    this.formData.label = label;
+                    var index = layer.load(1);
+                    store.basePost($h.U({
+                        c: 'merchant',
+                        a: 'apply'
+                    }), this.formData, function (res) {
+                        layer.close(index);
+                        vm.applyVisible = true;
+                        vm.applyStatus = 0;
+                    }, function (err) {
+                        layer.close(index);
+                        layer.msg(err);
+                    }, true);
+                },
+                // 申请状态
+                is_apply: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'is_apply'
+                    }), function (res) {
+                        if (res.data.data) {
+                            vm.applyStatus = res.data.data.status;
+                            if (res.data.data.status === 2) {
+                                vm.ready = true;
+                            } else {
+                                vm.apply_data();
+                            }
+                        } else {
+                            vm.ready = true;
+                        }
+                    });
+                },
+                // 申请数据
+                apply_data: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'apply_data'
+                    }), function (res) {
+                        var data = res.data.data;
+                        vm.formData = data;
+                        vm.label = data.label.join();
+                        vm.ready = true;
+                    });
+                },
+                // 添加领域规则弹窗
+                labelAlert: function () {
+                    layer.alert('格式：领域一,领域二<br>领域之间用逗号分隔<br>每个领域1-6个字<br>可添加1-3个领域', {
+                        title: false,
+                        closeBtn: false,
+                        btnAlign: 'c',
+                        btn: '知道了'
+                    });
+                },
+                // 获取验证码
+                getCode: function (captchaVerification) {
+                    var vm = this;
+                    var timer;
+                    if (!this.formData.link_tel) {
+                        return $h.pushMsg('请输入手机号');
+                    }
+                    if (!/^1[3456789]\d{9}$/.test(this.formData.link_tel)) {
+                        return $h.pushMsg('请输入正确的手机号');
+                    }
+                    timer = setInterval(function () {
+                        vm.count--;
+                        if (!vm.count) {
+                            clearInterval(timer);
+                            timer = null;
+                        }
+                    }, 1000);
+                    this.count = COUNT;
+                    var index = layer.load(1);
+                    store.basePost($h.U({
+                        c: 'auth_api',
+                        a: 'code'
+                    }), {
+                        phone: this.formData.link_tel,
+                        captchaVerification: captchaVerification,
+                        captchaType: 'blockPuzzle'
+                    }, function (res) {
+                        layer.close(index);
+                        layer.msg(res.data.msg);
+                    }, function (err) {
+                        layer.msg(err);
+                        if (timer) {
+                            clearInterval(timer);
+                            timer = null;
+                            vm.count = 0;
+                        }
+                    }, true);
+                }
+            }
+        });
+    });
+</script>
+{/block}

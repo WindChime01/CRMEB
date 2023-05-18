@@ -1,0 +1,216 @@
+{extend name="public/container"}
+{block name="title"}图文详情{/block}
+{block name="head"}
+<style>
+    .try-btn {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 10;
+        width: 100%;
+        padding: .2rem .3rem;
+    }
+
+    .try-btn a {
+        display: block;
+        width: 100%;
+        height: .88rem;
+        border-radius: .44rem;
+        background-color: #2C8EFF;
+        font-size: .28rem;
+        line-height: .88rem;
+        text-align: center;
+        color: #FFFFFF;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="single-text-detail">
+        <div ref="header" class="header">
+            <i class="iconfont iconxiangyou" @click="goBack"></i>
+            <div>{{ title }}</div>
+        </div>
+        <div class="main" v-html="content.isPay ? content.content : profile.try_content"></div>
+        <div v-if="!content.isPay" style="height: 1.28rem;"></div>
+        <div v-if="!content.isPay" class="try-btn">
+            <a href="javascript:" @click="handlePay">已试看，立即购买</a>
+        </div>
+    </div>
+    <pay-dialog :open.sync="payDialogOpen" :money="content.money" :now_money="now_money" :special_id="id" :pay_type_num="2" :is-wechat="isWechat" :is-alipay="is_alipay"
+                :is-balance="is_yue" :template-id="templateIds" :wxpay-h5="wxpayH5" :is-member="content.is_member" :member-money="content.member_money" :member-link="memberLink"
+                @change="changeVal"></pay-dialog>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'components/pay-dialog/index'], function (Vue, $h, $http, PayDialog) {
+        var isWechat = {$isWechat? 'true': 'false'};
+        var now_money = {$now_money};
+        var is_alipay = {$is_alipay? 'true': 'false'};
+        var is_yue = {$is_yue? 'true': 'false'};
+        var wxpayH5 = {$is_h5_wechat_payment_switch? 'true': 'false'};
+        var memberLink = "{:url('special/member_recharge')}";
+        var id = {$id};
+        var vm = new Vue({
+            el: '#app',
+            components: {
+                'pay-dialog': PayDialog
+            },
+            data: {
+                title: '',
+                profile: {},
+                content: {
+                    isPay: true
+                },
+                id: id,
+                isTry: '',
+                payDialogOpen: false,
+                now_money: now_money,
+                isWechat: isWechat,
+                is_alipay: is_alipay,
+                is_yue: is_yue,
+                templateIds: '',
+                wxpayH5: wxpayH5,
+                memberLink: memberLink,
+            },
+            created: function () {
+                this.getDetail();
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    document.body.style.paddingTop = this.$refs.header.clientHeight + 'px';
+                });
+            },
+            methods: {
+                getDetail: function () {
+                    $h.loadFFF();
+                    $http.baseGet($h.U({
+                        c: 'special',
+                        a: 'single_img_content',
+                        q: {
+                            id: this.id
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        $h.loadClear();
+                        vm.title = data.title;
+                        vm.profile = data.profile;
+                        vm.content = data;
+                        if (isWechat) {
+                            mapleWx($jssdk(), function () {
+                                this.onMenuShareAll({
+                                    title: vm.title,
+                                    desc: vm.title,
+                                    imgUrl: vm.image,
+                                    link: data.link_url
+                                });
+                            });
+                        }
+                    }, function () {
+                        $h.loadClear();
+                    });
+                },
+                goBack: function () {
+                    window.location.href = "{:url('special/single_details')}?id=" + this.id;
+                },
+                handlePay: function () {
+                    this.payDialogOpen = true;
+                },
+                changeVal: function (opt) {
+                    if (typeof opt !== 'object') {
+                        opt = {};
+                    }
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                // 支付方式回调
+                pay_order: function (data) {
+                    this.orderId = data.data.result.orderId || '';
+                    switch (data.data.status) {
+                        case "PAY_ERROR":
+                        case 'ORDER_EXIST':
+                        case 'ORDER_ERROR':
+                            this.extendOrder(data.msg);
+                            break;
+                        case 'WECHAT_PAY':
+                            this.wechatPay(data.data.result.jsConfig);
+                            break;
+                        case 'WECHAT_H5_PAY':
+                            this.payDialogOpen = false;
+                            var callbackUrl = callback_url + '?type=7&id=' + this.special.id;
+                            var mwebUrl = data.data.result.jsConfig.mweb_url + '&redirect_url=' + encodeURIComponent(callbackUrl);
+                            window.location.assign(mwebUrl);
+                            break;
+                        case 'SUCCESS':
+                            this.successOrder(data.msg);
+                            break;
+                        case 'ZHIFUBAO_PAY':
+                            window.location.assign($h.U({
+                                c: 'alipay',
+                                a: 'index',
+                                q: {
+                                    info: data.data.result,
+                                    params: 'special'
+                                }
+                            }));
+                            break;
+                    }
+                },
+                // 微信支付
+                wechatPay: function (config) {
+                    var vm = this;
+                    mapleWx($jssdk(), function () {
+                        this.chooseWXPay(config, function () {
+                            vm.successOrder();
+                        }, {
+                            fail: vm.extendOrder,
+                            cancel: vm.extendOrder
+                        });
+                    });
+                },
+                // 支付成功
+                successOrder: function (msg) {
+                    var that = this;
+                    $h.showMsg({
+                        title: msg || '支付成功',
+                        icon: 'success',
+                        success: function () {
+                            that.payDialogOpen = false;
+                            that.$nextTick(function () {
+                                this.getDetail();
+                            });
+                        }
+                    });
+                },
+                // 支付未完成
+                extendOrder: function (msg) {
+                    var that = this;
+                    if (typeof msg === 'object') {
+                        if (msg.errMsg === 'chooseWXPay:cancel') {
+                            msg = '微信支付取消';
+                        } else {
+                            msg = '支付失败';
+                        }
+                    } else {
+                        msg = msg || '支付失败';
+                    }
+                    $h.pushMsg(msg, function () {
+                        that.payDialogOpen = false;
+                        if (that.orderId) {
+                            store.baseGet($h.U({
+                                c: 'special',
+                                a: 'del_order',
+                                q: {
+                                    orderId: that.orderId
+                                }
+                            }));
+                        }
+                    });
+                },
+            }
+        });
+    });
+</script>
+{/block}

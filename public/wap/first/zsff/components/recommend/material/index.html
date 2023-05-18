@@ -1,0 +1,30 @@
+<div class="recommend-material">
+    <div>
+        <div>{{ materialTitle }}</div>
+        <a :href="allLink">查看更多<i class="iconfont iconxiangyou"></i></a>
+    </div>
+    <ul :class="{ column: typeSetting === 2 }">
+        <li v-for="item in materialList">
+            <a :href="cellLink + '?id=' + item.id">
+                <div>
+                    <img :src="item.image" alt="">
+                </div>
+                <div>
+                    <div>{{ item.title }}</div>
+                    <div :class="{ money: item.pay_type }">
+                        <template v-if="item.pay_type">
+                            ￥<span>{{ item.money }}</span>
+                        </template>
+                        <template v-else>
+                            免费
+                        </template>
+                    </div>
+                    <div>
+                        <div>{{item.count }}人已下载</div>
+                        <button type="button">去下载</button>
+                    </div>
+                </div>
+            </a>
+        </li>
+    </ul>
+</div>

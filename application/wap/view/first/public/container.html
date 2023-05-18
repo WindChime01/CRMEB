@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    {include file="public/head" /}
+    <title>{block name="title"}{/block}</title>
+    {block name="aliplayer"}{/block}
+    {include file="public/style" /}
+    {block name="head_top"}{/block}
+    <script type="text/javascript" src="//res2.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+    <script type="text/javascript" src="{__PLUG_PATH}wxApi.js"></script>
+    <script>
+        $jssdk = function () {return <?=\service\WechatService:: jsSdk() ?>;}
+        window.overallShare = true;
+    </script>
+    {if !isset($requirejs)}{include file="public/requirejs" /}{/if}
+    {block name="head"}{/block}
+</head>
+
+<body>
+    {block name="content"}{/block}
+    {block name="foot"}{/block}
+    {include file="public/foot" /}
+    {include file="public/right_nav" /}
+</body>
+
+</html>

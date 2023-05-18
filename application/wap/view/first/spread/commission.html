@@ -1,0 +1,108 @@
+{extend name="public/container"}
+{block name="title"}佣金明细{/block}
+{block name="head"}
+<style>
+    body {
+        background: #F5F5F5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div id="app" class="commission-details" v-cloak>
+    <div class="header">
+        <div>累计佣金(元)：{$data.sum_spread}</div>
+        <div>
+            <div :class="{ on: type == 0 }" @click="tab(0)">
+                <div>一级推广佣金(元)</div>
+                <div>{$data.spread_one}</div>
+            </div>
+            <div :class="{ on: type == 1 }" @click="tab(1)">
+                <div>二级推广佣金(元)</div>
+                <div>{$data.spread_two}</div>
+            </div>
+        </div>
+    </div>
+    <div class="main">
+        <ul>
+            <li v-for="item in spreadList" class="item">
+                <div>{{item.time}}</div>
+                <ul>
+                    <li v-for="cell in item.list" class="cell">
+                        <div>
+                            <div>{{cell.mark}}</div>
+                            <div>{{cell.add_time}}</div>
+                        </div>
+                        <div v-if="cell.pm==1">+{{cell.number}}</div>
+                        <div v-else>-{{cell.number}}</div>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <div v-if="!spreadList.length && finished" class="empty">
+            <img src="{__WAP_PATH}zsff/images/empty.png" alt="暂无数据">
+            <div>暂无数据</div>
+        </div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'quick'], function (Vue, helper, store) {
+        new Vue({
+            el: '#app',
+            data: {
+                type: 0,
+                page: 1,
+                limit: 16,
+                spreadList: [],
+                finished: false
+            },
+            created: function () {
+                var vm = this;
+                vm.getRecords();
+                helper.EventUtil.listenTouchDirection(document, function () {
+                    vm.getRecords();
+                });
+            },
+            methods: {
+                getRecords: function () {
+                    var vm = this;
+                    if (vm.finished) {
+                        return;
+                    }
+                    helper.loadFFF();
+                    store.baseGet(helper.U({
+                        c: 'spread',
+                        a: 'get_spread_list',
+                        q: {
+                            type: vm.type,
+                            page: vm.page,
+                            limit: vm.limit
+                        }
+                    }), function (res) {
+                        var list = res.data.data.data;
+                        helper.loadClear();
+                        vm.spreadList = vm.spreadList.concat(list);
+                        vm.finished = vm.limit > list.length;
+                        vm.page=res.data.data.page;
+                    }, function () {
+                        helper.loadClear();
+                    });
+                },
+                tab: function (type) {
+                    var vm = this;
+                    if (type == vm.type) {
+                        return;
+                    }
+                    vm.type = type;
+                    vm.spreadList = [];
+                    vm.page = 1;
+                    vm.finished = false;
+                    vm.getRecords();
+                }
+            }
+        });
+    });
+</script>
+{/block}

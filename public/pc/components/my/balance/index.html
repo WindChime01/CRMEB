@@ -1,0 +1,60 @@
+<div class="my-balance">
+    <div class="total">
+        <ul>
+            <li>
+                <div>账户可用余额(元)：</div>
+                <div>{{ balance }}</div>
+            </li>
+            <li>
+                <div>累计充值(元)：</div>
+                <div>{{ recharge }}</div>
+            </li>
+            <li>
+                <div>累计消费(元)：</div>
+                <div>{{ consumption }}</div>
+            </li>
+        </ul>
+    </div>
+    <el-tabs v-if="activeName === 'balance'" v-model="active" @tab-click="handleClick">
+        <el-tab-pane label="全部" name="first">
+            <ul v-if="balanceList1.length">
+                <li v-for="(item, index) in balanceList1" :key="index">
+                    <div>
+                        <div>{{ item.title }}</div>
+                        <div>{{ item.add_time }}</div>
+                    </div>
+                    <div :class="{ red: item.pm }">{{ item.pm ? '+' : '-' }}￥{{ item.number }}</div>
+                </li>
+            </ul>
+            <div v-else class="empty"></div>
+            <el-pagination :page-size="limit" :total="total1" :current-page.sync="page1" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page @current-change="get_user_balance_list1"></el-pagination>
+        </el-tab-pane>
+        <el-tab-pane label="收入明细" name="second">
+            <ul v-if="balanceList2.length">
+                <li v-for="(item, index) in balanceList2" :key="index">
+                    <div>
+                        <div>{{ item.title }}</div>
+                        <div>{{ item.add_time }}</div>
+                    </div>
+                    <div :class="{ red: item.pm }">{{ item.pm ? '+' : '-' }}￥{{ item.number }}</div>
+                </li>
+            </ul>
+            <div v-else class="empty"></div>
+            <el-pagination :page-size="limit" :total="total2" :current-page.sync="page2" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page @current-change="get_user_balance_list2"></el-pagination>
+        </el-tab-pane>
+        <el-tab-pane label="支出明细" name="third">
+            <ul v-if="balanceList3.length">
+                <li v-for="(item, index) in balanceList3" :key="index">
+                    <div>
+                        <div>{{ item.title }}</div>
+                        <div>{{ item.add_time }}</div>
+                    </div>
+                    <div>{{ item.pm ? '+' : '-' }}￥{{ item.number }}</div>
+                </li>
+            </ul>
+            <div v-else class="empty"></div>
+            <el-pagination :page-size="limit" :total="total3" :current-page.sync="page3" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page @current-change="get_user_balance_list3"></el-pagination>
+        </el-tab-pane>
+    </el-tabs>
+    <div><i class="el-icon-warning"></i>系统仅显示您两年之内的余额明细，更早的余额明细不再显示</div>
+</div>

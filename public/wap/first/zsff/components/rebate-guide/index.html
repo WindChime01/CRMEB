@@ -1,0 +1,10 @@
+<div ref="rebate" class="rebate-guide" :style="{ top: top + 'px' }" @touchmove.prevent="touchMove">
+    <i ref="close" class="iconfont iconguanbi1" @click="rebateAction('close')"></i>
+    <div class="bottom">
+        <div class="title">分享返佣</div>
+        <div class="money">¥{{ rebateMoney }}</div>
+    </div>
+    <div class="top">
+        <button type="button" @click="rebateAction('share')">立即分享</button>
+    </div>
+</div>

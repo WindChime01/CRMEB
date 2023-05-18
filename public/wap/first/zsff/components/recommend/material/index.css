@@ -1,0 +1,166 @@
+.recommend-material {
+    margin-top: .14rem;
+    background-color: #fff;
+    overflow: hidden;
+}
+
+.recommend-material > div {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
+    padding: .2rem;
+}
+
+.recommend-material > div > div {
+    font-weight: bold;
+    font-size: .32rem;
+    color: #333;
+}
+
+.recommend-material > div > a {
+    font-size: .22rem;
+    color: #999;
+}
+
+.recommend-material .iconfont {
+    margin-left: .09rem;
+    font-size: .18rem;
+}
+
+.recommend-material ul {
+    padding-right: .2rem;
+    padding-left: .2rem;
+}
+
+.recommend-material li {
+    margin-bottom: .4rem;
+}
+
+.recommend-material li a {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: .22rem;
+    color: #999;
+}
+
+.recommend-material img {
+    display: block;
+    width: 2.5rem;
+    height: 1.4rem;
+    border-radius: .1rem;
+    -o-object-fit: cover;
+       object-fit: cover;
+}
+
+.recommend-material a > div:last-child {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    min-width: 0;
+    margin-left: .24rem;
+}
+
+.recommend-material a > div > div:first-child {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: .28rem;
+    color: #333;
+}
+
+.recommend-material a > div > div:nth-child(2) {
+    font-weight: bold;
+    font-size: .28rem;
+    color: #ff6b00;
+}
+
+.recommend-material a > div > div.money {
+    font-size: .22rem;
+}
+
+.recommend-material .money span {
+    font-size: .32rem;
+}
+
+.recommend-material a > div > div:last-child {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
+}
+
+.recommend-material button {
+    padding: .03rem .2rem;
+    border-radius: .19rem;
+    background-color: #2c8eff;
+    font-family: inherit;
+    font-weight: normal;
+    font-size: .22rem;
+    color: #fff;
+}
+
+.recommend-material .column {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+}
+
+.recommend-material .column li {
+    width: 3.45rem;
+}
+
+.recommend-material .column a {
+    display: inline;
+}
+
+.recommend-material .column img {
+    width: 3.45rem;
+    height: 1.92rem;
+}
+
+.recommend-material .column a > div:last-child {
+    height: 1.34rem;
+    margin-top: .14rem;
+    margin-left: 0;
+}

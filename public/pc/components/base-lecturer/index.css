@@ -1,0 +1,41 @@
+.base-lecturer {
+    display: block;
+    padding: 30px 30px 37px;
+    background-color: #FFFFFF;
+}
+
+.base-lecturer .lecturer-main {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+       -moz-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+}
+
+.base-lecturer img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+.base-lecturer .name-tags {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+       -moz-box-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    padding-left: 20px;
+}
+
+.base-lecturer .lecturer-name {
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 24px;
+    color: #333333;
+}

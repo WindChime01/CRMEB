@@ -1,0 +1,194 @@
+{extend name="public/container"}
+{block name="title"}答题卡{/block}
+{block name="head"}
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="answer-sheet-page">
+        <div class="header">
+            <a :href="'{:url('topic/question_detail')}?test_id=' + test_id + '&e_id=' + record_id + '&is_analysis=' + is_analysis + '&index=' + index + '&txamination_time=' + txamination_time + '&exam_time=' + duration">{{ is_analysis ? '返回试题' : '返回答题' }}</a>
+            <a v-if="!is_analysis" class="time" href="javascript:">{{ duration | formatTime }}</a>
+        </div>
+        <div class="main">
+            <div class="main-hd">
+                <div>答题情况</div>
+                <ul>
+                    <li>已答</li>
+                    <li>未答</li>
+                </ul>
+            </div>
+            <div v-if="questions.length" class="main-bd">
+                <a
+                  v-for="(item, index) in questions"
+                  :class="{ blue: item.is_correct }"
+                  :href="'{:url('topic/question_detail')}?test_id=' + test_id + '&index=' + index + '&is_analysis=' + is_analysis + '&e_id=' + record_id + '&txamination_time=' + txamination_time"
+                >{{ index + 1 }}</a>
+            </div>
+        </div>
+        <div v-if="!is_analysis && !isSubmits" class="footer">
+            <a href="javascript:" @click="submit">提交考试</a>
+        </div>
+    </div>
+    <quick-menu v-if="is_analysis"></quick-menu>
+</div>
+<script>
+    require([
+        'vue',
+        'helper',
+        'store',
+        'quick'
+    ], function (Vue, $h, $http) {
+        var vm = new Vue({
+            el: '#app',
+            filters: {
+                formatTime: function (time) {
+                    var hour = Math.floor(time / 3600000);
+                    var minute = Math.floor((time - hour * 3600000) / 60000);
+                    var second = Math.floor((time - hour * 3600000 - minute * 60000) / 1000);
+
+                    if (hour < 10) {
+                        hour = '0' + hour;
+                    }
+                    if (minute < 10) {
+                        minute = '0' + minute;
+                    }
+                    if (second < 10) {
+                        second = '0' + second;
+                    }
+
+                    return hour + ':' + minute + ':' + second;
+                }
+            },
+            data: {
+                startTime: new Date(),
+                duration: 0,
+                test_id: '',
+                record_id: '',
+                index: 0,
+                questions: [],
+                loading: false,
+                is_analysis: 0,
+                txamination_time: 0,
+                isSubmits: 1
+            },
+            watch: {
+                loading: function (val) {
+                    val ? $h.loadFFF() : $h.loadClear();
+                }
+            },
+            created: function () {
+                if ($h.getCookie('exam_time')) {
+                    this.exam_time = parseInt($h.getCookie('exam_time'));
+                }
+                this.test_id = $h.getParmas('test_id');
+                this.record_id = $h.getParmas('record_id');
+                this.is_analysis = parseInt($h.getParmas('is_analysis'));
+                if ($h.getParmas('index')) {
+                    this.index = parseInt($h.getParmas('index'));
+                }
+                if ($h.getParmas('is_analysis') && parseInt($h.getParmas('is_analysis'))) {
+
+                } else {
+                    this.setTimer();
+                    this.txamination_time = parseInt($h.getParmas('txamination_time'));
+                }
+                this.getSheet();
+                this.isSubmit();
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    window.addEventListener('pagehide', function () {
+                        $h.setCookie('exam_time', vm.duration);
+                    });
+                });
+            },
+            methods: {
+                getSheet: function () {
+                    this.loading = true;
+                    $http.baseGet($h.U({
+                        c: 'topic',
+                        a: 'answerSheet',
+                        q: {
+                            test_id: this.test_id,
+                            type: 2,
+                            record_id: this.record_id
+                        }
+                    }), function (res) {
+                        vm.loading = false;
+
+                        var questions = res.data.data;
+
+                        for (var i = questions.length; i--;) {
+                            if (!Array.isArray(questions[i].userAnswer)) {
+                                Object.assign(questions[i], questions[i].userAnswer);
+                            }
+                        }
+
+                        vm.questions = questions;
+                    }, function () {
+                        window.location.replace($h.U({
+                            c: 'topic',
+                            a: 'question_user'
+                        }));
+                    });
+                },
+                setTimer: function () {
+                    var timer = setInterval(function () {
+                        vm.duration = new Date() - vm.startTime + vm.exam_time;
+                        if (vm.duration >= vm.txamination_time * 60000) {
+                            clearInterval(timer);
+                            $h.pushMsg('考试时间已到', function () {
+                                vm.submit();
+                            });
+                        }
+                    }, 1000);
+                },
+                submit: function () {
+                    var that=this;
+                    this.loading = true;
+                    $http.basePost($h.U({
+                        c: 'topic',
+                        a: 'submitTestPaper'
+                    }), {
+                        examination_id: that.record_id,
+                        type: 2,
+                        duration: that.duration
+                    }, function (res) {
+                        vm.loading = false;
+                        if (200 === res.data.code) {
+                            $h.delCookie('e_id');
+                            $h.delCookie('exam_time');
+                            vm.is_analysis = 1;
+                            $h.pushMsg('提交成功', function () {
+                                location.href = "{:url('topic/question_result')}?test_id=" + that.test_id;
+                            });
+                        } else {
+                            $h.pushMsg(res.data.msg);
+                        }
+                    });
+                },
+                isSubmit: function (n) {
+                    var that=this;
+                    $h.loadFFF();
+                    $http.basePost($h.U({
+                        c: 'topic',
+                        a: 'is_submit'
+                    }), {
+                        examination_id: that.record_id,
+                        type: 2
+                    }, function (res) {
+                        $h.loadClear();
+                        $h.delCookie('e_id');
+                        that.isSubmits = res.data.data;
+                    }, undefined, true);
+                },
+            }
+        });
+    });
+</script>
+{/block}

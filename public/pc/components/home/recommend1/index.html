@@ -1,0 +1,36 @@
+<div class="recommend recommend1">
+    <div class="head">
+        <div>{{ recommend.title }}<span>{{ recommend.explain }}</span></div>
+        <el-link :href="$router.special_live" :underline="false">更多<i class="el-icon-arrow-right el-icon--right"></i></el-link>
+    </div>
+    <el-row :gutter="24">
+        <el-col v-for="item in recommend.list" :key="item.id" :span="8">
+            <a :href="$router.special_detail + '?id=' + item.id">
+                <div>
+                    <div v-if="item.status === 1" class="live1">直播中</div>
+                    <div v-else-if="item.status === 2" class="live1">回放</div>
+                    <div v-else-if="item.status === 4" class="live2">已结束</div>
+                    <div v-else>直播时间 {{ item.start_play_time }}</div>
+                    <el-image :src="item.image" fit="cover">
+                        <div slot="error" class="image-slot">
+                            <i class="el-icon-picture-outline"></i>
+                        </div>
+                    </el-image>
+                </div>
+                <div>
+                    <div class="title">{{ item.title }}</div>
+                    <div v-if="item.lecturer_id" class="lecturer">
+                        <el-avatar :src="item.lecturer.lecturer_head" :size="34" icon="el-icon-user-solid"></el-avatar>
+                        {{ item.lecturer.lecturer_name }}
+                    </div>
+                    <div v-else style="height: 75px;"></div>
+                    <div class="browse-money">
+                        <div><i class="el-icon-view"></i>{{ item.browse_count }}人已学</div>
+                        <div v-if="item.pay_type" class="money">￥<span>{{ item.money }}</span></div>
+                        <div v-else class="money free">免费</div>
+                    </div>
+                </div>
+            </a>
+        </el-col>
+    </el-row>
+</div>

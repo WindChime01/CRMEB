@@ -1,0 +1,541 @@
+{extend name="public/container"}
+{block name="title"}{$storeInfo.store_name}{/block}
+{block name="head_top"}
+<link rel="stylesheet" href="{__PLUG_PATH}vue-photo-preview/skin.css">
+<script src="{__PLUG_PATH}vue-photo-preview/vue-photo-preview.js"></script>
+<style>
+    body {
+        padding-bottom: 1rem;
+        padding-bottom: calc(1rem + constant(safe-area-inset-bottom));
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+
+    .layui-layer-imgsee {
+        display: none;
+    }
+
+    a[href^="tel"] {
+        color: #2C8EFF;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="goods-detail">
+    <div class="first">
+        <div :style="{ height: width + 'px' }" class="swiper-container">
+            <div class="swiper-wrapper">
+                <div v-for="(item, index) in storeInfo.slider_image" :key="index" class="swiper-slide">
+                    <img :src="item">
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+        <div class="detail">
+            <div class="price">
+                <div class="now">￥<span>{{ storeInfo.price }}</span></div>
+                <div class="vip">￥{{ storeInfo.vip_price }}</div>
+            </div>
+            <div class="title">{{ storeInfo.store_name }}</div>
+            <div class="other">
+                <div>划线价:<del>￥{{ storeInfo.ot_price }}</del></div>
+                <div>库存:{{ storeInfo.stock }}件</div>
+                <div>销量:{{ storeInfo.sales }}件</div>
+            </div>
+        </div>
+    </div>
+    <!-- 相关讲师 -->
+    <related-lecturer v-if="lecturer" :lecturer="lecturer"></related-lecturer>
+    <div class="second">
+        <div class="tab">
+            <div :class="{ on: tabOn == 1 }" @click="tabOn = 1">详情</div>
+            <div :class="{ on: tabOn == 2 }" @click="tabOn = 2">评价({{ whole }})</div>
+            <div :class="{ on: tabOn == 3 }" @click="tabOn = 3">赠送课程({{ specialList.length }})</div>
+        </div>
+        <div class="content">
+            <div v-show="tabOn == 1" class="detail" v-html="storeInfo.description"></div>
+            <div v-show="tabOn == 2" class="evaluate-section">
+                <div class="head">
+                    <div class="score">
+                        <div>评分<span v-for="star in 5" :key="star" :class="{ on: star <= rate }" class="iconfont iconxing"></span></div>
+                        <div>{{ positive_rate }}%<span>好评率</span></div>
+                    </div>
+                    <div class="cate">
+                        <div :class="{ on: score === 4 }" @click="cateTab(4)">全部({{ whole }})</div>
+                        <div :class="{ on: score === 3 }" @click="cateTab(3)">好评({{ praise }})</div>
+                        <div :class="{ on: score === 2 }" @click="cateTab(2)">中评({{ review }})</div>
+                        <div :class="{ on: score === 1 }" @click="cateTab(1)">差评({{ difference }})</div>
+                    </div>
+                </div>
+                <!-- 评价列表 -->
+                <evaluate-list :evaluate-list="evaluateList"></evaluate-list>
+                <div v-if="loading" class="loading">
+                    <i class="fa fa-spinner fa-spin"></i>
+                </div>
+                <div v-if="finished && evaluateList.length" class="finished">已全部加载完</div>
+                <div v-if="finished && !evaluateList.length" class="empty">
+                    <img src="{__WAP_PATH}zsff/images/empty.png" alt="暂无评价">
+                    <div>暂无评价</div>
+                </div>
+            </div>
+            <div v-show="tabOn == 3" class="special">
+                <a v-for="item in specialList" :key="item.id" :href="item.path">
+                    <div class="image">
+                        <img :src="item.image">
+                        <div>{{ item.typeName }}</div>
+                    </div>
+                    <div class="text">
+                        <div class="title">{{ item.title }}</div>
+                        <div class="label">
+                            <div v-for="label in item.label">{{ label }}</div>
+                        </div>
+                        <div class="price">￥<span>{{ item.money }}</span></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="third">
+        <div class="group">
+            <button type="button" @click="goPage(1)">
+                <img src="{__WAP_PATH}zsff/images/special01.png">
+                <div>首页</div>
+            </button>
+            <button type="button" @click="goPage(2)">
+                <img src="{__WAP_PATH}zsff/images/special02.png">
+                <div>客服</div>
+            </button>
+        </div>
+        <button type="button" @click="buy">立即购买</button>
+    </div>
+    <div class="share" @click="createSharePoster">
+        <i class="iconfont iconfenxiang"></i>
+    </div>
+    <base-login :login-show="loginShow" :site-name="siteName" @login-close="logComplete"></base-login>
+    <rebate-guide v-if="rebateMoney && isShareDisplaySwitch" :rebate-money="rebateMoney" @rebate-action="rebateAction"></rebate-guide>
+</div>
+<script>
+    require([
+        'vue',
+        'store',
+        'helper',
+        'swiper',
+        'components/evaluate-list/index',
+        'components/base-login/index',
+        'components/rebate-guide/index',
+        'components/related-lecturer/index',
+        'qrcode',
+        '{__WAP_PATH}zsff/js/quick.js'
+    ], function (Vue, api, $h, Swiper, evaluateList, BaseLogin, RebateGuide, RelatedLecturer) {
+        var storeInfo = {$storeInfo};
+        var siteUrl = '{$site_url}';
+        var siteName = '{$Auth_site_name}';
+        var isWeChat = '{$isWechat}';
+        var uid = {$uid};
+        var options = {
+            captionEl: false,
+            fullscreenEl: false,
+            zoomEl: false,
+            arrowEl: false
+        };
+        console.log(storeInfo);
+        Vue.use(vuePhotoPreview, options);
+        var app = new Vue({
+            el: '#app',
+            components: {
+                'evaluate-list': evaluateList,
+                'base-login': BaseLogin,
+                'rebate-guide': RebateGuide,
+                'related-lecturer': RelatedLecturer
+            },
+            data: {
+                storeInfo: storeInfo ? storeInfo : [],
+                width: window.innerWidth,
+                loginShow: false,
+                isWeChat: isWeChat,
+                url: isWeChat ? $h.U({c: 'index', a: 'login'}) : $h.U({c: 'login', a: 'phone_check'}),
+                tabOn: 1,
+                score: 4,
+                page: 1,
+                limit: 16,
+                loading: false,
+                finished: false,
+                evaluateList: [],
+                rate: 5,
+                positive_rate: '0',
+                whole: 0,
+                praise: 0,
+                review: 0,
+                difference: 0,
+                siteUrl: siteUrl,
+                siteName: siteName,
+                rebateMoney: 0,
+                page2: 1,
+                specialList: [],
+                lecturer: null,
+                isShareDisplaySwitch: {$is_share_display_switch}  // 是否显示分享返佣
+            },
+            created: function () {
+                var vm = this;
+                if (isWeChat) {
+                    mapleWx($jssdk(), function () {
+                        this.onMenuShareAll({
+                            title: vm.storeInfo.store_name,
+                            desc: vm.storeInfo.store_info,
+                            imgUrl: vm.storeInfo.image,
+                            link: customWXShare(uid)
+                        });
+                    });
+                }
+                window.addEventListener('resize', function () {
+                    vm.width = this.innerWidth;
+                });
+                $h.EventUtil.listenTouchDirection(document, function () {
+                    if (vm.tabOn === 2) {
+                        vm.getEvaluateList();
+                    }
+                });
+            },
+            mounted: function () {
+                var vm = this;
+                this.$nextTick(function () {
+                    this.initSwiper();
+                    this.getLecturer();
+                    this.getEvaluateStatus();
+                    this.getEvaluateList();
+                    this.rebateAmount();
+                    this.getAssociatedTopics();
+                });
+            },
+            updated: function () {
+                this.$nextTick(function () {
+                    this.$previewRefresh();
+                });
+            },
+            methods: {
+                goPage: function (value) {
+                    var vm = this;
+                    switch (value) {
+                        case 1:
+                            window.location.assign("{:url('index/index')}");
+                            break;
+                        case 2:
+                            api.baseGet("{:url('index/login_user')}", function () {
+                                api.baseGet("{:url('PublicApi/get_site_service_phone')}?mer_id=" + storeInfo.mer_id, function (res) {
+                                    var data = res.data.data;
+                                    if (Array.isArray(data)) {
+                                        api.baseGet("{:url('PublicApi/public_data')}", function (res) {
+                                            var data = res.data.data;
+                                            if (data.customer_service === '3') {
+                                                if (data.site_service_phone) {
+                                                    layer.confirm('拨打<a href="tel:' + data.site_service_phone + '">' + data.site_service_phone + '</a>进行咨询？', {
+                                                        title: false,
+                                                        closeBtn: false,
+                                                        btn: ['拨打', '取消']
+                                                    }, function (index) {
+                                                        window.location.assign('tel:' + data.site_service_phone);
+                                                        layer.close(index);
+                                                    });
+                                                } else {
+                                                    layer.msg('抱歉，无法联系客服');
+                                                }
+                                            } else {
+                                                window.location.assign("{:url('service/service_list')}?mer_id=" + storeInfo.mer_id);
+                                            }
+                                        });
+                                    } else {
+                                        layer.confirm('拨打<a href="tel:' + data.site_service_phone + '">' + data.site_service_phone + '</a>进行咨询？', {
+                                            title: false,
+                                            closeBtn: false,
+                                            btn: ['拨打', '取消']
+                                        }, function (index) {
+                                            window.location.assign('tel:' + data.site_service_phone);
+                                            layer.close(index);
+                                        });
+                                    }
+                                });
+                            }, function () {
+                                if (isWechat) {
+                                    window.localStorage.setItem('login_back_url', window.location.href);
+                                    window.location.assign("{:url('login/index')}");
+                                } else {
+                                    vm.loginShow = true;
+                                }
+                            }, true);
+                            break;
+                    }
+                },
+                initSwiper: function () {
+                    new Swiper('.swiper-container', {
+                        loop: true,
+                        autoplay: true,
+                        pagination: {
+                            el: '.swiper-pagination'
+                        },
+                        observeParents: true
+                    });
+                },
+                // 立即购买
+                buy: function () {
+                    var vm = this;
+                    api.baseGet("{:url('index/login_user')}", function () {
+                        if (isWechat) {
+                            api.baseGet("{:url('index/user_login')}", function () {
+                                api.goBuy({
+                                    productId: vm.storeInfo.id,
+                                    cartNum: 1
+                                }, function (cartId) {
+                                    window.location.assign("{:url('special/confirm_order')}?cartId=" + cartId);
+                                });
+                            }, function () {
+                                vm.loginShow = true;
+                            }, true);
+                        } else {
+                            api.goBuy({
+                                productId: vm.storeInfo.id,
+                                cartNum: 1
+                            }, function (cartId) {
+                                window.location.assign("{:url('special/confirm_order')}?cartId=" + cartId);
+                            });
+                        }
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                enter: function () {
+                    this.loginShow = true;
+                },
+                //关闭登录
+                loginClose: function (value) {
+                    this.loginShow = false;
+                    value && this.logComplete();
+                },
+                //登录完成回调事件
+                logComplete: function () {
+                    this.loginShow = false;
+                },
+                //所有插件回调处理事件
+                changeVal: function (opt) {
+                    if (typeof opt != 'object') opt = {};
+                    var action = opt.action || '';
+                    var value = opt.value || '';
+                    this[action] && this[action](value);
+                },
+                // 获取评价列表
+                getEvaluateList: function () {
+                    var vm = this;
+                    if (this.finished) {
+                        return false;
+                    }
+                    api.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'product_reply_list',
+                        q: {
+                            productId: this.storeInfo.id,
+                            score: this.score,
+                            page: this.page++,
+                            limit: this.limit
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        vm.evaluateList = vm.evaluateList.concat(data);
+                        vm.finished = vm.limit > data.length;
+                    });
+                },
+                // 获取各状态评价数量
+                getEvaluateStatus: function () {
+                    var vm = this;
+                    api.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'product_reply_data',
+                        q: {
+                            productId: this.storeInfo.id
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        vm.rate = data.star;
+                        vm.positive_rate = data.positive_rate;
+                        vm.whole = data.whole;
+                        vm.praise = data.praise;
+                        vm.review = data.review;
+                        vm.difference = data.difference;
+                    })
+                },
+                // 评价列表状态切换
+                cateTab: function (score) {
+                    if (this.score === score) {
+                        return;
+                    }
+                    this.score = score;
+                    this.evaluateList = [];
+                    this.loading = false;
+                    this.finished = false;
+                    this.page = 1;
+                    this.getEvaluateList();
+                },
+                // 生成分享海报
+                createSharePoster: function () {
+                    var vm = this;
+                    var imagePromise = new Promise(function (resolve, reject) {
+                        var image = new Image();
+                        image.crossOrigin = 'anonymous';
+                        image.src = vm.storeInfo.image + '?' + new Date().getTime();
+                        image.onload = function () {
+                            resolve(image);
+                        },
+                            image.onerror = function () {
+                                reject('error-image');
+                            };
+                    }),
+                        qrcodePromise = new Promise(function (resolve, reject) {
+                            resolve(new QRCode(document.createElement('canvas'), vm.siteUrl));
+                        });
+                    api.baseGet("{:url('index/login_user')}", function () {
+                      Promise.all([
+                          imagePromise,
+                          qrcodePromise
+                      ]).then(function (sources) {
+                          var canvas = document.createElement('canvas');
+                          var context = canvas.getContext('2d');
+                          canvas.width = 600;
+                          canvas.height = 820;
+
+                          context.fillStyle = '#FFFFFF';
+                          context.fillRect(0, 0, 600, 820);
+
+                          context.drawImage(sources[0], 0, 0, 600, 600);
+                          context.drawImage(sources[1]._el.firstElementChild, 108, 635, 150, 150);
+
+                          context.font = '22px sans-serif';
+                          context.fillStyle = '#999999';
+                          context.textBaseline = 'top';
+
+                          var text = '邀您加入' + siteName;
+                          var list = [];
+                          var start = 0;
+                          for (var i = 0; i <= text.length; i++) {
+                              if (context.measureText(text.slice(start, i)).width > 198) {
+                                  list.push(text.slice(start, i - 1));
+                                  start = i - 1;
+                              }
+                          }
+                          if (start !== text.length) {
+                              list.push(text.slice(start));
+                          }
+                          if (list.length > 3) {
+                              list.length = 3;
+                              for (var j = 0; j <= list[2].length; j++) {
+                                  if (context.measureText(list[2].slice(0, j) + '……').width > 198) {
+                                      list[2] = list[2].slice(0, j - 1) + '……';
+                                      break;
+                                  }
+                              }
+                          }
+                          list.push('长按识别或扫码进入');
+                          for (var k = 0; k < list.length; k++) {
+                              context.fillText(list[k], 294, 635 + (150 / list.length) * k);
+                          }
+
+                          layer.photos({
+                              photos: {
+                                  data: [
+                                      {
+                                          src: canvas.toDataURL('image/jpeg')
+                                      }
+                                  ]
+                              },
+                              anim: 5
+                          });
+                          canvas = null;
+                      }).catch(function (err) {
+                          $h.pushMsg(err);
+                      });
+                    }, function () {
+                      if (isWechat) {
+                        window.localStorage.setItem('login_back_url', window.location.href);
+                        window.location.assign("{:url('login/index')}");
+                      } else {
+                        vm.loginShow = true;
+                      }
+                    });
+                },
+                // 获取返佣金额
+                rebateAmount: function () {
+                    var vm = this;
+                    api.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'rebateAmount',
+                        p: {
+                            type: 2,
+                            id: this.storeInfo.id
+                        }
+                    }), function (res) {
+                        vm.rebateMoney = Number(res.data.data.brokeragePrice);
+                    });
+                },
+                rebateAction: function (value) {
+                    switch (value) {
+                        case 'close':
+                            this.rebateMoney = 0;
+                            break;
+                        case 'share':
+                            this.createSharePoster();
+                            break;
+                    }
+                },
+                // 获取关联专题
+                getAssociatedTopics: function () {
+                    var vm = this;
+                    api.baseGet($h.U({
+                        c: 'store',
+                        a: 'getAssociatedTopics',
+                        q: {
+                            page: this.page2,
+                            list: 100,
+                            id: this.storeInfo.id
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        data.forEach(function (item) {
+                            var path = "{:url('special/details')}";
+                            var typeName = '图文';
+                            if (item.is_light) {
+                                path = "{:url('special/single_details')}";
+                            }
+                            if (item.type === 2 || item.light_type === 2) {
+                                typeName = '音频';
+                            } else if (item.type === 3 || item.light_type === 3) {
+                                typeName = '视频';
+                            } else if (item.type === 4) {
+                                typeName = '直播';
+                            } else if (item.type === 5) {
+                                typeName = '专栏';
+                            }
+                            item.path = path + '?id=' + item.id;
+                            item.typeName = typeName;
+                        });
+                        vm.specialList = data;
+                    });
+                },
+                // 相关讲师
+                getLecturer: function () {
+                    var vm = this;
+                    api.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'getLecturer',
+                        q: {
+                            mer_id: this.storeInfo.mer_id
+                        }
+                    }), function (res) {
+                        vm.lecturer = res.data.data;
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

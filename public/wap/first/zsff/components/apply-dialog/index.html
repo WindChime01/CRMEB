@@ -1,0 +1,22 @@
+<div :class="{ show: show }" class="apply-dialog">
+    <div class="mask"></div>
+    <div class="dialog">
+        <div>
+            <img v-if="status === 0" :src="images[0]">
+            <img v-if="status === -1" :src="images[1]">
+            <img v-if="status === 1" :src="images[2]">
+        </div>
+        <div v-if="status === 0" class="title">申请待审核</div>
+        <div v-if="status === -1" class="title fail">审核失败</div>
+        <div v-if="status === 1" class="title success">审核成功</div>
+        <div v-if="status === 0" class="message">您的申请工作人员正在审核，稍后再试</div>
+        <div v-if="status === -1" class="message">{{ fail }}</div>
+        <div v-if="status === 1" class="message">您已申请成功，快去上传您的课程吧！</div>
+        <div class="btn-group">
+            <button v-if="page.indexOf('merchant') !== -1 && status === 0" class="btn" type="button" @click="goBack">知道了</button>
+            <button v-if="page.indexOf('merchant') === -1 && (status === 0 || status === 1)" class="btn" type="button" @click="goApply">查看申请</button>
+            <button v-if="page.indexOf('merchant') === -1 && status === -1" class="btn" type="button" @click="goApply">重新申请</button>
+        </div>
+        <button class="close-btn" type="button" @click="$emit('update:show', false)"><i class="iconfont iconcha3"></i></button>
+    </div>
+</div>

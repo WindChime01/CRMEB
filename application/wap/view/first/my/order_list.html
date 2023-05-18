@@ -1,0 +1,107 @@
+{extend name="public/container"}
+{block name="title"}拼团课程{/block}
+{block name="head"}
+<style>
+    body {
+        background: #F5F5F5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="group-special">
+    <div class="list">
+        <div v-for="item in list" :key="item.id" class="item">
+            <div class="item-hd">
+                <div>{{ item.stop_time }}</div>
+                <div v-if="item.pink_status == 1">拼团中</div>
+                <div v-else-if="item.pink_status == 2">拼团成功</div>
+                <div v-else-if="item.pink_status == 3">拼团失败</div>
+                <div v-else-if="item.pink_status == 4">已退款</div>
+                <div v-else-if="item.pink_status == 5">拼团删除</div>
+            </div>
+            <div class="item-bd">
+                <div class="special">
+                    <div>
+                        <img :src="item.image" :alt="item.title">
+                    </div>
+                    <div class="text">
+                        <div class="title">{{ item.title }}</div>
+                        <div class="money">￥<span>{{ item.money }}</span></div>
+                    </div>
+                </div>
+                <div v-if="item.pink_status <= 3" class="button-group">
+                    <button v-show="item.pink_status == 1" type="button" @click="invite(item)">邀请参团</button>
+                    <button v-show="item.pink_status == 2" type="button" @click="goSpecial(item)">去学习</button>
+                    <button v-show="item.pink_status == 3" type="button" @click="goSpecial(item)">重新开团</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <img v-if="!list.length && finished" class="empty" src="{__WAP_PATH}zsff/images/no_data_available.png" alt="">
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'quick'], function (Vue, helper, store) {
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                page: 1,
+                limit: 16,
+                list: [],
+                finished: false
+            },
+            created: function () {
+                this.getList();
+                helper.EventUtil.listenTouchDirection(document, function () {
+                    vm.getList();
+                });
+            },
+            methods: {
+                // 列表信息
+                getList: function () {
+                    if (this.finished) {
+                        return;
+                    }
+                    helper.loadFFF();
+                    store.baseGet(helper.U({
+                        c: 'my',
+                        a: 'get_order_list',
+                        q: {
+                            page: this.page++,
+                            limit: this.limit,
+                            type: 3
+                        }
+                    }), function (res) {
+                        var list = res.data.data.list;
+                        helper.loadClear();
+                        vm.list = vm.list.concat(list);
+                        vm.finished = vm.limit > list.length;
+                    }, function (err) {
+                        helper.pushMsg(err.data.msg);
+                    });
+                },
+                // 点击邀请参团
+                invite: function (item) {
+                    if (item.pink_status != 4) {
+                        window.location.href = helper.U({
+                            c: 'special',
+                            a: 'pink',
+                            q: {
+                                pink_id: item.pink_id,
+                                special_id: item.cart_id,
+                                is_help: 0
+                            }
+                        });
+                    }
+                },
+                // 点击去学习、重新开团
+                goSpecial: function (item) {
+                    window.location.href = (item.is_light ? "{:url('special/single_details')}" : "{:url('special/details')}") + '?id=' + item.cart_id;
+                }
+            }
+        });
+    });
+</script>
+{/block}

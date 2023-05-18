@@ -1,0 +1,81 @@
+{extend name="public/container"}
+{block name="title"}提现记录{/block}
+{block name="head"}
+<style>
+    body {
+        background: #F5F5F5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div id="app" class="withdraw-record" v-cloak>
+    <ul>
+        <li v-for="item in records" class="item">
+            <div>{{item.time}}</div>
+            <ul>
+                <li v-for="cell in item.list" class="cell">
+                    <div>
+                        <div>{{cell.title}}</div>
+                        <div>{{cell.add_time}}</div>
+                    </div>
+                    <div v-if="cell.pm==0">-{{cell.number}}</div>
+                    <div v-else>+{{cell.number}}</div>
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <div v-if="!records.length && finished" class="empty">
+        <img src="{__WAP_PATH}zsff/images/empty.png" alt="暂无数据">
+        <div>暂无数据</div>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store', 'quick'], function (Vue, helper, store) {
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                page: 1,
+                limit: 16,
+                records: [],
+                finished: false
+            },
+            created: function () {
+                this.getRecords();
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    helper.EventUtil.listenTouchDirection(document, function () {
+                        vm.getRecords();
+                    });
+                });
+            },
+            methods: {
+                // 记录数据
+                getRecords: function () {
+                    if (this.finished) {
+                        return;
+                    }
+                    helper.loadFFF();
+                    store.baseGet(helper.U({
+                        c: 'spread',
+                        a: 'get_withdrawal_list',
+                        q: {
+                            page: this.page,
+                            limit: this.limit
+                        },
+                    }), function (res) {
+                        var list = res.data.data.data;
+                        helper.loadClear();
+                        vm.records = vm.records.concat(list);
+                        vm.finished = vm.limit > list.length;
+                        vm.page =res.data.data.page;
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

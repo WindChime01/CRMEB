@@ -1,0 +1,95 @@
+.my-material .el-row {
+    padding: 40px 50px;
+}
+
+.my-material .el-col {
+    margin-bottom: 20px;
+}
+
+.my-material .el-col a {
+    display: block;
+    border-radius: 8px;
+    overflow: hidden;
+    -webkit-box-shadow: 0 2px 15px rgba(79, 109, 143, 0.15);
+            box-shadow: 0 2px 15px rgba(79, 109, 143, 0.15);
+}
+
+.my-material .el-image {
+    display: block;
+    width: 100%;
+    height: 146px;
+}
+
+.my-material .el-image + div {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+       -moz-box-orient: vertical;
+       -moz-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+       -moz-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    height: 124px;
+    padding: 13px 20px 18px;
+    font-size: 14px;
+    color: #999;
+}
+
+.my-material .title {
+    overflow: hidden;
+    white-space: nowrap;
+    -o-text-overflow: ellipsis;
+       text-overflow: ellipsis;
+    font-size: 16px;
+    color: #282828;
+}
+
+.my-material .money-vip {
+    font-size: 0;
+}
+
+.my-material .money {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 12px;
+    color: #ff6b00;
+}
+
+.my-material .money.free {
+    font-size: 18px;
+}
+
+.my-material .money span {
+    font-size: 20px;
+}
+
+.my-material .vip {
+    display: inline-block;
+    padding-left: 25px;
+    margin-left: 8px;
+    background: url("../../../images/vip_money.png") left center/21px 13px no-repeat;
+    vertical-align: middle;
+    font-size: 12px;
+    line-height: 13px;
+    color: #282828;
+}
+
+.my-material .el-pagination {
+    padding-top: 58px;
+    padding-bottom: 58px;
+    text-align: center;
+}
+
+.my-material .empty {
+    height: 600px;
+    background: url("../../../images/empty8.png") center/274px no-repeat;
+}

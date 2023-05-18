@@ -1,0 +1,19 @@
+<div class="my-lecturer">
+    <div v-if="followList.length" class="lecturer-list">
+        <a v-for="item in followList" :key="item.id" :href="$router.teacher_detail + '?id=' + item.id" class="item">
+            <button @click.prevent="follow(item)"><i class="iconfont iconguanbi"></i>取消关注</button>
+            <div class="avatar">
+                <img :src="item.lecturer_head" alt="">
+            </div>
+            <div class="name">{{ item.lecturer_name }}</div>
+            <div class="tags">
+                <div v-for="label in item.label" :key="label" class="tag">{{ label }}</div>
+            </div>
+            <div class="info">{{ item.explain }}</div>
+        </a>
+    </div>
+    <el-empty v-if="!followList.length && finished" description=" "></el-empty>
+    <el-pagination :page-size="limit" :total="total" :current-page.sync="page" layout="prev, pager, next" prev-text="上一页" next-text="下一页"
+                   hide-on-single-page>
+    </el-pagination>
+</div>

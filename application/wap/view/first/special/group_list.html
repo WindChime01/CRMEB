@@ -1,0 +1,92 @@
+{extend name="public/container"}
+{block name="title"}拼团列表{/block}
+{block name="head"}
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div :style="{ backgroundImage: 'url(' + backgroundImage + ')' }" class="group-list-page">
+        <ul v-if="groupList.length">
+            <li v-for="item in groupList" :key="item.id">
+                <a :href="(item.is_light ? '{:url('special/single_details')}' : '{:url('special/details')}') + '?id=' + item.id">
+                    <img :src="item.image">
+                    <div class="text">
+                        <div class="name">{{ item.title }}</div>
+                        <div class="info">
+                            <div class="people">
+                                <span class="iconfont iconpintuan"></span>{{ item.pink_number }}人团
+                            </div>
+                            已拼{{ item.count }}件
+                        </div>
+                        <div class="wrap">
+                            <div class="money">￥<span>{{ item.pink_money }}</span></div>
+                            <div class="button">去拼团</div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+        </ul>
+        <img v-else-if="!loading && page === 2" class="empty" src="/wap/first/zsff/images/no_data_available.png">
+    </div>
+    <quick-menu></quick-menu>
+</div>
+<script>
+    var backgroundImage = "{$group_background}";
+    require(['vue', 'helper', 'store', 'quick'], function (Vue, $h, api) {
+        var app = new Vue({
+            el: '#app',
+            data: {
+                backgroundImage: backgroundImage,
+                groupList: [],
+                page: 1,
+                limit: 15,
+                loading: false,
+                finished: false
+            },
+            created: function() {
+                this.getGroupList();
+            },
+            mounted: function () {
+                var that = this;
+                that.$nextTick(function() {
+                    $h.EventUtil.listenTouchDirection(document, function() {
+                        !that.loading && that.getGroupList();
+                    }, false);
+                });
+            },
+            methods: {
+                // 获取拼团列表
+                getGroupList: function() {
+                    var that = this;
+                    if (that.loading || that.finished) {
+                        return;
+                    }
+                    that.loading = true;
+                    $h.loadFFF();
+                    api.baseGet($h.U({
+                        c: 'special',
+                        a: 'groupProjectList',
+                        q: {
+                            page: that.page++,
+                            limit: that.limit
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        that.loading = false;
+                        $h.loadClear();
+                        that.groupList = that.groupList.concat(data);
+                        that.finished = that.limit > data.length;
+                    }, function (err) {
+                        that.loading = false;
+                        $h.loadClear();
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

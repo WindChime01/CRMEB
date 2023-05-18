@@ -1,0 +1,179 @@
+{extend name="public/container" /}
+{block name="title"}我的关注{/block}
+{block name="head"}
+<style>
+    body {
+        background-color: #F5F5F5;
+    }
+
+    .my-follow .item {
+        display: flex;
+        align-items: center;
+        padding: .3rem;
+        border-top: 1px solid #F5F5F5;
+        background-color: #FFFFFF;
+    }
+
+    .my-follow .item:first-child {
+        border-top: none;
+    }
+
+    .my-follow .avatar {
+        width: 1.3rem;
+        height: 1.3rem;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    .my-follow .text {
+        flex: 1;
+        margin-left: .22rem;
+    }
+
+    .my-follow .name {
+        font-weight: 500;
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #282828;
+    }
+
+    .my-follow .tags {
+        display: flex;
+        margin-top: .1rem;
+    }
+
+    .my-follow .tag {
+        height: .32rem;
+        padding: 0 .12rem;
+        border-radius: .04rem;
+        margin-left: .1rem;
+        background-color: rgba(255, 107, 0, 0.1);
+        font-size: .22rem;
+        line-height: .32rem;
+        color: #FF6B00;
+    }
+
+    .my-follow .tag:first-child {
+        margin-left: 0;
+    }
+
+    .my-follow .attr {
+        margin-top: .1rem;
+        font-size: .26rem;
+        line-height: .37rem;
+        color: #666666;
+    }
+
+    .my-follow button {
+        width: 1.2rem;
+        height: .48rem;
+        border: 1px solid #999999;
+        border-radius: .24rem;
+        font-size: .22rem;
+        color: #999999;
+    }
+
+    .my-follow button .iconfont {
+        margin-right: .05rem;
+        vertical-align: middle;
+        font-size: .15rem;
+    }
+
+    .my-follow .followed {
+        border-color: #999999;
+        color: #999999;
+    }
+
+    .my-follow .empty {
+        display: block;
+        width: 4.14rem;
+        margin: 1rem auto 0;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="my-follow">
+    <a v-for="item in followList" :key="item.id" class="item" :href="'{:url('merchant/teacher_detail')}?id=' + item.id">
+        <div class="avatar">
+            <img :src="item.lecturer_head" alt="">
+        </div>
+        <div class="text">
+            <div class="name">{{ item.lecturer_name }}</div>
+            <div class="tags">
+                <div v-for="label in item.label" :key="label" class="tag">{{ label }}</div>
+            </div>
+            <div class="attr">{{ item.study }}人学习 | {{ item.curriculum }}课时</div>
+        </div>
+        <button @click.prevent="follow(item)">取消关注</button>
+    </a>
+    <img v-if="!followList.length && finished" class="empty" src="{__WAP_PATH}zsff/images/empty.png" alt="">
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'helper', 'store'], function (Vue, $h, store) {
+        new Vue({
+            el: '#app',
+            data: {
+                page: 1,
+                limit: 16,
+                followList: [],
+                finished: false
+            },
+            created: function () {
+                var vm = this;
+                this.getFollowList();
+                $h.EventUtil.listenTouchDirection(document, function () {
+                    vm.getFollowList();
+                });
+            },
+            methods: {
+                // 获取关注的讲师
+                getFollowList: function () {
+                    var vm = this;
+                    if (this.finished) {
+                        return;
+                    }
+                    $h.loadFFF();
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'get_user_follow_list',
+                        q: {
+                            page: this.page++,
+                            limit: 15
+                        }
+                    }), function (res) {
+                        $h.loadClear();
+                        var followList = res.data.data;
+                        followList.forEach(function (item) {
+                            item.label = JSON.parse(item.label);
+                        });
+                        vm.followList = vm.followList.concat(followList);
+                        vm.finished = vm.limit > followList.length;
+                    });
+                },
+                // 取消关注
+                follow: function (item) {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'merchant',
+                        a: 'user_follow',
+                        q: {
+                            mer_id: item.mer_id,
+                            is_follow: 0
+                        }
+                    }), function (res) {
+                        for (var i = 0; i < vm.followList.length; i++) {
+                            if (vm.followList[i].id === item.id) {
+                                vm.followList.splice(i, 1);
+                                break;
+                            }
+                        }
+                        $h.pushMsg('取消关注成功');
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

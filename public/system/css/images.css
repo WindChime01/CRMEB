@@ -1,0 +1,251 @@
+[v-cloak] {
+    display: none !important;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+.layui-fluid {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    height: 100%;
+    padding: 0;
+}
+
+.layui-fluid-side {
+    width: 15%;
+    min-width: 150px;
+}
+
+.layui-tree {
+    height: 100%;
+}
+
+.layui-fluid-main {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+       -moz-box-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+       -moz-box-orient: vertical;
+       -moz-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    border-left: 1px solid #eee;
+}
+
+.main-header {
+    padding: 10px;
+}
+
+.main-header .layui-btn {
+    border-right: 1px solid #1E9FFF;
+}
+
+.main-header .layui-btn-disabled {
+    border-right-color: #e6e6e6;
+}
+
+.main-header .layui-btn:first-child {
+    border-left: 1px solid #1E9FFF;
+}
+
+.main-header .layui-btn-disabled:first-child {
+    border-left-color: #e6e6e6;
+}
+
+.main-header .layui-btn-disabled + .layui-btn-normal {
+    border-left-color: #1E9FFF;
+}
+
+.main-content {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+       -moz-box-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    position: relative;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+    -webkit-align-content: flex-start;
+        -ms-flex-line-pack: start;
+            align-content: flex-start;
+    padding: 20px 0 0 20px;
+    border-top: 1px solid #eee;
+    overflow: auto;
+}
+
+.image-item {
+    width: 100px;
+    margin: 0 20px 20px 0;
+}
+
+.image-wrap {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background-color: #f0f0f0;
+}
+
+.image-wrap:hover .image-mask {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.image-wrap.on::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border: 2px solid #5fb878;
+}
+
+.layui-badge {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+}
+
+.image-wrap img {
+    width: 100%;
+    height: 100%;
+    -o-object-fit: contain;
+       object-fit: contain;
+}
+
+.image-wrap .layui-btn-group {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    z-index: 5;
+    display: none;
+    -webkit-transform: translateX(-50%);
+       -moz-transform: translateX(-50%);
+        -ms-transform: translateX(-50%);
+         -o-transform: translateX(-50%);
+            transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+.image-wrap:hover .layui-btn-group {
+    display: inline-block;
+}
+
+.image-wrap .layui-btn {
+    height: 20px;
+    padding: 0 2px;
+    line-height: 20px;
+}
+
+.image-wrap .layui-btn:hover {
+    color: #1e9fff;
+}
+
+.image-wrap .fa {
+    font-size: 14px;
+}
+
+.image-item input {
+    width: 100%;
+    height: 24px;
+    padding: 0 4px;
+    border: 1px solid transparent;
+    margin-top: 4px;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+    -o-text-overflow: ellipsis;
+       text-overflow: ellipsis;
+    font-size: 14px;
+}
+
+.image-item input:focus {
+    border-color: #1e9fff;
+}
+
+.main-footer {
+    position: relative;
+    text-align: center;
+}
+
+.main-footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    border-top: 1px solid #eee;
+}
+
+.layui-laypage a, .layui-laypage span {
+    margin-bottom: 0;
+}
+
+.layui-layer-tips {
+    position: absolute !important;
+    top: 0 !important;
+    left: 20px !important;
+    display: none;
+    -webkit-transform: translateY(-100%);
+       -moz-transform: translateY(-100%);
+        -ms-transform: translateY(-100%);
+         -o-transform: translateY(-100%);
+            transform: translateY(-100%);
+}
+
+.layui-layer-tips .layui-layer-content {
+    padding: 0 !important;
+    background-color: #1e9fff !important;
+}
+
+.layui-layer-tips i.layui-layer-TipsT {
+    border-right-color: #1e9fff !important;
+}
+
+.layui-tree-entry:hover .layui-layer-tips {
+    display: block;
+}
+
+.layui-tree-txt.on {
+    color: #1e9fff;
+}
+
+.layui-laypage a:hover {
+    color: #1E9FFF;
+}
+
+.empty {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 325px;
+    -webkit-transform: translate(-50%, -50%);
+       -moz-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+         -o-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+}

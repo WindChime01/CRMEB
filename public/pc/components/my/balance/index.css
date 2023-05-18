@@ -1,0 +1,119 @@
+.my-balance {
+    padding-right: 55px;
+    padding-left: 55px;
+}
+
+.el-pagination {
+    padding: 50px 0 !important;
+    text-align: center;
+}
+
+.my-balance .total ul {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding-top: 65px;
+    padding-bottom: 35px;
+    font-size: 14px;
+    color: #969696;
+}
+
+.my-balance .total li ~ li {
+    margin-left: 170px;
+}
+
+.my-balance .total li > div:last-child {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 32px;
+    color: #282828;
+}
+
+.my-balance .el-tabs.el-tabs--top {
+    margin-top: 0;
+}
+
+.my-balance .el-tabs__header.is-top {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.my-balance .el-tabs__nav-wrap.is-top::after {
+    display: block;
+    height: 1px;
+    background-color: #ececec;
+}
+
+.my-balance .el-tabs__item.is-top {
+    padding-right: 25px;
+    padding-left: 25px;
+    color: #999;
+}
+
+.my-balance .el-tabs.el-tabs--top .el-tabs__item.is-top:nth-child(2) {
+    padding-left: 25px;
+}
+
+.my-balance .el-tabs.el-tabs--top .el-tabs__item.is-top:last-child {
+    padding-right: 25px;
+}
+
+.my-balance .el-tabs.el-tabs--top .el-tab-pane > ul > li {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+       -moz-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+       -moz-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    height: 86px;
+    padding-right: 10px;
+    padding-left: 10px;
+    border-bottom: 1px dashed #d0d0d0;
+    font-size: 14px;
+    color: #969696;
+}
+
+.my-balance .el-tabs.el-tabs--top li > div > div:first-child {
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #282828;
+}
+
+.my-balance .el-tabs.el-tabs--top li > div:last-child {
+    font-weight: bold;
+    font-size: 16px;
+    color: #2c8eff;
+}
+
+.my-balance .el-tabs.el-tabs--top li > .red:last-child {
+    color: #FF6B00;
+}
+
+.my-balance > div:last-child {
+    padding-top: 41px;
+    padding-bottom: 53px;
+    font-size: 12px;
+    color: #969696;
+}
+
+.my-balance .el-tab-pane .el-icon-warning {
+    margin-right: 8px;
+    font-size: 14px;
+    color: #ff6b00;
+}
+
+.my-balance .empty {
+    height: 488px;
+    background: url("../../../images/empty7.png") center/274px no-repeat;
+}

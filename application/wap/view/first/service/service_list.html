@@ -1,0 +1,151 @@
+{extend name="public/container"}
+{block name="title"}客服列表{/block}
+{block name="head_top"}
+<link rel="stylesheet" type="text/css" href="{__WAP_PATH}crmeb/css/store_service.css" />
+{if $service_url neq '' && $service_configuration eq 2}
+<script src="{$service_url}/customerServer.js"></script>
+{/if}
+<style>
+    body {
+        background-color: #FFFFFF;
+    }
+
+    .empty {
+        display: block;
+        width: 4.14rem;
+        margin: 1.5rem auto 0;
+    }
+
+    iframe {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+</style>
+{/block}
+{block name="content"}
+<div class="cus_server" id="app" v-cloak>
+    <div v-if="configuration === 1">
+        <ul v-if="list.length">
+            <li v-for="item in list">
+                <a :href="'{:url('service/service_ing')}?to_uid=' + item.uid">
+                    <div>
+                        <img :src="item.avatar">
+                        <div>{{ where.mer_id ? '讲师端' : '平台端' }}</div>
+                    </div>
+                    <div>{{item.nickname}}</div>
+                </a>
+            </li>
+        </ul>
+        <img v-if="!list.length && loadend" class="empty" src="/wap/first/zsff/images/empty.png">
+    </div>
+    <iframe v-if="configuration === 2 && serviceUrl && frameQuery.token" :src="frameSrc"></iframe>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    var site_name = "{$Auth_site_name}", isWechat = '{$isWechat}', configuration = {$service_configuration}, serviceUrl = '{$service_url}';
+    var userInfo = {$userInfo};
+    var token = '{$kefu_token}';
+    require(['vue', 'helper', 'store', 'quick'], function (Vue, $h, store) {
+        new Vue({
+            el: '#app',
+            data: {
+                loading: false,
+                loadend: false,
+                loadTitle: '上拉加载更多',
+                list: [],
+                where: {
+                    page: 1,
+                    limit: 20,
+                    mer_id: ''
+                },
+                url: isWechat ? $h.U({c: 'index', a: 'login'}) : $h.U({c: 'login', a: 'phone_check'}),
+                site_name: site_name,
+                isWechat: isWechat,
+                configuration: configuration,
+                serviceUrl: serviceUrl,
+                frameQuery: {
+                    token: token,
+                    nickName: userInfo.nickname,
+                    phone: userInfo.phone,
+                    avatar: userInfo.avatar,
+                    kefu_id: 0
+                }
+            },
+            computed: {
+                frameSrc: function () {
+                    var query = [];
+                    for (var name in this.frameQuery) {
+                        if (Object.hasOwnProperty.call(this.frameQuery, name)) {
+                            query.push(name + '=' + this.frameQuery[name]);
+                        }
+                    }
+                    return this.serviceUrl + '/chat/index?' + query.join('&');
+                }
+            },
+            created: function () {
+                var vm = this;
+                var query = {};
+                var search = window.location.search.slice(1);
+                if (search) {
+                    search.split('&').forEach(function (item) {
+                        item = item.split('=');
+                        query[item[0]] = item[1];
+                    });
+                }
+                this.where.mer_id = query.mer_id || '';
+                if (this.configuration === 1) {
+                    this.get_service_list();
+                    $h.EventUtil.listenTouchDirection(document, function () {
+                        vm.get_service_list();
+                    }, false);
+                } else if (this.configuration === 2) {
+                    if (this.serviceUrl && this.frameQuery.token) {
+                        this.get_kefu_id(this.where.mer_id);
+                    } else {
+                        layer.msg('请检查客服配置', {anim: 0}, function () {
+                            window.history.back();
+                        });
+                    }
+                }
+            },
+            methods: {
+                // 客服列表
+                get_service_list: function () {
+                    var vm = this;
+                    if (this.loading) return;
+                    if (this.loadend) return;
+                    this.loadTitle = '';
+                    this.loading = true;
+                    store.baseGet($h.U({
+                        c: 'service',
+                        a: 'get_service_list',
+                        q: this.where
+                    }), function (res) {
+                        var data = res.data.data;
+                        vm.list = vm.list.concat(data);
+                        vm.loading = false;
+                        vm.where.page++;
+                        vm.loadend = vm.where.limit > data.length;
+                        vm.loadTitle = vm.loadend ? '我是有底线的' : '上拉加载更多';
+                    }, function () {
+                        vm.loadTitle = '上拉加载更多';
+                        vm.loading = false;
+                    });
+                },
+                get_kefu_id: function () {
+                    var vm = this;
+                    store.baseGet("{:url('PublicApi/get_kefu_id')}?mer_id=" + this.where.mer_id, function (res) {
+                        vm.frameQuery.kefu_id = res.data.data.kefu_id;
+                    });
+                }
+            }
+        })
+    })
+</script>
+{/block}

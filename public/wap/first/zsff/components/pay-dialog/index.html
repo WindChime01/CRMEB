@@ -1,0 +1,51 @@
+<div>
+    <div :class="{ mask: open }" @touchmove.prevent @click="$emit('update:open', false)"></div>
+    <div :class="{ show: open }" class="pay-dialog">
+        <div class="dialog-hd">
+            支付方式
+            <button @click="$emit('update:open', false)">
+                <i class="iconfont iconguanbi"></i>
+            </button>
+        </div>
+        <div class="dialog-bd">
+            <template v-for="item in payOptions">
+                <label v-if="item.canuse" :key="item.id">
+                    <input v-model="payChecked" :value="item.value" type="radio" hidden>
+                    <div :style="{ backgroundImage: 'url(' + item.icon + ')' }">
+                        <div class="name">
+                            {{ item.name }}
+                            <div v-if="item.value === 'yue'" class="info">可用余额：￥{{ now_money }}</div>
+                        </div>
+                        <i class="iconfont icongouxuan"></i>
+                    </div>
+                </label>
+            </template>
+        </div>
+        <div class="dialog-ft">
+            <a v-if="!isMember && pay_type_num != 10 && pay_type_num != 3 && pay_type_num!= 30 && canReduce>0 && showReduce" class="member" :href="memberLink">
+                <div>开通会员，本单可减<span class="money">{{ canReduce }}元</span></div>
+                <i class="iconfont iconxiangyou"></i>
+            </a>
+            <wx-open-subscribe v-if="isWechat && templateId && !WeixinOpenTagsError" :template="templateId" @success="onPay" @error="subscribeError">
+                <script type="text/wxtag-template" slot="style">
+                    <style>
+                        .subscribe-btn {
+                            width: 100%;
+                            height: 40px;
+                            border: 0;
+                            border-radius: 20px;
+                            background-color: #2C8EFF;
+                            outline: 0;
+                            font-size: 14px;
+                            color: #FFFFFF;
+                        }
+                      </style>
+                </script>
+                <script type="text/wxtag-template">
+                    <button class="subscribe-btn">立即支付</button>
+                </script>
+            </wx-open-subscribe>
+            <button v-else :disabled="!payChecked" @click="onPay">立即支付：￥ {{ money }}</button>
+        </div>
+    </div>
+</div>

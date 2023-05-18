@@ -1,0 +1,79 @@
+<div class="my-activity">
+    <el-tabs  v-model="active" @tab-click="handleClick">
+        <el-tab-pane label="全部" name="0">
+            <a v-for="item in list0" class="item" href="javascript:">
+                <div class="item-head">
+                    <div class="item-code">核销码：<span>{{ item.code }}</span></div>
+                    <div :class="{ no: !item.status }" class="item-status no">{{ item.status ? '已核销' : '待核销' }}</div>
+                </div>
+                <div class="item-body">
+                    <el-image :src="item.image"></el-image>
+                    <div class="item-text">
+                        <div class="item-title">{{ item.title }}</div>
+                        <div class="item-attr">
+                            <div><i class="iconfont iconhuodongshijian"></i>活动时间：{{ item.start_time | timeFormat }}~{{ item.end_time | timeFormat }}</div>
+                            <div><i class="iconfont iconhuodongdizhi"></i>活动地址：{{ item.province }}{{ item.city }}{{ item.district }}{{ item.detail }}</div>
+                        </div>
+                    </div>
+                    <div class="item-info">
+                        <div v-if="item.price == '0.00'" class="item-money free">免费</div>
+                        <div v-else class="item-money">￥<span>{{ item.pay_price }}</span></div>
+                        <div class="item-people">{{ item.upUnmber }}人参加</div>
+                    </div>
+                </div>
+            </a>
+            <el-pagination :page-size="limit" :total="total0" :current-page.sync="page0" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page @current-change="activitySignInList0"></el-pagination>
+            <el-empty v-if="!list0.length" :image-size="200"></el-empty>
+        </el-tab-pane>
+        <el-tab-pane label="待核销" name="1">
+            <a v-for="item in list1" class="item" href="javascript:">
+                <div class="item-head">
+                    <div class="item-code">核销码：<span>{{ item.code }}</span></div>
+                    <div class="item-status no">待核销</div>
+                </div>
+                <div class="item-body">
+                    <el-image :src="item.image"></el-image>
+                    <div class="item-text">
+                        <div class="item-title">{{ item.title }}</div>
+                        <div class="item-attr">
+                            <div><i class="iconfont iconhuodongshijian"></i>活动时间：{{ item.start_time | timeFormat }}~{{ item.end_time | timeFormat }}</div>
+                            <div><i class="iconfont iconhuodongdizhi"></i>活动地址：{{ item.province }}{{ item.city }}{{ item.district }}{{ item.detail }}</div>
+                        </div>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-money">￥<span>{{ item.pay_price }}</span></div>
+                        <div v-if="item.price == '0.00'" class="item-money free">免费</div>
+                        <div class="item-people">{{ item.upUnmber }}人参加</div>
+                    </div>
+                </div>
+            </a>
+            <el-pagination :page-size="limit" :total="total1" :current-page.sync="page1" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page @current-change="activitySignInList1"></el-pagination>
+            <el-empty v-if="!list1.length" :image-size="200"></el-empty>
+        </el-tab-pane>
+        <el-tab-pane label="已核销" name="2">
+            <a v-for="item in list2" class="item" href="javascript:">
+                <div class="item-head">
+                    <div class="item-code">核销码：<span>{{ item.code }}</span></div>
+                    <div class="item-status">已核销</div>
+                </div>
+                <div class="item-body">
+                    <el-image :src="item.image"></el-image>
+                    <div class="item-text">
+                        <div class="item-title">{{ item.title }}</div>
+                        <div class="item-attr">
+                            <div><i class="iconfont iconhuodongshijian"></i>活动时间：{{ item.start_time | timeFormat }}~{{ item.end_time | timeFormat }}</div>
+                            <div><i class="iconfont iconhuodongdizhi"></i>活动地址：{{ item.province }}{{ item.city }}{{ item.district }}{{ item.detail }}</div>
+                        </div>
+                    </div>
+                    <div class="item-info">
+                        <div v-if="item.price == '0.00'" class="item-money free">免费</div>
+                        <div v-else class="item-money">￥<span>{{ item.pay_price }}</span></div>
+                        <div class="item-people">{{ item.upUnmber }}人参加</div>
+                    </div>
+                </div>
+            </a>
+            <el-pagination :page-size="limit" :total="total2" :current-page.sync="page2" layout="prev, pager, next" prev-text="上一页" next-text="下一页" hide-on-single-page @current-change="activitySignInList2"></el-pagination>
+            <el-empty v-if="!list2.length" :image-size="200"></el-empty>
+        </el-tab-pane>
+    </el-tabs>
+</div>

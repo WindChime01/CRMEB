@@ -1,0 +1,225 @@
+{extend name="public/container"}
+{block name="title"}{$title}{/block}
+{block name="head_top"}
+<style>
+    body {
+        padding-bottom: 1rem;
+        padding-bottom: calc(1rem + constant(safe-area-inset-bottom));
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+        background-color: #f5f5f5;
+    }
+
+    .link .cont {
+        display: inline-block;
+        vertical-align: middle;
+        font-weight: 400;
+        font-size: .18rem;
+        line-height: .36rem;
+        color: #666;
+    }
+
+    .link .cont img {
+        width: 0.4rem;
+        height: 0.4rem;
+        margin: auto;
+        display: block;
+    }
+
+    .picker .picker-panel .picker-choose .cancel,
+    .picker .picker-panel .picker-choose .confirm {
+        top: 0 !important;
+    }
+
+    .picker .picker-panel .picker-choose .confirm {
+        color: #2c8eff !important;
+    }
+
+    .picker .picker-panel .wheel-wrapper .wheel {
+        font-size: .3rem !important;
+    }
+
+    .picker .picker-panel .picker-choose {
+        font-size: .3rem !important;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app">
+    <div class="activity">
+        <div class="header">
+            <div class="image">
+                <img class="img" :src="activity.image">
+            </div>
+            <div class="text">
+                <div class="name" v-text="activity.title"></div>
+                <div class="group">
+                    <div class="money">¥<span class="num" v-text="activity.price"></span>
+                        <span class="vip-price" style="color: #0A0A0A;">¥{{ activity.member_price }}</span>
+                        <img class="vip-price-icon" src="{__WAP_PATH}zsff/images/vip.png">
+                    </div>
+                    <div>{{ activity.count }}人已报名</div>
+                </div>
+            </div>
+            <div class="info">
+                <div class="item">
+                    <div class="iconfont iconshijian2"></div>
+                    <div class="cont">报名时间：{{activity.signup_start_time}}至{{activity.signup_end_time}}</div>
+                </div>
+                <div class="item">
+                    <div class="iconfont iconshijian2"></div>
+                    <div class="cont">活动时间：{{activity.start_time}}至{{activity.end_time}}</div>
+                </div>
+                <div class="item">
+                    <div class="iconfont icondidian"></div>
+                    <div class="cont">活动地址：{{activity.province}}{{activity.city}}{{activity.district}}{{activity.detail}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="chat" v-if="isPay">
+            <div class="text">赶紧加入活动群聊吧~</div>
+            <div class="btn" @click=" open = true ">加入群聊</div>
+        </div>
+        <!-- 相关讲师 -->
+        <related-lecturer v-if="lecturer" :lecturer="lecturer"></related-lecturer>
+        <div class="main">
+            <div class="nav-bar">
+                <div :class="{ on: navOn === 1 }" class="item" @click="navOn = 1">详情</div>
+                <div :class="{ on: navOn === 2 }" class="item" @click="navOn = 2">规则</div>
+            </div>
+            <div class="nav-cont">
+                <!-- 详情 -->
+                <div v-show="navOn === 1" class="section">{$content}</div>
+                <!-- 规则 -->
+                <div v-show="navOn === 2" class="section">{$activity_rules}</div>
+            </div>
+        </div>
+        <div class="footer">
+            <a class="link" href="{:url('wap/index/index')}">
+                <div class="cont">
+                    <img src="{__WAP_PATH}zsff/images/special01.png">
+                    <div>首页</div>
+                </div>
+            </a>
+            <button class="button" type="button" v-if="activity.statu === 0" disabled>未开始报名</button>
+            <template v-else-if="activity.statu === 1">
+                <button class="button" type="button" v-if="activity.number > activity.count" @click="activitySign">去报名</button>
+                <button class="button" type="button" v-else disabled>报名结束</button>
+            </template>
+            <button class="button" type="button" v-else-if="activity.statu === 2 || activity.statu === 3" disabled>报名结束</button>
+            <button class="button" type="button" v-else disabled>活动结束</button>
+        </div>
+        <div class="groupCode" v-show="open">
+            <div class="code"><img :src="activity.qrcode_img"></div>
+            <div class="codeTip">长按扫一扫<br>加进群哦</div>
+        </div>
+        <div :class="{ mask: open }" @click="open = false"></div>
+    </div>
+    <base-login :login-show="loginShow" :site-name="siteName" @login-close="loginClose"></base-login>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'store', 'components/base-login/index', 'components/related-lecturer/index',], function (Vue, store, BaseLogin, RelatedLecturer) {
+        var uid = "{$uid}" || 0;
+        var activity = {$activity};
+        var siteName = '{$Auth_site_name}';
+        var isWeChat = '{$isWechat}';
+        var isMember = {$is_member};
+        new Vue({
+            el: '#app',
+            components: {
+                'base-login': BaseLogin,
+                'related-lecturer': RelatedLecturer
+            },
+            data: {
+                navOn: 1,
+                isRestrictions: 0,
+                open: false,
+                activity: activity,
+                siteName: siteName,
+                isPay: 0,
+                isMember: isMember,
+                loginShow: false,
+                specialEvent: '',
+                lecturer: null
+            },
+            created: function () {
+                var vm = this;
+                this.activityType();
+                this.getLecturer();
+                this.specialEvent = $h.U({
+                    c: 'special',
+                    a: 'event',
+                    q: {
+                        id: this.activity.id
+                    }
+                });
+                if (isWeChat) {
+                    mapleWx($jssdk(), function () {
+                        this.onMenuShareAll({
+                            title: vm.activity.title,
+                            desc: (vm.activity.province === vm.activity.city ? '' : vm.activity.province) + vm.activity.city + vm.activity.district + vm.activity.detail,
+                            imgUrl: vm.activity.image,
+                            link: customWXShare(uid)
+                        });
+                    });
+                }
+            },
+            methods: {
+                activityType: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'special',
+                        a: 'activityType',
+                        q: {
+                            id: this.activity.id
+                        }
+                    }), function (res) {
+                        var data = res.data.data;
+                        vm.isPay = data.is_pay;
+                        vm.isRestrictions = data.is_restrictions;
+                    });
+                },
+                activitySign: function () {
+                    var vm = this;
+                    store.baseGet("{:url('index/login_user')}", function () {
+                        if (vm.isRestrictions) {
+                            $h.pushMsg('您的报名已超过限额');
+                        } else {
+                            window.location.assign(vm.specialEvent);
+                        }
+                    }, function () {
+                        if (isWechat) {
+                            window.localStorage.setItem('login_back_url', window.location.href);
+                            window.location.assign("{:url('login/index')}");
+                        } else {
+                            vm.loginShow = true;
+                        }
+                    }, true);
+                },
+                // 关闭登录弹窗
+                loginClose: function (data) {
+                    this.loginShow = false;
+                    if (data) {
+                        window.location.assign(this.specialEvent);
+                    }
+                },
+                // 相关讲师
+                getLecturer: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'auth_api',
+                        a: 'getLecturer',
+                        q: {
+                            mer_id: this.activity.mer_id
+                        }
+                    }), function (res) {
+                        vm.lecturer = res.data.data;
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

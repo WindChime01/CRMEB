@@ -1,0 +1,194 @@
+{extend name="public/container"}
+{block name="title"}{$title}{/block}
+{block name="head"}
+<style>
+    html, body {
+        height: 100%;
+    }
+
+    body {
+        padding: 1.72rem .3rem 0;
+        background: url("{__WAP_PATH}zsff/images/gift.png") center/cover no-repeat;
+        overflow: hidden;
+    }
+
+    .share-guide {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 20;
+        display: none;
+    }
+    .share-guide img {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+    .layui-layer-imgbar {
+        display: none !important;
+    }
+</style>
+{/block}
+{block name="content"}
+<div class="present-topics">
+    <div class="info">
+        <div>
+            <img src="{$userInfo.avatar}" alt="">
+        </div>
+        <div>{$userInfo.nickname}发礼物啦</div>
+        <div>
+            <img src="{$special.image}" alt="">
+        </div>
+        <div>{$special.title}</div>
+    </div>
+    <div class="btn">
+        <button class="sendBnt" type="button">发送给朋友</button>
+        <a href="{:Url('gift_receive',['orderId'=>$orderId])}">查看领取详情</a>
+    </div>
+    <div class="share-guide shares-model">
+        <img src="{__WAP_PATH}zsff/images/share-info.png" alt="">
+    </div>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['qrcode'], function () {
+        var posterURL = '';
+
+        function preview(src) {
+            layer.photos({
+                photos: {
+                    data: [
+                        {
+                            src: src
+                        }
+                    ]
+                },
+                anim: 5
+            });
+        }
+
+        function createPoster() {
+            Promise.all([
+                new Promise(function (resolve, reject) {
+                    var image = new Image();
+                    image.crossOrigin = 'anonymous';
+                    image.onload = function () {
+                        resolve(image);
+                    };
+                    image.onerror = function () {
+                        reject('error-image');
+                    };
+                    image.src = '{$special.image}?' + new Date().getTime();
+                }),
+                new Promise(function (resolve, reject) {
+                    resolve(new QRCode(document.createElement('canvas'), {
+                        text: '{$site_url}',
+                        width: 149,
+                        height: 149,
+                        colorDark : '#000000',
+                        colorLight : '#FFFFFF',
+                        correctLevel : QRCode.CorrectLevel.L
+                    }));
+                })
+            ]).then(function (sources) {
+                var canvasElement = document.createElement('canvas');
+                var context = canvasElement.getContext('2d');
+                canvasElement.width = 610;
+                canvasElement.height = 669;
+                context.fillStyle = '#FFFFFF';
+                context.fillRect(0, 0, canvasElement.width, canvasElement.height);
+                context.save();
+                context.beginPath();
+                context.moveTo(40, 30);
+                context.arcTo(580, 30, 580, 338, 10);
+                context.arcTo(580, 338, 30, 338, 10);
+                context.arcTo(30, 338, 30, 30, 10);
+                context.arcTo(30, 30, 580, 30, 10);
+                context.closePath();
+                context.clip();
+                context.drawImage(sources[0], 30, 30, 550, 308);
+                context.restore();
+                context.font = '28px sans-serif';
+                context.fillStyle = '#282828';
+                context.lineWidth = 1;
+                var title = '{$special.title}';
+                var lineWidth = 0;
+                var substringIndex = 0;
+                var offsetTop = 396;
+                for (var i = 0; i < title.length; i++) {
+                    lineWidth += context.measureText(title[i]).width;
+                    if (lineWidth > 550) {
+                        context.fillText(title.substring(substringIndex, i), 30, offsetTop);
+                        offsetTop += 41;
+                        lineWidth = 0;
+                        substringIndex = i;
+                    }
+                    if (i == title.length - 1) {
+                        context.fillText(title.substring(substringIndex, i + 1), 30, offsetTop);
+                    }
+                }
+                context.fillStyle = '#F7F7F7';
+                context.fillRect(0, 480, canvasElement.width, canvasElement.height - 480);
+                context.drawImage(sources[1]._el.firstElementChild, 60, 500, 149, 149);
+                context.font = '22px sans-serif';
+                context.fillStyle = '#999999';
+                context.lineWidth = 1;
+                var nickname = '{$userInfo.nickname}';
+                var lineWidth2 = context.measureText('手慢无！发送礼物啦！').width;
+                var offsetTop2 = 557;
+                for (var i = 0; i < nickname.length; i++) {
+                    lineWidth2 += context.measureText(nickname[i]).width;
+                    if (lineWidth2 > 371) {
+                        context.fillText('手慢无！' + nickname.substring(0, i) + '发送礼物啦！', 244, offsetTop2);
+                        break;
+                    }
+                }
+                if (lineWidth2 <= 371) {
+                    context.fillText('手慢无！' + nickname + '发送礼物啦！', 244, offsetTop2);
+                }
+                offsetTop2 += 40;
+                context.fillText('扫码领礼物', 244, offsetTop2);
+                posterURL = canvasElement.toDataURL('image/jpeg');
+                canvasElement = null;
+                preview(posterURL);
+            }).catch(function (err) {
+                console.error(err);
+            });
+        }
+
+        this.overallShare = false;
+
+        mapleWx($jssdk(), function () {
+            this.onMenuShareAll({
+                title: '手慢无!{$userInfo.nickname}发送礼物啦! {$special.title}',
+                desc: "{$special.abstract}",
+                imgUrl: '{$special.image}',
+                link: '{$site_url}'
+            });
+        });
+
+        $('.shares-model').on('touchmove', function (event) {
+            event.preventDefault();
+        });
+
+        $('.shares-model').on('click', function (event) {
+            $('.shares-model').hide();
+        });
+
+        $('.sendBnt').on('click', function () {
+            if (navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == 'micromessenger') {
+                $('.shares-model').show();
+                return;
+            }
+            if (posterURL) {
+                preview(posterURL);
+                return;
+            }
+            createPoster();
+        });
+    });
+</script>
+{/block}

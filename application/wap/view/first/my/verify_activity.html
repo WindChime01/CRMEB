@@ -1,0 +1,65 @@
+{extend name="public/container" /}
+{block name="title"}报名核销{/block}
+{block name="content"}
+<div v-cloak id="app" class="verify-activity">
+    <div class="one">
+        <div><span v-if="isWeChat">扫码或</span>输入核销码核销</div>
+    </div>
+    <div class="two">
+        <form @submit.prevent="verify">
+            <div>
+                <input v-model.trim="code" type="text" placeholder="输入核销码">
+                <i v-if="isWeChat" class="iconfont iconsaoma" @click="scanQRCode"></i>
+            </div>
+            <input type="submit" value="立即核销">
+        </form>
+    </div>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'store'], function (Vue, store) {
+        var isWeChat = '{$isWechat}';
+        new Vue({
+            el: '#app',
+            data: {
+                isWeChat: isWeChat,
+                code: '',
+                mapleApi: null
+            },
+            created: function () {
+                if (this.isWeChat) {
+                    this.mapleApi = mapleWx($jssdk());
+                }
+            },
+            methods: {
+                scanQRCode: function () {
+                    this.mapleApi.scanQRCode();
+                },
+                verify: function () {
+                    if (this.code) {
+                        store.baseGet($h.U({
+                            c: 'activity',
+                            a: 'getWriteOffCode',
+                            q: {
+                                code: this.code
+                            }
+                        }), function (res) {
+                            window.location.assign($h.U({
+                                c: 'my',
+                                a: 'sign_order',
+                                q: {
+                                    order_id: res.data.data.order_id,
+                                    type: 2
+                                }
+                            }));
+                        });
+                    } else {
+                        $h.pushMsg('请' + (this.isWeChat ? '扫码或' : '') + '输入核销码核销');
+                    }
+                }
+            }
+        });
+    });
+</script>
+{/block}

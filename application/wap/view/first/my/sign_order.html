@@ -1,0 +1,135 @@
+{extend name="public/container"}
+{block name="title"}报名核销{/block}
+{block name="head"}
+<style>
+    body {
+        background: #F5F5F5;
+    }
+
+    .activity-verify {
+        padding-top: .7rem;
+    }
+</style>
+{/block}
+{block name="content"}
+<div v-cloak id="app" class="activity-verify">
+    <div class="two" @click="activityDetails(activity.id)">
+        <div>
+            <img :src="activity.image">
+        </div>
+        <div>
+            <div v-text="activity.title"></div>
+            <div>￥<span>{{activity.price}}</span></div>
+        </div>
+    </div>
+    <div class="four">
+        <div>订单信息</div>
+        <div>
+            <div v-for="item in userInfo">
+                <div>{{ item.event_name }}：</div>
+                <div>{{ item.event_value }}</div>
+            </div>
+            <div>
+                <div>人数：</div>
+                <div>{{ order.number }}</div>
+            </div>
+            <div>
+                <div>订单编号：</div>
+                <div>{{order_id}}</div>
+            </div>
+            <div>
+                <div>支付时间：</div>
+                <div>{{order.pay_time}}</div>
+            </div>
+            <div>
+                <div>支付金额：</div>
+                <div>￥{{order.pay_price}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="five">
+        <button type="button" @click="verify">确认核销</button>
+    </div>
+    <quick-menu></quick-menu>
+</div>
+{/block}
+{block name="foot"}
+<script>
+    require(['vue', 'store', 'helper', '{__WAP_PATH}zsff/js/quick.js'], function (Vue, store, $h) {
+        var type = '{$type}';
+        var orderId = '{$order_id}';
+        new Vue({
+            el: '#app',
+            data: {
+                order: {},
+                activity: {},
+                order_id: orderId,
+                status: 0,
+                userInfo: []
+            },
+            mounted: function () {
+                this.getActivitySign();
+                setInterval(this.orderStatus, 60000);
+            },
+            methods: {
+                orderStatus:function(){
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'activity',
+                        a: 'orderStatus',
+                        q: {
+                            order_id: this.order_id
+                        }
+                    }),function (res) {
+                        if (res.data.data == 1) {
+                            window.location.assign("{:url('wap/my/sign_list')}");
+                        }
+                    });
+                },
+                getActivitySign: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'activity',
+                        a: 'writeOffSignIn',
+                        q:{
+                            order_id: this.order_id
+                        }
+                    }),function (res) {
+                        var data = res.data.data;
+                        vm.order = data;
+                        vm.activity = data.activity;
+                        vm.userInfo = JSON.parse(data.user_info);
+                    });
+                },
+                activityDetails: function (id) {
+                    window.location.assign($h.U({
+                        c: 'special',
+                        a: 'activity_details',
+                        q: {
+                            id: id
+                        }
+                    }));
+                },
+                verify: function () {
+                    var vm = this;
+                    store.baseGet($h.U({
+                        c: 'activity',
+                        a: 'scanCodeSignIn',
+                        q: {
+                            order_id: this.order_id
+                        }
+                    }),function (res) {
+                        $h.showMsg({
+                            title: res.data.msg,
+                            icon: 'success',
+                            success: function () {
+                                window.location.replace("{:url('wap/my/verify_activity')}");
+                            }
+                        });
+                    });
+                }
+            }
+        });
+    });
+</script>
+{/block}

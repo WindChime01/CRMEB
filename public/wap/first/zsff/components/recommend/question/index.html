@@ -1,0 +1,79 @@
+<div class="recommend-question">
+    <div>
+        {{ obj.title }}
+        <a :href="obj.urlCategory + '?type=2'">
+            查看更多<span class="iconfont iconxiangyou"></span>
+        </a>
+    </div>
+    <div v-if="obj.typesetting === 4" id="swiper6" class="swiper-container">
+        <div class="swiper-wrapper">
+            <!-- <div v-for="item in obj.list" :key="item.id" class="swiper-slide">
+                <a :href="obj.url + '?id=' + item.id">
+                    <div>
+                        <img class="figure" :src="item.image">
+                    </div>
+                    <div class="attr">
+                        <div class="title">{{ item.title }}</div>
+                        <div class="people">{{ item.answer }}人已答题</div>
+                        <div class="group">
+                            <div v-if="item.pay_type" class="money">
+                                ￥<span>{{ item.money }}</span>
+                            </div>
+                            <div v-else class="money free">免费</div>
+                            <a class="link" href="javascript:">
+                                <img src="">答题
+                            </a>
+                        </div>
+                    </div>
+                </a>
+            </div> -->
+            <div v-for="item in obj.list" :key="item.id" class="swiper-slide">
+                <a :href="obj.url + '?id=' + item.id">
+                    <div>
+                        <img class="figure" :src="item.image">
+                    </div>
+                    <div class="attr">
+                        <div class="title">{{ item.title }}</div>
+                        <div class="people">{{ item.count }}人已答题</div>
+                        <div class="group">
+                            <div v-if="item.pay_type" class="money">
+                                ￥<span>{{ item.money }}</span>
+                            </div>
+                            <div v-else class="money free">免费</div>
+                            <div class="link">
+                                <img :src="obj.source_url + 'zsff/images/question08.png'">答题
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <ul v-else :class="{ gird: obj.typesetting === 2, small: obj.typesetting === 3 }">
+        <li v-for="item in obj.list" :key="item.id">
+            <a :href="obj.url + '?id=' + item.id">
+                <div>
+                    <img class="figure" :src="item.image">
+                </div>
+                <div class="attr">
+                    <div class="title">{{ item.title }}</div>
+                    <div v-if="obj.typesetting === 2" class="people">{{ item.answer }}人已答题</div>
+                    <div v-if="obj.typesetting === 3 && item.pay_type" class="money">
+                        ￥<span>{{ item.money }}</span>
+                    </div>
+                    <div v-if="obj.typesetting === 3 && !item.pay_type" class="money free">免费</div>
+                    <div class="group">
+                        <div v-if="obj.typesetting !== 3 && item.pay_type" class="money">
+                            ￥<span>{{ item.money }}</span>
+                        </div>
+                        <div v-if="obj.typesetting !== 3 && !item.pay_type" class="money free">免费</div>
+                        <div v-if="obj.typesetting !== 2" class="people">{{ item.answer }}人已答题</div>
+                        <div class="link">
+                            <img :src="obj.source_url + 'zsff/images/question08.png'">答题
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </li>
+    </ul>
+</div>

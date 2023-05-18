@@ -1,0 +1,96 @@
+.recommend-problem {
+    padding: .15rem .2rem .5rem;
+    margin-top: .14rem;
+    background-color: #fff;
+}
+
+.recommend-problem > div {
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    -webkit-box-align: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: .32rem;
+    color: #333;
+}
+
+.recommend-problem > div a {
+    font-weight: normal;
+    font-size: .22rem;
+    color: #999;
+}
+
+.recommend-problem .iconxiangyou {
+    margin-left: .09rem;
+    font-size: .18rem;
+}
+
+.recommend-problem ul {
+    margin-top: .3rem;
+}
+
+.recommend-problem li > a {
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    flex-direction: column;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    height: 1.4rem;
+    padding: .3rem .25rem .2rem;
+    /* border-radius: .12rem; */
+    border-bottom: 1px solid #f5f5f5;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    /* -webkit-box-shadow: 0 .03rem .2rem rgba(0, 0, 0, .07);
+    box-shadow: 0 .03rem .2rem rgba(0, 0, 0, .07); */
+}
+
+.recommend-problem li:last-child > a {
+    border: none;
+}
+
+.recommend-problem li > a > div:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: .28rem;
+    color: #282828;
+}
+
+.recommend-problem li > a > div:last-child {
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    font-size: .22rem;
+    color: #ff6b00;
+}
+
+.recommend-problem div div:nth-child(1) {
+    -webkit-box-flex: 1;
+    flex: 1;
+    margin-left: .15rem;
+    color: #999;
+}
+
+.recommend-problem li a div > div:last-child {
+    height: .38rem;
+    padding-right: .17rem;
+    padding-left: .17rem;
+    border-radius: .19rem;
+    background-color: #f2f8ff;
+    line-height: .38rem;
+    color: #2c8eff;
+}
+
+.recommend-problem img {
+    width: .17rem;
+    height: .19rem;
+    margin-right: .1rem;
+    -webkit-touch-callout: none;
+    pointer-events: none;
+}

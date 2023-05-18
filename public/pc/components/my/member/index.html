@@ -1,0 +1,94 @@
+<div class="my-member">
+    <div class="section">
+        <div>会员权益</div>
+        <div>
+            <ul>
+                <li v-for="item in interests" :key="item.id">
+                    <el-image :src="item.pic" fit="cover">
+                        <div slot="error" class="image-slot">
+                            <i class="el-icon-picture-outline"></i>
+                        </div>
+                    </el-image>
+                    <div>
+                        <div>{{ item.name }}</div>
+                        <div>{{ item.explain }}</div>
+                    </div>
+                </li>
+            </ul>
+            <el-button :disabled="userInfo.level && userInfo.is_permanent" @click="exchangeVisible = true">卡密兑换</el-button>
+        </div>
+    </div>
+    <div class="section">
+        <div>会员套餐</div>
+        <div>
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+                    <div v-for="(item, index) in memberShipList" :key="item.id" class="swiper-slide">
+                        <label>
+                            <input v-model="filterData.type" :value="index" type="radio" hidden>
+                            <div>
+                                <div>
+                                    <el-image :src="item.img" fit="cover"></el-image>
+                                    <div>{{ item.title }}</div>
+                                </div>
+                                <!-- <div v-if="item.is_free"><span>0</span>元/体验 试用{{ item.vip_day }}天</div>
+                                <div v-else><span>{{ item.price | priceReal }}</span>元<del>{{ item.original_price | priceReal }}元</del></div> -->
+                                <div v-if="item.is_free"><span>0</span>元/体验 试用{{ item.vip_day }}天</div>
+                                <div v-else>￥<span>{{ item.price | priceReal }}</span><del>￥{{ item.original_price | priceReal }}</del></div>
+                                <i class="el-icon-check"></i>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-button-prev swiper-button-black"></div>
+            <div class="swiper-button-next swiper-button-black"></div>
+        </div>
+    </div>
+    <div v-show="!userInfo.level || !userInfo.is_permanent" class="section">
+        <div>支付方式</div>
+        <div>
+            <label v-if="isWechat">
+                <input v-model="filterData.payType" value="weixin" type="radio" hidden>
+                <div>
+                    <div>微信支付</div>
+                    <i class="el-icon-check"></i>
+                </div>
+            </label>
+            <label v-if="isAlipay">
+                <input v-model="filterData.payType" value="zhifubao" type="radio" hidden>
+                <div>
+                    <div>支付宝支付</div>
+                    <i class="el-icon-check"></i>
+                </div>
+            </label>
+        </div>
+        <div>
+            <div v-show="!isReset" ref="qrcode"></div>
+            <div v-show="!isReset" class="pay-tip">请用{{ filterData.payType === 'weixin' ? '微信' : '支付宝' }}扫码支付，支付<span>{{ memberShipList.length && memberShipList[filterData.type].price | priceReal }}</span>元
+            </div>
+            <el-button v-show="isReset" @click="create_order" :disabled="!filterData.payType">去支付</el-button>
+        </div>
+    </div>
+    <div class="section">
+        <div>会员说明</div>
+        <div>
+            <ol>
+                <li v-for="item in description" :key="item.id">{{ item.text }}</li>
+            </ol>
+        </div>
+    </div>
+    <el-dialog title="激活会员卡" :visible.sync="exchangeVisible" width="512px" center>
+        <el-form>
+            <el-form-item>
+                <el-input v-model.trim="member_code" type="text" placeholder="请输入卡号" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-input v-model.trim="member_pwd" placeholder="请输入卡密" autocomplete="off" show-password></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button @click.native="confirm_activation">确定</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+</div>
